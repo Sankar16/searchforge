@@ -6,7 +6,6 @@ __pycache__/
 .env
 .env.local
 
-data/catalog_clean.json
 chroma_db/
 
 .pytest_cache/

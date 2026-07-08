@@ -57,3 +57,8 @@ for original, rewritten in zip(normalized_products, rewritten_products):
         print(f"\nSKU: {original.sku}")
         print(f"Before: {original.description}")
         print(f"After:  {rewritten.description}")
+
+with open("data/catalog_clean.json", "w") as f:
+    json.dump([product.model_dump() for product in rewritten_products], f, indent=2)
+
+print("\nSaved cleaned catalog to data/catalog_clean.json")
