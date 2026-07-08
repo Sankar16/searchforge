@@ -4,6 +4,7 @@
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
     "description": "6205-2RS Sealed Ball Bearing is a bearings product with inner diameter mm: 25; outer diameter mm: 52; width mm: 15; seal type: 2RS; bearing type: deep groove ball bearing. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
       "outer_diameter_mm": 52,
@@ -12,26 +13,40 @@
       "bearing_type": "deep groove ball bearing",
       "material": "chrome steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 8.95,
+    "search_terms": [
+      "6205 bearing",
+      "sealed bearing",
+      "25mm bearing",
+      "motor bearing"
+    ]
   },
   {
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
     "description": "Rubber Sealed 6205 Bearing is a bearing product with bore: 25 mm; od: 52 mm; width: 15 mm; seal: rubber. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "bore": "25 mm",
       "od": "52 mm",
       "width": "15 mm",
       "seal": "rubber"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 7.5,
+    "search_terms": [
+      "6205 rubber bearing",
+      "sealed ball bearing"
+    ]
   },
   {
     "sku": "BRG-6004-ZZ",
     "name": "6004-ZZ Shielded Ball Bearing",
     "category": "Bearings",
     "description": "6004-ZZ deep groove ball bearing with metal shields for electric motors, pumps, and rotating shafts.",
+    "brand": "NSK",
     "specs": {
       "inner_diameter_mm": 20,
       "outer_diameter_mm": 42,
@@ -40,26 +55,39 @@
       "bearing_type": "deep groove ball bearing",
       "material": "chrome steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.25,
+    "search_terms": [
+      "6004 bearing",
+      "20mm bearing",
+      "shielded bearing"
+    ]
   },
   {
     "sku": "BRG-6004-METAL",
     "name": "6004 Metal Shield Bearing",
     "category": "Bearings",
     "description": "6004 Metal Shield Bearing is a bearings product with inner diameter mm: 20; outer diameter mm: 42; width mm: 12; seal type: metal shield. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "NTN",
     "specs": {
       "inner_diameter_mm": 20,
       "outer_diameter_mm": 42,
       "width_mm": 12,
       "seal_type": "metal shield"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.1,
+    "search_terms": [
+      "6004 bearing",
+      "metal shield bearing"
+    ]
   },
   {
     "sku": "BRG-6303-OPEN",
     "name": "6303 Open Ball Bearing",
     "category": "Bearings",
     "description": "Open deep groove bearing for light industrial rotating equipment.",
+    "brand": "Timken",
     "specs": {
       "inner_diameter_mm": 17,
       "outer_diameter_mm": 47,
@@ -67,23 +95,35 @@
       "seal_type": "open",
       "bearing_type": "deep groove ball bearing"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 5.75,
+    "search_terms": [
+      "6303 bearing",
+      "open bearing",
+      "17mm bearing"
+    ]
   },
   {
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
     "description": "6303 Bearing is a bearings product with seal type: open. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "seal_type": "open"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 4.95,
+    "search_terms": [
+      "6303 bearing"
+    ]
   },
   {
     "sku": "BRG-608-2RS",
     "name": "608-2RS Miniature Sealed Bearing",
     "category": "Bearings",
     "description": "608-2RS sealed miniature bearing with 8mm bore for small wheels, rollers, and compact equipment.",
+    "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 8,
       "outer_diameter_mm": 22,
@@ -91,13 +131,20 @@
       "seal_type": "2RS",
       "bearing_type": "miniature ball bearing"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 2.2,
+    "search_terms": [
+      "608 bearing",
+      "skate bearing",
+      "8mm bearing"
+    ]
   },
   {
     "sku": "BRG-1IN-PILOT",
     "name": "1 Inch Pilot Bearing",
     "category": "Bearings",
     "description": "Pilot bearing for transmission and shaft support applications.",
+    "brand": "National",
     "specs": {
       "inner_diameter_in": 1,
       "outer_diameter_in": 2.047,
@@ -107,13 +154,19 @@
       "outer_diameter_mm": 51.99,
       "width_mm": 14.99
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 12.4,
+    "search_terms": [
+      "1 inch bearing",
+      "pilot bearing"
+    ]
   },
   {
     "sku": "BRG-TAPER-30205",
     "name": "30205 Tapered Roller Bearing",
     "category": "Bearings",
     "description": "30205 tapered roller bearing for radial and axial load support in hubs and gearboxes.",
+    "brand": "Timken",
     "specs": {
       "inner_diameter_mm": 25,
       "outer_diameter_mm": 52,
@@ -121,13 +174,20 @@
       "bearing_type": "tapered roller bearing",
       "material": "chrome steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 14.8,
+    "search_terms": [
+      "30205 bearing",
+      "taper roller bearing",
+      "25mm tapered bearing"
+    ]
   },
   {
     "sku": "BRG-UC205",
     "name": "UC205 Insert Bearing",
     "category": "Bearings",
     "description": "Insert bearing with set screws for mounted bearing units and pillow block assemblies.",
+    "brand": "FYH",
     "specs": {
       "inner_diameter_mm": 25,
       "outer_diameter_mm": 52,
@@ -136,13 +196,20 @@
       "bearing_type": "insert bearing",
       "compatible_housing_series": "P205"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 11.9,
+    "search_terms": [
+      "UC205 bearing",
+      "insert bearing",
+      "pillow block bearing"
+    ]
   },
   {
     "sku": "HSG-P205",
     "name": "P205 Pillow Block Housing",
     "category": "Housings",
     "description": "P205 cast iron pillow block housing compatible with UC205 and 6205-series bearing inserts for 25mm shaft support.",
+    "brand": "FYH",
     "specs": {
       "compatible_bearing_series": [
         "UC205",
@@ -153,25 +220,39 @@
       "material": "cast iron",
       "bolt_hole_spacing_mm": 105
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 18.5,
+    "search_terms": [
+      "P205 housing",
+      "pillow block",
+      "6205 housing",
+      "25mm shaft mount"
+    ]
   },
   {
     "sku": "HSG-P205-CAST",
     "name": "Cast Iron Pillow Block P205",
     "category": "Mounts",
     "description": "Cast Iron Pillow Block P205 is a mounts product with compatible bearing: 6205 / UC205; shaft size: 25 mm; mount: pillow block. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "compatible_bearing": "6205 / UC205",
       "shaft_size": "25 mm",
       "mount": "pillow block"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 16.95,
+    "search_terms": [
+      "P205 pillow block",
+      "25mm bearing housing"
+    ]
   },
   {
     "sku": "HSG-FL205",
     "name": "FL205 Two-Bolt Flange Housing",
     "category": "Housings",
     "description": "FL205 two-bolt flange housing for UC205 insert bearings and 25mm shafts.",
+    "brand": "FYH",
     "specs": {
       "compatible_bearing_series": [
         "UC205"
@@ -181,13 +262,20 @@
       "material": "cast iron",
       "bolt_hole_spacing_mm": 99
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 20.75,
+    "search_terms": [
+      "FL205 housing",
+      "two bolt flange",
+      "UC205 housing"
+    ]
   },
   {
     "sku": "HSG-UCP204",
     "name": "UCP204 Pillow Block Bearing Unit",
     "category": "Housings",
     "description": "Mounted pillow block bearing unit with UC204 insert for 20mm shafts.",
+    "brand": "FYH",
     "specs": {
       "compatible_bearing_series": [
         "UC204"
@@ -196,37 +284,56 @@
       "mount_type": "pillow block",
       "material": "cast iron"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 24.3,
+    "search_terms": [
+      "UCP204",
+      "20mm pillow block bearing"
+    ]
   },
   {
     "sku": "MNT-MOTOR-BASE-56C",
     "name": "56C Motor Mount Base Plate",
     "category": "Housings",
     "description": "Adjustable steel base plate for mounting 56C frame motors.",
+    "brand": "Baldor",
     "specs": {
       "mount_type": "motor base plate",
       "compatible_motor_frame": "56C",
       "material": "steel",
       "slot_length_mm": 60
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 42.0,
+    "search_terms": [
+      "motor mount",
+      "56C motor base",
+      "base plate"
+    ]
   },
   {
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
     "description": "Motor Base Plate for 56C Frame is a fasteners product with compatible motor frame: 56C; material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
       "material": "steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 39.5,
+    "search_terms": [
+      "motor mount plate",
+      "56C base"
+    ]
   },
   {
     "sku": "FST-M8-40-ZN",
     "name": "M8 x 40mm Zinc Hex Bolt",
     "category": "Fasteners",
     "description": "M8 x 40mm zinc-plated hex bolt for machinery, mounting brackets, and motor base assemblies.",
+    "brand": "Hillman",
     "specs": {
       "diameter_mm": 8,
       "length_mm": 40,
@@ -234,38 +341,58 @@
       "material": "zinc-plated steel",
       "head_type": "hex"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.28,
+    "search_terms": [
+      "M8 bolt",
+      "8mm bolt",
+      "motor mount bolt",
+      "hex bolt"
+    ]
   },
   {
     "sku": "FST-HEX-M8X40",
     "name": "Hex Bolt M8x40",
     "category": "Fasteners",
     "description": "Hex Bolt M8x40 is a fasteners product with diameter: M8; length: 40 mm; material: zinc steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "diameter": "M8",
       "length": "40 mm",
       "material": "zinc steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.25,
+    "search_terms": [
+      "hex bolt",
+      "M8 40mm bolt"
+    ]
   },
   {
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
     "description": "M8 40mm Hexagon Bolt Zinc is a bolts product with diameter mm: 8; length mm: 40; material: zinc-plated steel; head type: hexagon. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
       "length_mm": 40,
       "material": "zinc-plated steel",
       "head_type": "hexagon"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.27,
+    "search_terms": [
+      "M8 hexagon bolt",
+      "M8x40 bolt"
+    ]
   },
   {
     "sku": "FST-M10-60-SS",
     "name": "M10 x 60mm Stainless Steel Hex Bolt",
     "category": "Fasteners",
     "description": "M10 x 60mm stainless steel hex bolt for corrosion-resistant industrial fastening.",
+    "brand": "Hillman",
     "specs": {
       "diameter_mm": 10,
       "length_mm": 60,
@@ -273,13 +400,20 @@
       "material": "stainless steel",
       "head_type": "hex"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.55,
+    "search_terms": [
+      "M10 bolt",
+      "stainless hex bolt",
+      "10mm bolt"
+    ]
   },
   {
     "sku": "FST-1-2-13X2-HEX",
     "name": "1/2-13 x 2 in Hex Cap Screw",
     "category": "Fasteners",
     "description": "1/2-13 UNC hex cap screw with 2 inch length for heavy-duty fastening.",
+    "brand": "Fastenal",
     "specs": {
       "diameter_in": 0.5,
       "length_in": 2,
@@ -290,25 +424,38 @@
       "diameter_mm": 12.7,
       "length_mm": 50.8
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.62,
+    "search_terms": [
+      "half inch bolt",
+      "hex cap screw",
+      "1/2-13 bolt"
+    ]
   },
   {
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
     "description": "Half Inch Hex Bolt 2 Inch is a fasteners product with diameter: 1/2 inch; length: 2 in; material: plain steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
       "length": "2 in",
       "material": "plain steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.48,
+    "search_terms": [
+      "half inch bolt",
+      "2 inch bolt"
+    ]
   },
   {
     "sku": "FST-M6-20-SOCKET",
     "name": "M6 x 20mm Socket Head Cap Screw",
     "category": "Fasteners",
     "description": "M6 socket head cap screw for machine assemblies requiring a recessed hex drive.",
+    "brand": "Brighton",
     "specs": {
       "diameter_mm": 6,
       "length_mm": 20,
@@ -316,39 +463,60 @@
       "material": "alloy steel",
       "head_type": "socket"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.18,
+    "search_terms": [
+      "M6 screw",
+      "socket head screw",
+      "cap screw"
+    ]
   },
   {
     "sku": "FST-WASHER-M8-FLAT",
     "name": "M8 Flat Washer Zinc",
     "category": "Fasteners",
     "description": "M8 zinc-plated flat washer for distributing load under bolts and nuts.",
+    "brand": "Hillman",
     "specs": {
       "inner_diameter_mm": 8.4,
       "outer_diameter_mm": 16,
       "thickness_mm": 1.6,
       "material": "zinc-plated steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.06,
+    "search_terms": [
+      "M8 washer",
+      "flat washer",
+      "bolt washer"
+    ]
   },
   {
     "sku": "FST-NUT-M8-ZN",
     "name": "M8 Zinc Hex Nut",
     "category": "Fasteners",
     "description": "M8 zinc-plated hex nut for use with M8 bolts and threaded rods.",
+    "brand": "Hillman",
     "specs": {
       "diameter_mm": 8,
       "thread_pitch_mm": 1.25,
       "material": "zinc-plated steel",
       "nut_type": "hex"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.09,
+    "search_terms": [
+      "M8 nut",
+      "hex nut",
+      "zinc nut"
+    ]
   },
   {
     "sku": "FST-ANCHOR-3-8",
     "name": "3/8 in Wedge Anchor",
     "category": "Fasteners",
     "description": "Concrete wedge anchor for mounting equipment to concrete floors.",
+    "brand": "Red Head",
     "specs": {
       "diameter_in": 0.375,
       "length_in": 3.75,
@@ -357,24 +525,36 @@
       "diameter_mm": 9.52,
       "length_mm": 95.25
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 1.15,
+    "search_terms": [
+      "wedge anchor",
+      "concrete anchor",
+      "3/8 anchor"
+    ]
   },
   {
     "sku": "FST-ANCHOR-NOSIZE",
     "name": "Concrete Anchor",
     "category": "Fasteners",
     "description": "Concrete Anchor is a fasteners product with material: steel; anchor type: wedge. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "steel",
       "anchor_type": "wedge"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.9,
+    "search_terms": [
+      "concrete anchor"
+    ]
   },
   {
     "sku": "PIP-ELBOW-1-2-NPT-BRASS",
     "name": "1/2 in NPT Brass 90 Degree Elbow",
     "category": "Pipe Fittings",
     "description": "1/2 inch NPT brass 90 degree elbow for changing pipe direction in plumbing and heating systems.",
+    "brand": "Parker",
     "specs": {
       "size_inch": 0.5,
       "thread_type": "NPT",
@@ -382,51 +562,78 @@
       "material": "brass",
       "fitting_type": "elbow"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 4.2,
+    "search_terms": [
+      "1/2 NPT elbow",
+      "brass elbow",
+      "pipe elbow"
+    ]
   },
   {
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
     "description": "Half Inch Brass Elbow is a pipe fittings product with size: 1/2 inch; thread: NPT; material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
       "thread": "NPT",
       "material": "brass"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 3.95,
+    "search_terms": [
+      "half inch elbow",
+      "brass pipe elbow"
+    ]
   },
   {
     "sku": "PIP-TEE-3-4-NPT-GALV",
     "name": "3/4 in Galvanized Steel Tee Fitting",
     "category": "Pipe Fittings",
     "description": "3/4 inch NPT galvanized tee fitting for branching threaded pipe runs.",
+    "brand": "Mueller",
     "specs": {
       "size_inch": 0.75,
       "thread_type": "NPT",
       "material": "galvanized steel",
       "fitting_type": "tee"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 5.1,
+    "search_terms": [
+      "3/4 tee",
+      "galvanized tee",
+      "NPT tee"
+    ]
   },
   {
     "sku": "PIP-COUPLING-1-NPT-SS",
     "name": "1 in Stainless Steel NPT Coupling",
     "category": "Pipe Fittings",
     "description": "1 inch stainless steel NPT coupling for joining threaded pipe sections.",
+    "brand": "Parker",
     "specs": {
       "size_inch": 1,
       "thread_type": "NPT",
       "material": "stainless steel",
       "fitting_type": "coupling"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 9.8,
+    "search_terms": [
+      "1 inch coupling",
+      "stainless pipe coupling",
+      "NPT coupling"
+    ]
   },
   {
     "sku": "PIP-REDUCER-1X1-2-BRASS",
     "name": "1 in x 1/2 in Brass Reducer Bushing",
     "category": "Pipe Fittings",
     "description": "Brass reducer bushing for adapting 1 inch NPT female ports to 1/2 inch NPT male connections.",
+    "brand": "Parker",
     "specs": {
       "size_inch": 1,
       "reduced_size_inch": 0.5,
@@ -434,26 +641,40 @@
       "material": "brass",
       "fitting_type": "reducer bushing"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.45,
+    "search_terms": [
+      "reducer bushing",
+      "1 to 1/2 reducer",
+      "brass reducer"
+    ]
   },
   {
     "sku": "PIP-ADAPTER-25MM",
     "name": "25mm Compression Adapter",
     "category": "Pipe Fittings",
     "description": "25mm compression adapter for metric pipe connections.",
+    "brand": "Uponor",
     "specs": {
       "size_mm": 25,
       "connection_type": "compression",
       "material": "brass",
       "fitting_type": "adapter"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 7.3,
+    "search_terms": [
+      "25mm adapter",
+      "compression adapter",
+      "metric pipe fitting"
+    ]
   },
   {
     "sku": "PIP-SEALANT-PTFE",
     "name": "PTFE Thread Seal Tape",
     "category": "Pipe Fittings",
     "description": "PTFE thread seal tape for sealing NPT threaded pipe fittings and preventing leaks.",
+    "brand": "Oatey",
     "specs": {
       "width_in": 0.5,
       "length_ft": 260,
@@ -461,13 +682,21 @@
       "application": "thread sealing",
       "width_mm": 12.7
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 1.95,
+    "search_terms": [
+      "thread tape",
+      "PTFE tape",
+      "pipe sealant",
+      "teflon tape"
+    ]
   },
   {
     "sku": "PIP-SEALANT-PASTE",
     "name": "Pipe Thread Sealant Paste",
     "category": "Pipe Fittings",
     "description": "Non-hardening thread sealant paste for metal pipe fittings.",
+    "brand": "RectorSeal",
     "specs": {
       "container_size_oz": 4,
       "application": "thread sealing",
@@ -477,23 +706,35 @@
         "iron"
       ]
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.75,
+    "search_terms": [
+      "pipe dope",
+      "thread sealant",
+      "NPT sealant"
+    ]
   },
   {
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
     "description": "Threaded Pipe Fitting is a pipe fittings product with material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "brass"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 2.5,
+    "search_terms": [
+      "pipe fitting"
+    ]
   },
   {
     "sku": "VAL-BALL-1-2-BRASS",
     "name": "1/2 in Brass Ball Valve",
     "category": "Valves",
     "description": "1/2 inch brass full-port ball valve with NPT female connections for water and air service.",
+    "brand": "Apollo",
     "specs": {
       "size_inch": 0.5,
       "connection_type": "NPT female",
@@ -501,26 +742,39 @@
       "material": "brass",
       "valve_type": "ball"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 11.4,
+    "search_terms": [
+      "1/2 ball valve",
+      "brass valve",
+      "shutoff valve"
+    ]
   },
   {
     "sku": "VAL-HALF-BRASS-BALL",
     "name": "Half Inch Brass Shutoff Ball Valve",
     "category": "Valve",
     "description": "Half Inch Brass Shutoff Ball Valve is a valve product with size: 1/2 inch; connection: female NPT; material: brass; pressure: 600 psi. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
       "connection": "female NPT",
       "material": "brass",
       "pressure": "600 psi"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 10.9,
+    "search_terms": [
+      "half inch ball valve",
+      "brass shutoff valve"
+    ]
   },
   {
     "sku": "VAL-BALL-3-4-SS",
     "name": "3/4 in Stainless Steel Ball Valve",
     "category": "Valves",
     "description": "3/4 inch stainless steel ball valve for industrial fluid control and corrosive service.",
+    "brand": "Apollo",
     "specs": {
       "size_inch": 0.75,
       "connection_type": "NPT female",
@@ -528,13 +782,20 @@
       "material": "stainless steel",
       "valve_type": "ball"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 24.8,
+    "search_terms": [
+      "3/4 ball valve",
+      "stainless valve",
+      "industrial ball valve"
+    ]
   },
   {
     "sku": "VAL-CHECK-1-BRASS",
     "name": "1 in Brass Swing Check Valve",
     "category": "Valves",
     "description": "1 inch brass swing check valve for preventing reverse flow in water lines.",
+    "brand": "Nibco",
     "specs": {
       "size_inch": 1,
       "connection_type": "NPT female",
@@ -542,13 +803,20 @@
       "material": "brass",
       "valve_type": "swing check"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 18.65,
+    "search_terms": [
+      "check valve",
+      "1 inch check valve",
+      "backflow valve"
+    ]
   },
   {
     "sku": "VAL-GATE-2-IRON",
     "name": "2 in Cast Iron Gate Valve",
     "category": "Valves",
     "description": "2 inch cast iron gate valve for on/off control in low-pressure water systems.",
+    "brand": "Milwaukee Valve",
     "specs": {
       "size_inch": 2,
       "connection_type": "flanged",
@@ -556,13 +824,20 @@
       "material": "cast iron",
       "valve_type": "gate"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 95.0,
+    "search_terms": [
+      "2 inch gate valve",
+      "cast iron valve",
+      "flanged valve"
+    ]
   },
   {
     "sku": "VAL-NEEDLE-1-4-SS",
     "name": "1/4 in Stainless Steel Needle Valve",
     "category": "Valves",
     "description": "1/4 inch stainless needle valve for precise flow control in instrumentation lines.",
+    "brand": "Swagelok",
     "specs": {
       "size_inch": 0.25,
       "connection_type": "NPT female",
@@ -570,23 +845,36 @@
       "material": "stainless steel",
       "valve_type": "needle"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 32.9,
+    "search_terms": [
+      "needle valve",
+      "1/4 valve",
+      "instrument valve"
+    ]
   },
   {
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
     "description": "Pressure Relief Valve is a valves product with valve type: pressure relief. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 21.0,
+    "search_terms": [
+      "pressure relief valve",
+      "safety valve"
+    ]
   },
   {
     "sku": "FST-MOTOR-KIT-M8",
     "name": "M8 Motor Mount Hardware Kit",
     "category": "Fasteners",
     "description": "Hardware kit with M8 bolts, washers, and nuts for mounting small motors to base plates.",
+    "brand": "Brighton",
     "specs": {
       "diameter_mm": 8,
       "length_mm": 40,
@@ -598,24 +886,37 @@
       ],
       "application": "motor mounting"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.9,
+    "search_terms": [
+      "motor mount hardware",
+      "M8 motor bolt kit",
+      "mounting kit"
+    ]
   },
   {
     "sku": "FST-MOTOR-BOLT-KIT",
     "name": "Motor Mount Bolt Kit",
     "category": "Fasteners",
     "description": "Motor Mount Bolt Kit is a fasteners product with diameter: M8; material: zinc steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "diameter": "M8",
       "material": "zinc steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 5.95,
+    "search_terms": [
+      "motor mount bolt kit",
+      "motor hardware"
+    ]
   },
   {
     "sku": "MNT-VIBRATION-PAD-4IN",
     "name": "4 in Rubber Vibration Isolation Pad",
     "category": "Housings",
     "description": "Rubber vibration isolation pad for reducing motor and pump vibration on base plates.",
+    "brand": "Mason",
     "specs": {
       "length_in": 4,
       "width_in": 4,
@@ -625,26 +926,40 @@
       "width_mm": 101.6,
       "length_mm": 101.6
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 7.85,
+    "search_terms": [
+      "vibration pad",
+      "motor pad",
+      "rubber isolation pad"
+    ]
   },
   {
     "sku": "MNT-SHAFT-25MM",
     "name": "25mm Steel Shaft",
     "category": "Housings",
     "description": "25mm precision steel shaft for use with 6205 bearings and 25mm pillow block assemblies.",
+    "brand": "Misumi",
     "specs": {
       "diameter_mm": 25,
       "length_mm": 500,
       "material": "carbon steel",
       "compatible_bearing_bore_mm": 25
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 28.0,
+    "search_terms": [
+      "25mm shaft",
+      "bearing shaft",
+      "6205 shaft"
+    ]
   },
   {
     "sku": "MNT-SHAFT-1IN",
     "name": "1 in Steel Shaft",
     "category": "Housings",
     "description": "One inch steel shaft for inch-series bearings and mounted units.",
+    "brand": "Misumi",
     "specs": {
       "diameter_in": 1,
       "length_in": 24,
@@ -652,13 +967,20 @@
       "diameter_mm": 25.4,
       "length_mm": 609.6
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 31.5,
+    "search_terms": [
+      "1 inch shaft",
+      "steel shaft",
+      "bearing shaft"
+    ]
   },
   {
     "sku": "BRG-UC204",
     "name": "UC204 Insert Bearing",
     "category": "Bearings",
     "description": "UC204 insert bearing with set screws for 20mm mounted bearing applications.",
+    "brand": "FYH",
     "specs": {
       "inner_diameter_mm": 20,
       "outer_diameter_mm": 47,
@@ -667,13 +989,19 @@
       "bearing_type": "insert bearing",
       "compatible_housing_series": "P204"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 10.45,
+    "search_terms": [
+      "UC204 bearing",
+      "20mm insert bearing"
+    ]
   },
   {
     "sku": "HSG-P204",
     "name": "P204 Pillow Block Housing",
     "category": "Housings",
     "description": "P204 pillow block housing compatible with UC204 insert bearings for 20mm shaft mounting.",
+    "brand": "FYH",
     "specs": {
       "compatible_bearing_series": [
         "UC204"
@@ -682,13 +1010,20 @@
       "mount_type": "pillow block",
       "material": "cast iron"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 16.9,
+    "search_terms": [
+      "P204 housing",
+      "20mm pillow block",
+      "UC204 housing"
+    ]
   },
   {
     "sku": "BRG-6203-2RS",
     "name": "6203-2RS Sealed Ball Bearing",
     "category": "Bearings",
     "description": "6203-2RS sealed deep groove bearing for 17mm shafts, small motors, and pumps.",
+    "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 17,
       "outer_diameter_mm": 40,
@@ -696,13 +1031,20 @@
       "seal_type": "2RS",
       "bearing_type": "deep groove ball bearing"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 5.2,
+    "search_terms": [
+      "6203 bearing",
+      "17mm bearing",
+      "sealed bearing"
+    ]
   },
   {
     "sku": "HSG-FL204",
     "name": "FL204 Two-Bolt Flange Housing",
     "category": "Housings",
     "description": "Two-bolt flange housing for UC204 insert bearings.",
+    "brand": "FYH",
     "specs": {
       "compatible_bearing_series": [
         "UC204"
@@ -711,51 +1053,79 @@
       "mount_type": "two-bolt flange",
       "material": "cast iron"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 18.1,
+    "search_terms": [
+      "FL204 housing",
+      "UC204 flange",
+      "two bolt flange housing"
+    ]
   },
   {
     "sku": "PIP-NIPPLE-1-2-BRASS",
     "name": "1/2 in Brass Pipe Nipple",
     "category": "Pipe Fittings",
     "description": "1/2 inch brass close nipple with male NPT threads for connecting valves and fittings.",
+    "brand": "Mueller",
     "specs": {
       "size_inch": 0.5,
       "thread_type": "NPT",
       "material": "brass",
       "fitting_type": "nipple"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 2.25,
+    "search_terms": [
+      "1/2 nipple",
+      "brass pipe nipple",
+      "NPT nipple"
+    ]
   },
   {
     "sku": "PIP-UNION-1-2-BRASS",
     "name": "1/2 in Brass Pipe Union",
     "category": "Pipe Fittings",
     "description": "1/2 inch brass union fitting for detachable threaded pipe connections.",
+    "brand": "Mueller",
     "specs": {
       "size_inch": 0.5,
       "thread_type": "NPT",
       "material": "brass",
       "fitting_type": "union"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 7.9,
+    "search_terms": [
+      "1/2 union",
+      "brass union",
+      "pipe union"
+    ]
   },
   {
     "sku": "PIP-CLAMP-1IN",
     "name": "1 in Pipe Support Clamp",
     "category": "Pipe Fittings",
     "description": "Steel pipe support clamp for securing 1 inch pipe to walls or structural supports.",
+    "brand": "Unistrut",
     "specs": {
       "size_inch": 1,
       "material": "zinc-plated steel",
       "mount_type": "pipe clamp"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 3.75,
+    "search_terms": [
+      "pipe clamp",
+      "1 inch clamp",
+      "pipe support"
+    ]
   },
   {
     "sku": "VAL-SOLENOID-1-2-24V",
     "name": "1/2 in 24V Brass Solenoid Valve",
     "category": "Valves",
     "description": "24V brass solenoid valve with 1/2 inch NPT ports for automated water and air control.",
+    "brand": "ASCO",
     "specs": {
       "size_inch": 0.5,
       "connection_type": "NPT female",
@@ -764,112 +1134,171 @@
       "material": "brass",
       "valve_type": "solenoid"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 48.6,
+    "search_terms": [
+      "solenoid valve",
+      "24V valve",
+      "1/2 solenoid"
+    ]
   },
   {
     "sku": "VAL-SOLENOID-24V-HALF",
     "name": "24 Volt Half Inch Solenoid Valve",
     "category": "Electrical",
     "description": "24 Volt Half Inch Solenoid Valve is a electrical product with size: 1/2 inch; voltage: 24V; material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
       "voltage": "24V",
       "material": "brass"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 42.0,
+    "search_terms": [
+      "24v solenoid valve",
+      "half inch automatic valve"
+    ]
   },
   {
     "sku": "MNT-COUPLING-25MM",
     "name": "25mm Flexible Shaft Coupling",
     "category": "Housings",
     "description": "Flexible jaw coupling for connecting 25mm motor shafts to driven equipment.",
+    "brand": "Lovejoy",
     "specs": {
       "bore_diameter_mm": 25,
       "coupling_type": "jaw",
       "material": "steel",
       "application": "shaft coupling"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 34.8,
+    "search_terms": [
+      "25mm coupling",
+      "shaft coupling",
+      "motor coupling"
+    ]
   },
   {
     "sku": "MNT-COUPLING-20MM",
     "name": "20mm Flexible Shaft Coupling",
     "category": "Housings",
     "description": "Flexible jaw coupling for 20mm shafts in motor and pump assemblies.",
+    "brand": "Lovejoy",
     "specs": {
       "bore_diameter_mm": 20,
       "coupling_type": "jaw",
       "material": "steel",
       "application": "shaft coupling"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 29.4,
+    "search_terms": [
+      "20mm coupling",
+      "shaft coupling",
+      "pump coupling"
+    ]
   },
   {
     "sku": "MNT-KEY-8X7X40",
     "name": "8mm x 7mm x 40mm Shaft Key",
     "category": "Fasteners",
     "description": "Parallel shaft key for locking pulleys, sprockets, and couplings to metric shafts.",
+    "brand": "Misumi",
     "specs": {
       "width_mm": 8,
       "height_mm": 7,
       "length_mm": 40,
       "material": "carbon steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 1.2,
+    "search_terms": [
+      "shaft key",
+      "8mm key",
+      "coupling key"
+    ]
   },
   {
     "sku": "MNT-KEY-NOSPEC",
     "name": "Shaft Key",
     "category": "Fasteners",
     "description": "Shaft Key is a fasteners product with material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.95,
+    "search_terms": [
+      "shaft key"
+    ]
   },
   {
     "sku": "BRG-MISC-001",
     "name": "Industrial Bearing",
     "category": "Bearings",
     "description": "Industrial Bearing is a bearings product for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {},
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 9.0,
+    "search_terms": [
+      "industrial bearing"
+    ]
   },
   {
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
     "description": "Machine Screw is a fasteners product with material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.12,
+    "search_terms": [
+      "machine screw"
+    ]
   },
   {
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
     "description": "Industrial Valve is a valves product with material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "brass"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 15.0,
+    "search_terms": [
+      "industrial valve"
+    ]
   },
   {
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
     "description": "Bearing Mount is a housings product with material: cast iron. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "material": "cast iron"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 13.5,
+    "search_terms": [
+      "bearing mount"
+    ]
   },
   {
     "sku": "PIP-ELBOW-3-4-PVC",
     "name": "3/4 in PVC 90 Degree Elbow",
     "category": "Pipe Fittings",
     "description": "3/4 inch PVC elbow for non-metallic water pipe direction changes.",
+    "brand": "Charlotte Pipe",
     "specs": {
       "size_inch": 0.75,
       "connection_type": "slip",
@@ -877,26 +1306,40 @@
       "material": "PVC",
       "fitting_type": "elbow"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.95,
+    "search_terms": [
+      "PVC elbow",
+      "3/4 elbow",
+      "plastic pipe elbow"
+    ]
   },
   {
     "sku": "PIP-VALVE-ADAPTER-1-2",
     "name": "1/2 in Brass Valve Adapter",
     "category": "Pipe Fittings",
     "description": "Adapter fitting for connecting 1/2 inch brass valves to threaded pipe.",
+    "brand": "Mueller",
     "specs": {
       "size_inch": 0.5,
       "thread_type": "NPT",
       "material": "brass",
       "fitting_type": "adapter"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 4.6,
+    "search_terms": [
+      "valve adapter",
+      "1/2 adapter",
+      "brass adapter"
+    ]
   },
   {
     "sku": "PIP-HOSE-BARB-1-2",
     "name": "1/2 in Brass Hose Barb Adapter",
     "category": "Pipe Fittings",
     "description": "Brass hose barb adapter with 1/2 inch NPT male thread for hose connections.",
+    "brand": "Parker",
     "specs": {
       "size_inch": 0.5,
       "thread_type": "NPT",
@@ -904,13 +1347,20 @@
       "material": "brass",
       "fitting_type": "hose barb adapter"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 3.85,
+    "search_terms": [
+      "hose barb",
+      "1/2 hose adapter",
+      "brass barb"
+    ]
   },
   {
     "sku": "VAL-BUTTERFLY-4IN",
     "name": "4 in Lug Style Butterfly Valve",
     "category": "Valves",
     "description": "4 inch lug style butterfly valve for throttling and isolation in larger pipe systems.",
+    "brand": "Bray",
     "specs": {
       "size_inch": 4,
       "connection_type": "lug",
@@ -918,69 +1368,109 @@
       "material": "ductile iron",
       "valve_type": "butterfly"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 138.0,
+    "search_terms": [
+      "butterfly valve",
+      "4 inch valve",
+      "lug valve"
+    ]
   },
   {
     "sku": "VAL-BUTTERFLY-LUG",
     "name": "Lug Butterfly Valve 4 Inch",
     "category": "Valves",
     "description": "Lug Butterfly Valve 4 Inch is a valves product with size: 4 inch; connection: lug; pressure: 150 psi. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "brand": "Generic",
     "specs": {
       "size": "4 inch",
       "connection": "lug",
       "pressure": "150 psi"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 121.0,
+    "search_terms": [
+      "4 inch butterfly valve",
+      "lug butterfly valve"
+    ]
   },
   {
     "sku": "ACC-GREASE-NLGI2",
     "name": "NLGI 2 Bearing Grease Cartridge",
     "category": "Bearings",
     "description": "Lithium complex NLGI 2 grease cartridge for lubricating ball bearings and mounted units.",
+    "brand": "Mobil",
     "specs": {
       "grease_type": "lithium complex",
       "nlgi_grade": 2,
       "container_size_oz": 14,
       "application": "bearing lubrication"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 6.95,
+    "search_terms": [
+      "bearing grease",
+      "NLGI 2 grease",
+      "lubricant"
+    ]
   },
   {
     "sku": "ACC-GREASE-FITTING-M6",
     "name": "M6 Grease Zerk Fitting",
     "category": "Fasteners",
     "description": "M6 grease zerk fitting for relubricating bearings, housings, and machinery joints.",
+    "brand": "Lincoln",
     "specs": {
       "thread_size": "M6",
       "fitting_type": "grease zerk",
       "material": "zinc-plated steel"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 0.75,
+    "search_terms": [
+      "grease fitting",
+      "zerk fitting",
+      "M6 zerk"
+    ]
   },
   {
     "sku": "ACC-THREADLOCKER-BLUE",
     "name": "Blue Threadlocker Medium Strength",
     "category": "Fasteners",
     "description": "Medium strength blue threadlocker for securing bolts and screws against vibration loosening.",
+    "brand": "Loctite",
     "specs": {
       "strength": "medium",
       "color": "blue",
       "container_size_ml": 10,
       "application": "thread locking"
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 8.4,
+    "search_terms": [
+      "threadlocker",
+      "blue loctite",
+      "bolt adhesive"
+    ]
   },
   {
     "sku": "ACC-PIPE-WRENCH-10",
     "name": "10 in Pipe Wrench",
     "category": "Pipe Fittings",
     "description": "10 inch pipe wrench for installing and removing threaded pipe fittings.",
+    "brand": "Ridgid",
     "specs": {
       "length_in": 10,
       "tool_type": "pipe wrench",
       "material": "cast iron",
       "length_mm": 254.0
     },
-    "uom": "normalized"
+    "uom": "normalized",
+    "price": 19.95,
+    "search_terms": [
+      "pipe wrench",
+      "threaded pipe tool",
+      "plumbing wrench"
+    ]
   }
 ]
