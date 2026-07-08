@@ -1,13 +1,7 @@
 import json
 import streamlit as st
 
-from src.schemas import Product
-from src.catalog_agent.uom import normalize_catalog_uom
-from src.catalog_agent.spec_checker import check_missing_specs
-from src.catalog_agent.description_quality import check_description_quality
-from src.catalog_agent.description_rewriter import rewrite_weak_descriptions
-from src.catalog_agent.dedup import find_duplicate_candidates
-from src.catalog_agent.report import build_catalog_health_report
+from src.catalog_agent.graph import build_catalog_intelligence_graph
 from src.search.retriever import search_catalog
 from src.crosssell_agent.recommender import recommend_cross_sell
 
@@ -24,11 +18,6 @@ def load_json(path: str):
         return json.load(f)
 
 
-def load_products(path: str) -> list[Product]:
-    raw_catalog = load_json(path)
-    return [Product(**item) for item in raw_catalog]
-
-
 @st.cache_data
 def load_catalogs():
     messy_catalog = load_json("data/catalog_messy.json")
@@ -38,49 +27,25 @@ def load_catalogs():
 
 @st.cache_data
 def run_catalog_pipeline():
-    products = load_products("data/catalog_messy.json")
+    graph = build_catalog_intelligence_graph()
 
-    messy_spec_issues = check_missing_specs(products)
-    messy_description_issues = check_description_quality(products)
-
-    normalized_products = normalize_catalog_uom(products)
-
-    normalized_spec_issues = check_missing_specs(normalized_products)
-    normalized_description_issues = check_description_quality(normalized_products)
-
-    weak_skus = {issue.sku for issue in normalized_description_issues}
-
-    rewritten_products = rewrite_weak_descriptions(
-        products=normalized_products,
-        weak_skus=weak_skus,
-    )
-
-    final_spec_issues = check_missing_specs(rewritten_products)
-    final_description_issues = check_description_quality(rewritten_products)
-
-    duplicate_candidates = find_duplicate_candidates(rewritten_products, threshold=88)
-
-    report = build_catalog_health_report(
-        products=products,
-        messy_spec_issues=messy_spec_issues,
-        normalized_spec_issues=final_spec_issues,
-        description_issues=final_description_issues,
-    )
-
-    return {
-        "products": products,
-        "normalized_products": normalized_products,
-        "rewritten_products": rewritten_products,
-        "messy_spec_issues": messy_spec_issues,
-        "messy_description_issues": messy_description_issues,
-        "normalized_spec_issues": normalized_spec_issues,
-        "normalized_description_issues": normalized_description_issues,
-        "final_spec_issues": final_spec_issues,
-        "final_description_issues": final_description_issues,
-        "duplicate_candidates": duplicate_candidates,
-        "report": report,
-        "weak_skus": weak_skus,
+    initial_state = {
+        "input_path": "data/catalog_messy.json",
+        "output_path": "data/catalog_clean.json",
+        "raw_products": [],
+        "normalized_products": [],
+        "rewritten_products": [],
+        "messy_spec_issues": [],
+        "normalized_spec_issues": [],
+        "messy_description_issues": [],
+        "normalized_description_issues": [],
+        "final_description_issues": [],
+        "weak_skus": set(),
+        "duplicate_candidates": [],
+        "health_report": {},
     }
+
+    return graph.invoke(initial_state)
 
 
 st.title("🔎 SearchForge")
@@ -99,7 +64,7 @@ with tab1:
     st.header("Catalog Intelligence Agent")
 
     pipeline = run_catalog_pipeline()
-    report = pipeline["report"]
+    report = pipeline["health_report"]
 
     col1, col2, col3, col4 = st.columns(4)
 
