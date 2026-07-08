@@ -1,8 +1,11 @@
 pydantic
-pandasrapidfuzz
+pandas
+rapidfuzz
 networkx
 streamlit
 langgraph==1.2.8
 langgraph-checkpoint==4.1.1
 langgraph-prebuilt==1.1.0
 langgraph-sdk==0.4.2
+anthropic==0.116.0
+python-dotenv==1.2.2
