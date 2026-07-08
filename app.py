@@ -161,7 +161,7 @@ with tab1:
             }
             for item in pipeline["duplicate_candidates"]
         ]
-        st.dataframe(duplicate_rows, use_container_width=True)
+        st.dataframe(duplicate_rows, width="stretch")
     else:
         st.success("No duplicate candidates found.")
 
