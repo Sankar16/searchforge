@@ -5,7 +5,7 @@ from src.catalog_agent.spec_checker import check_missing_specs
 from src.catalog_agent.description_quality import check_description_quality
 from src.catalog_agent.description_rewriter import rewrite_weak_descriptions
 from src.catalog_agent.report import build_catalog_health_report, print_catalog_health_report
-
+from src.catalog_agent.dedup import find_duplicate_candidates
 
 with open("data/catalog_messy.json", "r") as f:
     raw_catalog = json.load(f)
@@ -34,7 +34,10 @@ rewritten_products = rewrite_weak_descriptions(
 final_spec_issues = check_missing_specs(rewritten_products)
 final_description_issues = check_description_quality(rewritten_products)
 
-# 6. Report
+# 6. Check duplicate candidate
+duplicate_candidates = find_duplicate_candidates(rewritten_products, threshold=88)
+
+# 7. Report
 report = build_catalog_health_report(
     products=products,
     messy_spec_issues=messy_spec_issues,
@@ -57,6 +60,17 @@ for original, rewritten in zip(normalized_products, rewritten_products):
         print(f"\nSKU: {original.sku}")
         print(f"Before: {original.description}")
         print(f"After:  {rewritten.description}")
+
+print("\nDUPLICATE DETECTION")
+print("-------------------")
+print(f"Possible duplicate pairs: {len(duplicate_candidates)}")
+
+for item in duplicate_candidates[:10]:
+    print(
+        f"{item['similarity_score']} | "
+        f"{item['sku_1']} ({item['name_1']}) "
+        f"<-> {item['sku_2']} ({item['name_2']})"
+    )
 
 with open("data/catalog_clean.json", "w") as f:
     json.dump([product.model_dump() for product in rewritten_products], f, indent=2)
