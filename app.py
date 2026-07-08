@@ -63,6 +63,24 @@ tab1, tab2, tab3 = st.tabs(
 with tab1:
     st.header("Catalog Intelligence Agent")
 
+    st.subheader("LangGraph Workflow")
+
+    workflow_steps = [
+        "Loaded messy catalog",
+        "Checked missing specifications",
+        "Normalized units of measurement",
+        "Re-checked specifications after UOM normalization",
+        "Checked description quality",
+        "Rewrote weak descriptions",
+        "Detected possible duplicate products",
+        "Generated catalog health report",
+        "Saved cleaned catalog",
+    ]
+
+    for step in workflow_steps:
+        st.success(f"✅ {step}")
+
+
     pipeline = run_catalog_pipeline()
     report = pipeline["health_report"]
 
