@@ -22,6 +22,7 @@ class CatalogAgentState(TypedDict):
     messy_description_issues: List[CatalogIssue]
     normalized_description_issues: List[CatalogIssue]
     final_description_issues: List[CatalogIssue]
+    description_evaluations: List[Dict[str, Any]]
 
     weak_skus: Set[str]
 

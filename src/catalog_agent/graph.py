@@ -1,4 +1,5 @@
 import json
+import asyncio
 from typing import Any, Dict
 
 from langgraph.graph import StateGraph, START, END
@@ -8,7 +9,8 @@ from src.catalog_agent.state import CatalogAgentState
 from src.catalog_agent.spec_checker import check_missing_specs
 from src.catalog_agent.uom import normalize_catalog_uom
 from src.catalog_agent.description_quality import check_description_quality
-from src.catalog_agent.llm_description_rewriter import rewrite_weak_descriptions_with_llm
+from src.catalog_agent.llm_description_rewriter import rewrite_weak_descriptions_with_llm_async
+from src.catalog_agent.llm_evaluator import evaluate_rewritten_descriptions_async
 from src.catalog_agent.dedup import find_duplicate_candidates
 from src.catalog_agent.report import build_catalog_health_report
 
@@ -64,9 +66,11 @@ def check_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
 
 
 def rewrite_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
-    rewritten_products = rewrite_weak_descriptions_with_llm(
-        products=state["normalized_products"],
-        weak_skus=state["weak_skus"],
+    rewritten_products = asyncio.run(
+        rewrite_weak_descriptions_with_llm_async(
+            products=state["normalized_products"],
+            weak_skus=state["weak_skus"],
+        )
     )
 
     final_description_issues = check_description_quality(rewritten_products)
@@ -87,6 +91,18 @@ def detect_duplicates_node(state: CatalogAgentState) -> Dict[str, Any]:
         "duplicate_candidates": duplicate_candidates,
     }
 
+def evaluate_rewrites_node(state: CatalogAgentState) -> Dict[str, Any]:
+    description_evaluations = asyncio.run(
+        evaluate_rewritten_descriptions_async(
+            original_products=state["normalized_products"],
+            rewritten_products=state["rewritten_products"],
+            weak_skus=state["weak_skus"],
+        )
+    )
+
+    return {
+        "description_evaluations": description_evaluations,
+    }
 
 def generate_report_node(state: CatalogAgentState) -> Dict[str, Any]:
     report = build_catalog_health_report(
@@ -121,6 +137,7 @@ def build_catalog_intelligence_graph():
     graph.add_node("check_specs_after", check_specs_after_node)
     graph.add_node("check_descriptions", check_descriptions_node)
     graph.add_node("rewrite_descriptions", rewrite_descriptions_node)
+    graph.add_node("evaluate_rewrites", evaluate_rewrites_node)
     graph.add_node("detect_duplicates", detect_duplicates_node)
     graph.add_node("generate_report", generate_report_node)
     graph.add_node("save_clean_catalog", save_clean_catalog_node)
@@ -131,7 +148,8 @@ def build_catalog_intelligence_graph():
     graph.add_edge("normalize_uom", "check_specs_after")
     graph.add_edge("check_specs_after", "check_descriptions")
     graph.add_edge("check_descriptions", "rewrite_descriptions")
-    graph.add_edge("rewrite_descriptions", "detect_duplicates")
+    graph.add_edge("rewrite_descriptions", "evaluate_rewrites")
+    graph.add_edge("evaluate_rewrites", "detect_duplicates")
     graph.add_edge("detect_duplicates", "generate_report")
     graph.add_edge("generate_report", "save_clean_catalog")
     graph.add_edge("save_clean_catalog", END)

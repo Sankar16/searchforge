@@ -1,10 +1,11 @@
 import os
 import json
 import re
-from typing import Dict, Any
+import asyncio
+from typing import Dict, Any, List
 
 from dotenv import load_dotenv
-from anthropic import Anthropic
+from anthropic import Anthropic, AsyncAnthropic
 
 from src.schemas import Product
 
@@ -21,14 +22,24 @@ def get_anthropic_client() -> Anthropic | None:
     return Anthropic(api_key=api_key)
 
 
+def get_async_anthropic_client() -> AsyncAnthropic | None:
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+
+    if not api_key:
+        return None
+
+    return AsyncAnthropic(api_key=api_key)
+
+
+def get_llm_concurrency() -> int:
+    try:
+        return int(os.getenv("LLM_CONCURRENCY", "5"))
+    except ValueError:
+        return 5
+
+
 def extract_json_from_text(text: str) -> Dict[str, Any]:
-    """
-    Claude may return JSON inside markdown or with a short preface.
-    This extracts the first JSON object from the response.
-    """
-
     cleaned = text.strip()
-
     cleaned = cleaned.replace("```json", "").replace("```", "").strip()
 
     try:
@@ -48,15 +59,10 @@ def heuristic_description_eval(
     product: Product,
     rewritten_description: str,
 ) -> Dict[str, Any]:
-    """
-    Fallback evaluator when no LLM key is available or parsing fails.
-    """
-
     score = 7
     notes = []
 
     description_lower = rewritten_description.lower()
-
     has_spec_value = False
 
     for value in product.specs.values():
@@ -98,10 +104,6 @@ def heuristic_description_eval(
 
 
 def normalize_eval_result(result: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Ensures the judge result always has the expected fields.
-    """
-
     score = result.get("score", 1)
 
     try:
@@ -135,23 +137,12 @@ def normalize_eval_result(result: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def evaluate_rewritten_description(
+def build_evaluation_prompt(
     product: Product,
     original_description: str,
     rewritten_description: str,
-) -> Dict[str, Any]:
-    """
-    Uses Claude as a judge to evaluate whether the rewritten description is accurate.
-    """
-
-    client = get_anthropic_client()
-
-    if client is None:
-        return heuristic_description_eval(product, rewritten_description)
-
-    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
-
-    prompt = f"""
+) -> str:
+    return f"""
 You are evaluating a rewritten B2B industrial product description.
 
 Your task:
@@ -160,6 +151,7 @@ Check whether the rewritten description is accurate, useful for search, and grou
 Important:
 - Penalize invented specs, invented materials, invented applications, or invented brands.
 - If the rewritten description adds details not present in product data, mark hallucination_risk as medium or high.
+- This is a rubric-based quality score, not statistical confidence.
 - Return JSON only.
 - Do not include markdown.
 - Do not include explanation outside JSON.
@@ -182,6 +174,19 @@ Return exactly this JSON shape:
 }}
 """
 
+
+def evaluate_rewritten_description(
+    product: Product,
+    original_description: str,
+    rewritten_description: str,
+) -> Dict[str, Any]:
+    client = get_anthropic_client()
+
+    if client is None:
+        return heuristic_description_eval(product, rewritten_description)
+
+    model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-haiku-4-5")
+
     try:
         response = client.messages.create(
             model=model,
@@ -190,7 +195,11 @@ Return exactly this JSON shape:
             messages=[
                 {
                     "role": "user",
-                    "content": prompt,
+                    "content": build_evaluation_prompt(
+                        product=product,
+                        original_description=original_description,
+                        rewritten_description=rewritten_description,
+                    ),
                 }
             ],
         )
@@ -204,3 +213,102 @@ Return exactly this JSON shape:
         fallback = heuristic_description_eval(product, rewritten_description)
         fallback["notes"].append(f"LLM judge fallback used because of error: {error}")
         return fallback
+
+
+async def evaluate_rewritten_description_async(
+    product: Product,
+    original_description: str,
+    rewritten_description: str,
+    client: AsyncAnthropic | None,
+    semaphore: asyncio.Semaphore,
+) -> Dict[str, Any]:
+    if client is None:
+        return heuristic_description_eval(product, rewritten_description)
+
+    model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-haiku-4-5")
+
+    async with semaphore:
+        try:
+            response = await client.messages.create(
+                model=model,
+                max_tokens=300,
+                temperature=0,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": build_evaluation_prompt(
+                            product=product,
+                            original_description=original_description,
+                            rewritten_description=rewritten_description,
+                        ),
+                    }
+                ],
+            )
+
+            raw_text = response.content[0].text.strip()
+            parsed = extract_json_from_text(raw_text)
+
+            return normalize_eval_result(parsed)
+
+        except Exception as error:
+            fallback = heuristic_description_eval(product, rewritten_description)
+            fallback["notes"].append(
+                f"LLM judge fallback used because of error: {error}"
+            )
+            return fallback
+
+
+async def evaluate_rewritten_descriptions_async(
+    original_products: List[Product],
+    rewritten_products: List[Product],
+    weak_skus: set[str],
+) -> List[Dict[str, Any]]:
+    """
+    Evaluates only products that were rewritten.
+    Runs judge calls concurrently with bounded concurrency.
+    """
+
+    client = get_async_anthropic_client()
+    semaphore = asyncio.Semaphore(get_llm_concurrency())
+
+    tasks = []
+
+    for original, rewritten in zip(original_products, rewritten_products):
+        if original.sku not in weak_skus:
+            continue
+
+        tasks.append(
+            evaluate_rewritten_description_async(
+                product=original,
+                original_description=original.description,
+                rewritten_description=rewritten.description,
+                client=client,
+                semaphore=semaphore,
+            )
+        )
+
+    raw_evaluations = await asyncio.gather(*tasks)
+
+    enriched_evaluations = []
+
+    weak_products = [
+        (original, rewritten)
+        for original, rewritten in zip(original_products, rewritten_products)
+        if original.sku in weak_skus
+    ]
+
+    for (original, rewritten), evaluation in zip(weak_products, raw_evaluations):
+        enriched_evaluations.append(
+            {
+                "sku": original.sku,
+                "name": original.name,
+                "original_description": original.description,
+                "rewritten_description": rewritten.description,
+                "judge_score": evaluation["score"],
+                "hallucination_risk": evaluation["hallucination_risk"],
+                "passes_quality_gate": evaluation["passes"],
+                "notes": evaluation["notes"],
+            }
+        )
+
+    return enriched_evaluations

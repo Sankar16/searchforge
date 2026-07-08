@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed ball bearing provides protection against contaminants in industrial applications.",
+    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed bearing is suitable for applications requiring protection from contaminants.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -26,7 +26,7 @@
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
-    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for general industrial applications requiring sealed ball bearing protection.",
+    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for applications requiring protection from contaminants while maintaining smooth rotation.",
     "brand": "Generic",
     "specs": {
       "bore": "25 mm",
@@ -315,7 +315,7 @@
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
-    "description": "Steel motor base plate designed for 56C frame motors. Provides secure mounting for compatible motor installations.",
+    "description": "Steel motor base plate designed for mounting 56C frame motors. Provides a stable mounting surface for secure motor installation.",
     "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for secure tightening with standard wrenches or sockets.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. Designed with a hexagonal head for wrench tightening.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable use in plumbing and fluid transfer applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and fluid transfer systems.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed of brass for fluid control applications.",
+    "description": "Industrial valve constructed of brass for fluid control applications. Suitable for general industrial use.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed for secure bearing installation in housing applications.",
+    "description": "Cast iron bearing mount designed for housing applications. Provides structural support for bearing installation.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
