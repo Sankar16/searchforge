@@ -1,16 +1,18 @@
 # SearchForge — Design Document
 
-Status snapshot as of 2026-07-08. This document reflects the **actual current implementation**, verified against source, not aspirational roadmap language (see [README.md](README.md), which is partly stale — its "planned"/"next milestone" LangGraph section was written before LangGraph was actually added).
+Status snapshot as of 2026-07-08. This document reflects the **actual current implementation**, verified against source and recent CLI runs, not aspirational roadmap language. README.md is a public onboarding document; this file is the technical implementation/design document.
 
 ## 1. Purpose
 
 SearchForge is a B2B eCommerce search quality platform. It cleans messy industrial product catalogs (missing specs, inconsistent units, weak descriptions, duplicate SKUs), compares search relevance before/after cleaning, and generates spec-aware cross-sell recommendations with human-readable reasoning.
 
+The current implementation now includes a real LLM path for description rewriting and evaluation: weak product descriptions are rewritten using Claude with bounded async concurrency, and rewritten descriptions are evaluated by a separate LLM-as-judge quality gate.
+
 ## 2. System Architecture
 
 Three layers, each backed by a `src/` package:
 
-```
+```text
 data/                          JSON catalogs (messy + clean), sole persistence layer
 ├── catalog_messy.json
 ├── catalog_clean.json
@@ -22,18 +24,20 @@ src/
 │   ├── spec_checker.py        product-type inference + required-spec rules
 │   ├── uom.py                 inch → mm normalization
 │   ├── description_quality.py rule-based description scoring
-│   ├── description_rewriter.py template-based description rewriting (NOT an LLM)
-│   ├── dedup.py                fuzzy duplicate detection (rapidfuzz)
-│   ├── report.py                health report aggregation
-│   ├── state.py                 CatalogAgentState (LangGraph TypedDict)
-│   └── graph.py                 LangGraph workflow (linear, 9 nodes)
-├── search/                     Layer 2: Search Quality
-│   ├── retriever.py             weighted in-memory keyword search
-│   └── indexer.py               EMPTY FILE — no indexing logic exists
-├── crosssell_agent/             Layer 3: Cross-Sell Reasoning
-│   ├── knowledge_graph.py       hardcoded compatibility graph (networkx.DiGraph)
-│   └── recommender.py           joins graph recs with catalog data
-└── evaluation/                  EMPTY DIRECTORY — scaffold only, not in git, no files
+│   ├── description_rewriter.py deterministic fallback/template description rewriting
+│   ├── llm_description_rewriter.py Claude-based async description rewriting
+│   ├── llm_evaluator.py       Claude-based LLM-as-judge description evaluation
+│   ├── dedup.py               fuzzy duplicate detection (rapidfuzz)
+│   ├── report.py              health report aggregation
+│   ├── state.py               CatalogAgentState (LangGraph TypedDict)
+│   └── graph.py               LangGraph workflow (linear, 10 nodes)
+├── search/                    Layer 2: Search Quality
+│   ├── retriever.py            weighted in-memory keyword search
+│   └── indexer.py              scaffold/empty or not meaningfully implemented yet
+├── crosssell_agent/            Layer 3: Cross-Sell Reasoning
+│   ├── knowledge_graph.py      hardcoded compatibility graph (networkx.DiGraph)
+│   └── recommender.py          joins graph recs with catalog data
+└── evaluation/                 scaffold only if present; no full evaluation harness yet
 
 app.py                         Streamlit UI (3 tabs), invokes the LangGraph pipeline
 run_catalog_check.py           CLI: pipeline as direct function calls (pre-LangGraph path)
@@ -41,7 +45,8 @@ run_catalog_graph.py           CLI: pipeline via the compiled LangGraph graph
 run_search_comparison.py       CLI: messy vs. clean search comparison
 run_dedup_check.py             CLI: standalone duplicate detection
 run_crosssell_demo.py          CLI: cross-sell recommendations for demo cart SKUs
-tests/                         EMPTY — no test files exist
+run_llm_rewrite_demo.py        CLI: standalone LLM rewrite + judge demo
+tests/                         empty or not meaningfully implemented yet
 ```
 
 ## 3. Data Models (`src/schemas.py`)
@@ -52,11 +57,12 @@ class Product(BaseModel):
     name: str
     category: str
     description: str
-    brand: Optional[str]
-    specs: Dict[str, Any] = {}
-    uom: Optional[str]
-    price: Optional[float]
-    search_terms: List[str] = []
+    brand: Optional[str] = None
+    specs: Dict[str, Any] = Field(default_factory=dict)
+    uom: Optional[str] = None
+    price: Optional[float] = None
+    search_terms: List[str] = Field(default_factory=list)
+
 
 class CatalogIssue(BaseModel):
     sku: str
@@ -65,35 +71,289 @@ class CatalogIssue(BaseModel):
     severity: str
 ```
 
-These two models are the only schemas in the system — there is no embedding/vector schema and no evaluation-result schema, matching the fact that neither vector search nor an evaluation harness is implemented yet.
+These two models are the only formal Pydantic schemas in the current system. LLM evaluation outputs are currently stored as plain dictionaries in the LangGraph state, not as a dedicated `EvaluationResult` model. There is still no embedding/vector schema because vector search has not been implemented yet.
 
 ## 4. Catalog Intelligence Agent
 
 ### 4.1 Product type inference & spec checking (`spec_checker.py`)
-- `infer_product_type(product)` — a rule-based keyword classifier (if/elif chain over `name`/`category`) covering ~27 product types (bearings, pillow blocks, valves, pipe fittings, fasteners, etc.), falling back to `"unknown"`. This function is the taxonomy backbone used by both spec-checking and dedup.
-- `PRODUCT_TYPE_REQUIRED_SPECS` — required spec fields per product type; `SPEC_ALIASES` — accepted alternate key names (e.g. `bore`/`id` for `inner_diameter_mm`).
+
+- `infer_product_type(product)` — a rule-based keyword classifier (if/elif chain over `name`/`category`) covering industrial product types such as bearings, pillow blocks, valves, pipe fittings, fasteners, shafts, couplings, threadlocker, bearing grease, and pipe wrenches. It falls back to `"unknown"` when no rule matches.
+- `PRODUCT_TYPE_REQUIRED_SPECS` — required spec fields per product type.
+- `SPEC_ALIASES` — accepted alternate key names (e.g. `bore`/`id` for `inner_diameter_mm`, `od` for `outer_diameter_mm`, `pressure` for `pressure_rating_psi`).
 - `check_missing_specs(products)` — flags `unknown_product_type` (medium) and `missing_spec` (high) issues.
 
-### 4.2 UOM normalization (`uom.py`)
-`normalize_product_uom` converts `*_in` spec keys to `*_mm` (`INCH_TO_MM = 25.4`), retaining the original inch fields and tagging `product.uom = "normalized"`.
+Current verified output:
 
-### 4.3 Description quality & rewriting
-- `description_quality.py` — `score_description` (0–5 rule-based score: penalizes short text, weak marketing phrases, absence of spec values or product name in the text). `check_description_quality` flags `weak_description` when score ≤ 2.
-- `description_rewriter.py` — **template-based, not LLM-based**: `rewrite_description` builds `"{name} is a {category} product with {specs_text}. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications."` No model inference or API calls exist anywhere in this codebase.
-
-### 4.4 Duplicate detection (`dedup.py`)
-`find_duplicate_candidates(products, threshold=88)` does an O(n²) pairwise comparison using `rapidfuzz.fuzz.token_set_ratio`, scored as `0.7 × name_similarity + 0.3 × spec_similarity`, gated by shared technical identifiers (regex-extracted: bearing codes, `M8`-style callouts, fractions) and product-type compatibility. Tuned during development from 173 → 9 → 6 candidate pairs on the demo catalog. Returns plain dicts, not `CatalogIssue` — `duplicate_candidates_to_issues` exists to convert them but is currently unused by the pipeline.
-
-### 4.5 Health report (`report.py`)
-`build_catalog_health_report` aggregates total products, spec issues before/after normalization, description issues, and a `Counter`-based issue-type/severity breakdown. Note: duplicate candidates are **not** included in this dict — callers (`app.py`, `run_catalog_check.py`) merge them in separately for display.
-
-### 4.6 LangGraph workflow (`state.py` + `graph.py`)
-
-`CatalogAgentState` (TypedDict) carries `input_path`/`output_path`, `raw_products`, `normalized_products`, `rewritten_products`, the four issue lists (messy/normalized specs, messy/normalized/final descriptions), `weak_skus`, `duplicate_candidates`, and `health_report`.
-
-`build_catalog_intelligence_graph()` wires 9 nodes with `StateGraph`:
-
+```text
+Spec issues before UOM normalization: 41
+Spec issues after UOM normalization: 33
 ```
+
+### 4.2 UOM normalization (`uom.py`)
+
+`normalize_product_uom` converts `*_in` spec keys to `*_mm` using:
+
+```python
+INCH_TO_MM = 25.4
+```
+
+Examples:
+
+```text
+inner_diameter_in → inner_diameter_mm
+outer_diameter_in → outer_diameter_mm
+width_in → width_mm
+diameter_in → diameter_mm
+length_in → length_mm
+bore_diameter_in → bore_diameter_mm
+shaft_diameter_in → shaft_diameter_mm
+```
+
+The original inch fields are retained, and the product is tagged as:
+
+```python
+product.uom = "normalized"
+```
+
+Current verified output:
+
+```text
+UOM-related issues fixed: 8
+```
+
+### 4.3 Description quality scoring (`description_quality.py`)
+
+`score_description(product)` is a rule-based 0–5 quality score.
+
+It penalizes:
+
+- Very short descriptions
+- Weak marketing phrases such as `"good"`, `"high quality"`, `"reliable"`, `"strong"`, `"useful"`
+- Descriptions that do not include product spec values
+- Descriptions that do not mention tokens from the product name
+
+`check_description_quality(products)` flags `weak_description` when:
+
+```python
+score <= 2
+```
+
+Current verified output:
+
+```text
+Weak descriptions before rewrite: 22
+Weak descriptions after rewrite: 0
+```
+
+### 4.4 Deterministic fallback description rewriter (`description_rewriter.py`)
+
+`description_rewriter.py` is still present and important, but it is now a fallback path rather than the primary rewrite path.
+
+`rewrite_description(product)` builds a deterministic description from the product name, category, and specs.
+
+Example style:
+
+```text
+{name} is a {category} product with {specs_text}. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.
+```
+
+This fallback is used when:
+
+- No Anthropic API key is available
+- An LLM call fails
+- A rewrite call returns empty text
+
+### 4.5 LLM description rewriter (`llm_description_rewriter.py`)
+
+`llm_description_rewriter.py` implements Claude-based description rewriting.
+
+Main functions:
+
+```python
+rewrite_description_with_claude(product)
+rewrite_description_with_claude_async(product, client, semaphore)
+rewrite_weak_descriptions_with_llm(products, weak_skus)
+rewrite_weak_descriptions_with_llm_async(products, weak_skus)
+```
+
+Current behavior:
+
+- Uses Claude to rewrite weak descriptions.
+- Uses product name, category, brand, specs, and current description as grounded context.
+- Instructs the model not to invent technical specs.
+- Writes concise, factual, search-friendly product descriptions.
+- Falls back to deterministic rewriting on failure.
+- Uses bounded async concurrency through:
+  - `AsyncAnthropic`
+  - `asyncio.gather`
+  - `asyncio.Semaphore`
+  - `LLM_CONCURRENCY`
+
+Environment variables:
+
+```text
+ANTHROPIC_API_KEY
+ANTHROPIC_REWRITE_MODEL
+LLM_CONCURRENCY
+```
+
+Example generated description:
+
+```text
+SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed ball bearing provides protection against contaminants in industrial applications.
+```
+
+This is now the primary rewrite path used by the LangGraph workflow.
+
+### 4.6 LLM-as-judge evaluator (`llm_evaluator.py`)
+
+`llm_evaluator.py` implements Claude-based evaluation of rewritten descriptions.
+
+Main functions:
+
+```python
+evaluate_rewritten_description(product, original_description, rewritten_description)
+evaluate_rewritten_description_async(...)
+evaluate_rewritten_descriptions_async(original_products, rewritten_products, weak_skus)
+```
+
+The evaluator checks whether the rewritten description:
+
+- Is grounded in the product data
+- Avoids invented specs
+- Avoids invented materials or brands
+- Is useful for eCommerce search
+- Avoids vague marketing fluff
+
+Current judge output fields:
+
+```text
+sku
+name
+original_description
+rewritten_description
+judge_score
+hallucination_risk
+passes_quality_gate
+notes
+```
+
+Important terminology:
+
+The judge score is a **rubric-based quality score**, not statistical confidence.
+
+Environment variables:
+
+```text
+ANTHROPIC_JUDGE_MODEL
+LLM_CONCURRENCY
+```
+
+The judge model is separately configurable from the rewrite model. This gives separation between the generation path and evaluation path, although both currently use Anthropic unless configured otherwise.
+
+Current verified output from `run_catalog_graph.py`:
+
+```text
+Description evaluations: 22
+Descriptions passing judge: 21
+Average judge score: 8.09/10
+```
+
+Sample judge output:
+
+```text
+BRG-6205-2RS | score=9/10 | risk=low | passes=True
+BRG-6303-NO-SPEC | score=7/10 | risk=medium | passes=True
+```
+
+### 4.7 Duplicate detection (`dedup.py`)
+
+`find_duplicate_candidates(products, threshold=88)` performs O(n²) pairwise comparison using `rapidfuzz.fuzz.token_set_ratio`.
+
+The algorithm uses:
+
+- Product-type compatibility
+- Shared technical identifiers
+- Regex-extracted identifiers such as `6205`, `UC205`, `P205`, `M8`, `40mm`, `1/2`
+- Name similarity
+- Spec similarity
+- Type-specific filters for valves and pipe adapters
+
+Scoring:
+
+```text
+final_score = 0.7 × name_similarity + 0.3 × spec_similarity
+```
+
+Tuning history on the demo catalog:
+
+```text
+173 possible duplicate pairs → 9 → 6
+```
+
+Current duplicate candidates:
+
+```text
+BRG-6303-OPEN ↔ BRG-6303-NO-SPEC
+FST-M8-40-ZN ↔ FST-M8-40-HEXAGON
+FST-M8-40-ZN ↔ FST-HEX-M8X40
+VAL-BUTTERFLY-4IN ↔ VAL-BUTTERFLY-LUG
+FST-MOTOR-KIT-M8 ↔ FST-MOTOR-BOLT-KIT
+FST-HEX-M8X40 ↔ FST-M8-40-HEXAGON
+```
+
+`duplicate_candidates_to_issues` exists but is currently not used by the main LangGraph pipeline. Duplicate candidates are displayed separately from formal health-report issue counts.
+
+### 4.8 Health report (`report.py`)
+
+`build_catalog_health_report` aggregates:
+
+```text
+total_products
+messy_spec_issues
+normalized_spec_issues
+uom_issues_fixed
+weak_description_issues
+total_current_issues
+issue_summary
+```
+
+Important note:
+
+The health report dictionary does **not** yet include:
+
+- Duplicate candidate count
+- Description judge metrics
+- Hallucination risk counts
+
+Those values are currently stored separately in LangGraph state and merged in CLI/UI display code.
+
+## 5. LangGraph workflow (`state.py` + `graph.py`)
+
+`CatalogAgentState` is a `TypedDict` carrying shared workflow state.
+
+Current state fields include:
+
+```text
+input_path
+output_path
+raw_products
+normalized_products
+rewritten_products
+messy_spec_issues
+normalized_spec_issues
+messy_description_issues
+normalized_description_issues
+final_description_issues
+description_evaluations
+weak_skus
+duplicate_candidates
+health_report
+```
+
+`build_catalog_intelligence_graph()` wires the current graph:
+
+```text
 START
  → load_catalog
  → check_specs_before
@@ -101,63 +361,470 @@ START
  → check_specs_after
  → check_descriptions
  → rewrite_descriptions
+ → evaluate_rewrites
  → detect_duplicates
  → generate_report
  → save_clean_catalog
  → END
 ```
 
-**This is fully implemented**, added in commit `274cd1e` (after README's "planned" language was written in `e544d83`). All edges are unconditional `add_edge` calls — there is **no conditional branching** yet (no `add_conditional_edges`), despite the README describing a vision of conditional skip-if-clean / LLM-fallback-if-unknown-type logic. That remains future work, not current behavior.
+Current graph nodes:
 
-The pre-LangGraph pipeline (`run_catalog_check.py`, direct function calls in sequence) still exists in parallel with the graph-based one (`run_catalog_graph.py`) and produces equivalent output.
+```text
+load_catalog
+check_specs_before
+normalize_uom
+check_specs_after
+check_descriptions
+rewrite_descriptions
+evaluate_rewrites
+detect_duplicates
+generate_report
+save_clean_catalog
+```
 
-## 5. Search Quality Layer
+Current status:
 
-- `retriever.py` — `search_catalog(catalog, query, top_k=5)`: weighted substring/keyword scoring over raw catalog dicts, no persistent index. Field weights: `name` (5), `search_terms` (4), `category` (3), `description` (2), `specs` (1). Recomputed from scratch on every call — O(products × query tokens), fine at demo scale (74 products), not indexed.
-- `indexer.py` — **empty file**. No inverted index, no persistence, no embeddings. Named/scaffolded but never implemented.
-- There is no vector search, no embeddings, and no ChromaDB integration anywhere in the codebase or `requirements.txt` — these remain future work as the README states.
+- The graph is fully implemented.
+- The graph is currently linear.
+- All edges are unconditional `add_edge` calls.
+- There are no conditional branches yet.
+- There is no `add_conditional_edges` usage yet.
+- The graph uses sync node functions; async LLM work is currently invoked inside nodes through `asyncio.run(...)`.
 
-## 6. Cross-Sell Reasoning Agent
+The pre-LangGraph direct pipeline (`run_catalog_check.py`) still exists in parallel with the graph-based path (`run_catalog_graph.py`).
 
-- `knowledge_graph.py` — `build_compatibility_graph()` builds a `networkx.DiGraph` from a **hardcoded list of ~15 relationship records** (bearing↔housing fits, shaft compatibility, motor-mount hardware, valve↔sealant pairing), each edge carrying `relationship`, `reason` (human-readable string), and `confidence`. This is a static, manually curated graph — not learned or dynamically inferred.
-- `recommender.py` — `recommend_cross_sell(cart_sku)` rebuilds the graph and joins outgoing edges with live catalog data (name/category/description/specs/price) from `data/catalog_clean.json`. Graph is rebuilt from scratch on every call; no caching.
+Current verified `run_catalog_graph.py` output:
 
-## 7. Streamlit UI (`app.py`)
+```text
+LANGGRAPH CATALOG INTELLIGENCE REPORT
+-------------------------------------
+Total products: 74
+Spec issues before UOM normalization: 41
+Spec issues after UOM normalization: 33
+UOM-related issues fixed: 8
+Weak descriptions before rewrite: 22
+Weak descriptions after rewrite: 0
+Description evaluations: 22
+Descriptions passing judge: 21
+Average judge score: 8.09/10
+Possible duplicate pairs: 6
+Total current issues: 39
+```
 
-Single-file app, `st.tabs(["Catalog Health", "Search Comparison", "Cart + Cross-Sell"])`.
+## 6. Search Quality Layer
 
-- **Tab 1 — Catalog Health**: `run_catalog_pipeline()` (cached via `@st.cache_data`) imports and invokes the **real compiled LangGraph graph** (`graph.invoke(initial_state)`) — this is the "Connect Streamlit UI to LangGraph workflow" change (commits `274cd1e`/`ec40940`/`775b153`). Renders 4 metrics (total products, spec issues, weak descriptions, duplicates), before/after rewrite samples, and the duplicate-pairs table. The "workflow steps" checklist shown in the UI is a **hardcoded static list mirroring the 9 node names** — it always renders all steps as complete; it is not driven by actual per-node execution status (no use of `graph.stream()` for progress).
-- **Tab 2 — Search Comparison**: reads `data/catalog_messy.json` and `data/catalog_clean.json` directly from disk (independent of any in-memory pipeline state) and runs `search_catalog` against both for side-by-side comparison.
-- **Tab 3 — Cart + Cross-Sell**: a hardcoded 5-SKU demo cart `st.selectbox`, calls `recommend_cross_sell`.
+`retriever.py` implements weighted in-memory keyword search.
 
-**Coupling note**: Tab 1's pipeline run overwrites `data/catalog_clean.json` via `save_clean_catalog_node`, and Tabs 2/3 read that same file from disk. The three tabs share state only through this file, not through any in-memory/session object — running Tab 1 changes what Tabs 2/3 see on their next read.
+Main function:
 
-## 8. Tech Stack
+```python
+search_catalog(catalog, query, top_k=5)
+```
 
-Python, Pydantic, RapidFuzz, NetworkX, Streamlit, LangGraph (`langgraph==1.2.8` + checkpoint/prebuilt/sdk packages), JSON-based catalog storage. No LLM API, no vector database — confirmed by a repo-wide search (no `openai`, `anthropic`, `chromadb`, `sentence-transformers`, or similar in `requirements.txt` or source).
+Field weights:
 
-**Known issue**: `requirements.txt` currently has a line-concatenation bug — `pandas` and `rapidfuzz` are merged onto one line as `pandasrapidfuzz` (missing newline), which breaks `pip install -r requirements.txt` as written. Needs a one-line fix.
+```text
+name: 5
+search_terms: 4
+category: 3
+description: 2
+specs: 1
+```
 
-## 9. Testing
+Current behavior:
 
-`tests/` exists but is completely empty — no test files, no framework config. There is currently zero automated test coverage across the project.
+- Tokenizes query text.
+- Adds simple token variants, such as `25mm → 25`.
+- Scores products by substring/token presence in weighted fields.
+- Sorts by score.
+- Returns top K results.
 
-## 10. Gaps vs. README's Roadmap Claims
+Current CLI:
 
-| README states | Actual status |
+```text
+run_search_comparison.py
+```
+
+Example queries:
+
+```text
+25mm sealed bearing
+bolt for motor mount
+half inch brass valve
+pillow block for 6205 bearing
+thread sealant for pipe fitting
+```
+
+Current limitations:
+
+- No inverted index
+- No embeddings
+- No vector database
+- No ChromaDB
+- No RAG
+- No semantic search
+- No search evaluation metrics beyond visual before/after comparison
+
+`indexer.py` exists as a scaffold but does not contain a meaningful implemented index yet.
+
+## 7. Cross-Sell Reasoning Agent
+
+Implemented in:
+
+```text
+src/crosssell_agent/knowledge_graph.py
+src/crosssell_agent/recommender.py
+```
+
+`knowledge_graph.py` builds a static `networkx.DiGraph` from a hardcoded relationship list.
+
+Each edge includes:
+
+```text
+relationship
+reason
+confidence
+```
+
+Example relationships:
+
+```text
+BRG-6205-2RS → HSG-P205
+BRG-6205-2RS → MNT-SHAFT-25MM
+BRG-UC205 → HSG-P205
+MNT-MOTOR-BASE-56C → FST-MOTOR-KIT-M8
+VAL-BALL-1-2-BRASS → PIP-SEALANT-PTFE
+FST-M8-40-ZN → FST-WASHER-M8-FLAT
+FST-M8-40-ZN → FST-NUT-M8-ZN
+```
+
+`recommender.py`:
+
+- Loads `data/catalog_clean.json`
+- Builds the graph
+- Gets outgoing edges for the cart SKU
+- Enriches target SKUs with product name/category/description/specs/price
+- Returns recommendation dictionaries
+
+Current CLI:
+
+```text
+run_crosssell_demo.py
+```
+
+Current limitations:
+
+- Cross-sell graph is hardcoded.
+- Graph is rebuilt from scratch on each call.
+- No LangGraph workflow exists for cross-sell yet.
+- No MCP server yet.
+- No LLM-generated cross-sell explanations yet.
+- Edge confidence values are manually assigned relationship weights, not learned probabilities.
+
+## 8. Streamlit UI (`app.py`)
+
+Single-file Streamlit app with three tabs:
+
+```text
+Catalog Health
+Search Comparison
+Cart + Cross-Sell
+```
+
+### Tab 1 — Catalog Health
+
+`run_catalog_pipeline()` is cached via `@st.cache_data` and invokes the real compiled LangGraph workflow:
+
+```python
+graph.invoke(initial_state)
+```
+
+It displays:
+
+- Total products
+- Spec issues
+- Weak descriptions
+- Possible duplicates
+- Catalog health summary
+- Sample description rewrites
+- Duplicate candidate table
+- Static LangGraph workflow checklist
+
+The workflow checklist is hardcoded and mirrors the graph nodes. It is not currently driven by actual `graph.stream()` node execution events.
+
+If the UI has not yet been updated after the LLM judge addition, it may not display:
+
+- Description evaluation count
+- Average judge score
+- Hallucination risk counts
+- Judge pass/fail table
+
+Those are available in the graph state and CLI output but may still need UI wiring.
+
+### Tab 2 — Search Comparison
+
+Reads:
+
+```text
+data/catalog_messy.json
+data/catalog_clean.json
+```
+
+Runs `search_catalog` against both and shows side-by-side results.
+
+### Tab 3 — Cart + Cross-Sell
+
+Uses a hardcoded demo SKU dropdown and calls:
+
+```python
+recommend_cross_sell(selected_sku)
+```
+
+Displays:
+
+- Recommended product
+- SKU
+- Category
+- Relationship type
+- Confidence
+- Reason
+- Price
+
+### Coupling note
+
+Tab 1 writes `data/catalog_clean.json`.
+
+Tabs 2 and 3 read `data/catalog_clean.json`.
+
+The three tabs share state through the file system, not through a backend API or in-memory session object. This is acceptable for the demo but should be redesigned for a production-style application.
+
+## 9. Tech Stack
+
+Current implemented stack:
+
+```text
+Python
+Pydantic
+LangGraph
+Anthropic Python SDK
+python-dotenv
+asyncio
+RapidFuzz
+NetworkX
+Streamlit
+JSON catalog files
+```
+
+Current AI usage:
+
+```text
+Claude-based description rewriting
+Claude-based LLM-as-judge description evaluation
+```
+
+Current deterministic/non-LLM logic:
+
+```text
+Product type inference
+Spec validation
+UOM normalization
+Description quality scoring
+Duplicate detection filters
+Weighted keyword search
+NetworkX graph traversal
+```
+
+Not implemented yet:
+
+```text
+OpenAI SDK
+Embeddings
+ChromaDB
+Vector search
+RAG
+MCP server
+FastAPI backend
+React frontend
+Automated tests
+```
+
+## 10. Configuration
+
+Expected `.env` configuration:
+
+```text
+ANTHROPIC_API_KEY=your_api_key_here
+ANTHROPIC_REWRITE_MODEL=claude-sonnet-4-5
+ANTHROPIC_JUDGE_MODEL=claude-haiku-4-5
+LLM_CONCURRENCY=5
+```
+
+`.env` must remain in `.gitignore`.
+
+Important note:
+
+`judge_score` is not statistical confidence. It is a model-generated rubric score.
+
+## 11. Testing
+
+Current status:
+
+```text
+tests/ exists but is empty or not meaningfully implemented
+No pytest coverage yet
+No CI workflow yet
+```
+
+Recommended first tests:
+
+```text
+test_spec_checker.py
+test_uom.py
+test_description_quality.py
+test_dedup.py
+test_search_retriever.py
+test_crosssell_recommender.py
+```
+
+LLM components should be tested with mocks, not live API calls.
+
+## 12. Known Issues and Limitations
+
+### 12.1 requirements.txt hygiene
+
+`requirements.txt` should be manually checked before sharing.
+
+A known failure mode is merged package names, such as:
+
+```text
+pandasrapidfuzz
+```
+
+Recommended verification:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 12.2 Linear LangGraph flow
+
+The graph is real but still linear.
+
+There are no conditional edges yet.
+
+Missing conditional behaviors:
+
+```text
+If no weak descriptions → skip rewrite/evaluate
+If judge fails → repair failed rewrites or fall back to deterministic rewrite
+If duplicate candidates exist → generate duplicate review report
+If product type is unknown → use LLM fallback classifier
+```
+
+### 12.3 Search is still keyword-based
+
+Search does not use embeddings or vector retrieval.
+
+### 12.4 Cross-sell is static
+
+Cross-sell recommendations are powered by a hardcoded NetworkX graph.
+
+No dynamic spec reasoning, MCP tool access, or LLM-generated explanation exists yet.
+
+### 12.5 Streamlit is demo UI
+
+Streamlit is useful for demonstration but does not demonstrate a production-style SaaS architecture.
+
+A FastAPI + React version would be stronger for full-stack engineering signal.
+
+### 12.6 LLM judge is a rubric evaluator
+
+The judge can catch obvious grounding issues, but it is still an LLM. It should be treated as a quality gate, not a source of absolute truth.
+
+## 13. Gaps vs. Target Architecture
+
+| Target capability | Current status |
 |---|---|
-| LangGraph orchestration — "planned"/"next milestone" | **Done.** Linear 9-node graph, no conditional edges yet. |
-| LLM-based product type fallback | Not implemented — `infer_product_type` is pure rule-based with an `"unknown"` fallback and no model call. |
-| LLM-based natural description rewriting | Not implemented — `rewrite_description` is pure string templating. |
-| Vector search / embeddings / ChromaDB | Not implemented — `retriever.py` is keyword/substring search only; `indexer.py` is empty. |
-| Evaluation metrics for search improvement | `src/evaluation/` is an empty, untracked scaffold directory — no code. |
-| (not mentioned) Automated tests | None exist. |
+| LangGraph Catalog Intelligence Agent | Implemented |
+| Conditional LangGraph branches | Not implemented |
+| LLM description rewriting | Implemented |
+| Async parallel LLM rewriting | Implemented |
+| LLM-as-judge description evaluation | Implemented |
+| Separate rewrite/judge model configuration | Implemented |
+| Embedding-based duplicate detection | Not implemented |
+| ChromaDB semantic search | Not implemented |
+| Search RAG | Not implemented |
+| LangGraph Cross-Sell Agent | Not implemented |
+| LLM-generated cross-sell explanations | Not implemented |
+| MCP catalog server | Not implemented |
+| FastAPI backend | Not implemented |
+| React frontend | Not implemented |
+| Automated tests | Not implemented |
 
-## 11. Near-Term Design Priorities
+## 14. Near-Term Design Priorities
 
-Given the above, the highest-leverage next steps (not yet scheduled, listed by dependency order) are:
-1. Fix the `requirements.txt` install bug.
-2. Add conditional edges to `graph.py` (skip rewrite if no weak descriptions; branch to review report when duplicates are found) — the state/graph scaffolding already supports this.
-3. Implement `src/search/indexer.py` or fold its intended responsibility into `retriever.py` explicitly, so the "indexer" module isn't a dead stub.
-4. Stand up minimal tests for the deterministic rule-based modules (`spec_checker`, `uom`, `description_quality`, `dedup`) before adding LLM/embedding-based components, since those are the easiest to regression-test.
-5. Decide whether cross-sell/search state should move from file-based coupling to shared in-memory session state in `app.py`, especially once the pipeline gets slower (e.g., after adding LLM calls).
+Given the current implementation, the highest-leverage next steps are:
+
+1. Fix and verify `requirements.txt`.
+2. Add conditional edges to `graph.py`.
+3. Add a repair loop for failed or high-risk description rewrites.
+4. Wire LLM judge metrics into the Streamlit Catalog Health tab.
+5. Add deterministic unit tests for rule-based modules.
+6. Add MCP catalog server for cross-sell/catalog access.
+7. Add LLM-generated cross-sell explanations.
+8. Replace Streamlit with FastAPI + React.
+9. Add embeddings + ChromaDB semantic search.
+10. Add semantic search evaluation metrics.
+
+## 15. Current Honest Technical Summary
+
+Current accurate summary:
+
+```text
+SearchForge is a LangGraph-orchestrated B2B catalog intelligence and search quality platform. It cleans messy industrial product catalogs using deterministic validation, unit normalization, fuzzy duplicate detection, and Claude-based async description rewriting. Rewrites are evaluated by a separately configurable LLM-as-judge for hallucination risk and search usefulness. The cleaned catalog powers keyword-based before/after search comparison and a NetworkX-based cross-sell recommendation demo.
+```
+
+Current honest limitation:
+
+```text
+The catalog agent now uses LLMs, but search is still keyword-based, cross-sell reasoning is still powered by a static graph, and the UI is still Streamlit rather than a production-style FastAPI/React stack.
+```
+
+## 16. Target Architecture
+
+The target architecture remains:
+
+```text
+Messy Catalog JSON
+        ↓
+Catalog Intelligence Agent
+LangGraph: analyze → fix → evaluate
+        ↓
+Clean Catalog
+        ↓
+ChromaDB Index
+        ↓
+Search RAG before/after comparison
+        ↓
+Cross-Sell Reasoning Agent
+LangGraph + MCP + NetworkX + spec filtering
+        ↓
+LLM-as-Judge Evaluator
+        ↓
+FastAPI + React UI
+```
+
+This target is not fully implemented yet.
+
+Current foundation pieces that are implemented:
+
+```text
+LangGraph orchestration
+LLM rewriting
+LLM evaluation
+Rule-based precision checks
+Duplicate detection
+Search comparison
+Cross-sell compatibility graph
+```

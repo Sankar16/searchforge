@@ -84,7 +84,27 @@ with tab1:
     pipeline = run_catalog_pipeline()
     report = pipeline["health_report"]
 
-    col1, col2, col3, col4 = st.columns(4)
+    description_evaluations = pipeline.get("description_evaluations", [])
+
+    passed_evals = [
+        item for item in description_evaluations
+        if item["passes_quality_gate"]
+    ]
+
+    avg_judge_score = (
+        sum(item["judge_score"] for item in description_evaluations)
+        / len(description_evaluations)
+        if description_evaluations
+        else 0
+    )
+
+    risk_counts = {}
+
+    for item in description_evaluations:
+        risk = item["hallucination_risk"]
+        risk_counts[risk] = risk_counts.get(risk, 0) + 1
+
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     col1.metric("Total Products", report["total_products"])
     col2.metric(
@@ -98,6 +118,10 @@ with tab1:
         delta=f"-{len(pipeline['normalized_description_issues'])}",
     )
     col4.metric("Possible Duplicates", len(pipeline["duplicate_candidates"]))
+    col5.metric(
+    "Avg Judge Score",
+    f"{avg_judge_score:.2f}/10",
+)
 
     st.subheader("Catalog Health Summary")
 
@@ -112,6 +136,38 @@ with tab1:
             "Total current issues": report["total_current_issues"] + len(pipeline["duplicate_candidates"]),
         }
     )
+
+    st.subheader("LLM Rewrite Evaluation")
+
+    col_a, col_b, col_c = st.columns(3)
+
+    col_a.metric("Descriptions Evaluated", len(description_evaluations))
+    col_b.metric("Passed Judge", len(passed_evals))
+    col_c.metric("Failed / Needs Review", len(description_evaluations) - len(passed_evals))
+
+    st.write(
+        {
+            "Average judge score": f"{avg_judge_score:.2f}/10",
+            "Hallucination risk counts": risk_counts,
+        }
+    )
+
+    if description_evaluations:
+        evaluation_rows = [
+            {
+                "SKU": item["sku"],
+                "Product": item["name"],
+                "Judge Score": item["judge_score"],
+                "Hallucination Risk": item["hallucination_risk"],
+                "Passes": item["passes_quality_gate"],
+                "Notes": " | ".join(item["notes"]),
+            }
+            for item in description_evaluations
+        ]
+
+        st.dataframe(evaluation_rows, width="stretch")
+    else:
+        st.info("No LLM description evaluations found.")
 
     st.subheader("Sample Description Rewrites")
 
