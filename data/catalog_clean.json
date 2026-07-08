@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "6205-2RS Sealed Ball Bearing is a bearings product with inner diameter mm: 25; outer diameter mm: 52; width mm: 15; seal type: 2RS; bearing type: deep groove ball bearing. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed ball bearing provides protection against contaminants in industrial applications.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -26,7 +26,7 @@
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
-    "description": "Rubber Sealed 6205 Bearing is a bearing product with bore: 25 mm; od: 52 mm; width: 15 mm; seal: rubber. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for general industrial applications requiring sealed ball bearing protection.",
     "brand": "Generic",
     "specs": {
       "bore": "25 mm",
@@ -67,7 +67,7 @@
     "sku": "BRG-6004-METAL",
     "name": "6004 Metal Shield Bearing",
     "category": "Bearings",
-    "description": "6004 Metal Shield Bearing is a bearings product with inner diameter mm: 20; outer diameter mm: 42; width mm: 12; seal type: metal shield. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "NTN 6004 metal shield bearing with 20mm inner diameter, 42mm outer diameter, and 12mm width. Features metal shield seal type for industrial machinery applications.",
     "brand": "NTN",
     "specs": {
       "inner_diameter_mm": 20,
@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "6303 Bearing is a bearings product with seal type: open. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "6303 bearing with open seal type, suitable for general industrial applications.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -233,7 +233,7 @@
     "sku": "HSG-P205-CAST",
     "name": "Cast Iron Pillow Block P205",
     "category": "Mounts",
-    "description": "Cast Iron Pillow Block P205 is a mounts product with compatible bearing: 6205 / UC205; shaft size: 25 mm; mount: pillow block. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Cast iron pillow block mount compatible with 6205/UC205 bearings, designed for 25 mm shaft applications.",
     "brand": "Generic",
     "specs": {
       "compatible_bearing": "6205 / UC205",
@@ -315,7 +315,7 @@
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
-    "description": "Motor Base Plate for 56C Frame is a fasteners product with compatible motor frame: 56C; material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Steel motor base plate designed for 56C frame motors. Provides secure mounting for compatible motor installations.",
     "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
@@ -354,7 +354,7 @@
     "sku": "FST-HEX-M8X40",
     "name": "Hex Bolt M8x40",
     "category": "Fasteners",
-    "description": "Hex Bolt M8x40 is a fasteners product with diameter: M8; length: 40 mm; material: zinc steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "M8x40 hex bolt manufactured from zinc-plated steel with 8mm diameter and 40mm length. Suitable for general fastening applications requiring metric threading.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "M8 40mm Hexagon Bolt Zinc is a bolts product with diameter mm: 8; length mm: 40; material: zinc-plated steel; head type: hexagon. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head for use with standard wrenches and sockets.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "Half Inch Hex Bolt 2 Inch is a fasteners product with diameter: 1/2 inch; length: 2 in; material: plain steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for secure tightening with standard wrenches or sockets.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -537,7 +537,7 @@
     "sku": "FST-ANCHOR-NOSIZE",
     "name": "Concrete Anchor",
     "category": "Fasteners",
-    "description": "Concrete Anchor is a fasteners product with material: steel; anchor type: wedge. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Steel wedge anchor designed for fastening applications in concrete and masonry substrates.",
     "brand": "Generic",
     "specs": {
       "material": "steel",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "Half Inch Brass Elbow is a pipe fittings product with size: 1/2 inch; thread: NPT; material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable use in plumbing and fluid transfer applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded Pipe Fitting is a pipe fittings product with material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and fluid transfer systems.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -754,7 +754,7 @@
     "sku": "VAL-HALF-BRASS-BALL",
     "name": "Half Inch Brass Shutoff Ball Valve",
     "category": "Valve",
-    "description": "Half Inch Brass Shutoff Ball Valve is a valve product with size: 1/2 inch; connection: female NPT; material: brass; pressure: 600 psi. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This 1/2 inch brass ball valve features female NPT connections and is rated for 600 psi working pressure. Suitable for shutoff applications in plumbing and industrial systems.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "Pressure Relief Valve is a valves product with valve type: pressure relief. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This pressure relief valve is designed to protect systems from excessive pressure buildup. Suitable for industrial applications requiring automatic pressure control.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -898,7 +898,7 @@
     "sku": "FST-MOTOR-BOLT-KIT",
     "name": "Motor Mount Bolt Kit",
     "category": "Fasteners",
-    "description": "Motor Mount Bolt Kit is a fasteners product with diameter: M8; material: zinc steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Motor mount bolt kit featuring M8 diameter zinc steel fasteners designed for securing motors to mounting surfaces.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -1146,7 +1146,7 @@
     "sku": "VAL-SOLENOID-24V-HALF",
     "name": "24 Volt Half Inch Solenoid Valve",
     "category": "Electrical",
-    "description": "24 Volt Half Inch Solenoid Valve is a electrical product with size: 1/2 inch; voltage: 24V; material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This brass solenoid valve features a 1/2 inch port size and operates on 24V power for automated flow control applications. Suitable for integration into electrical control systems requiring reliable on/off fluid management.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -1224,7 +1224,7 @@
     "sku": "MNT-KEY-NOSPEC",
     "name": "Shaft Key",
     "category": "Fasteners",
-    "description": "Shaft Key is a fasteners product with material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Steel shaft key designed for securing components to rotating shafts and transmitting torque in mechanical assemblies.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1239,7 +1239,7 @@
     "sku": "BRG-MISC-001",
     "name": "Industrial Bearing",
     "category": "Bearings",
-    "description": "Industrial Bearing is a bearings product for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Industrial bearing suitable for general mechanical applications. Manufactured by Generic.",
     "brand": "Generic",
     "specs": {},
     "uom": "normalized",
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Machine Screw is a fasteners product with material: steel. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Machine screw manufactured from steel, suitable for general fastening applications in industrial and mechanical assemblies.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial Valve is a valves product with material: brass. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Industrial valve constructed of brass for fluid control applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Bearing Mount is a housings product with material: cast iron. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "Cast iron bearing mount designed for secure bearing installation in housing applications.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
@@ -1380,7 +1380,7 @@
     "sku": "VAL-BUTTERFLY-LUG",
     "name": "Lug Butterfly Valve 4 Inch",
     "category": "Valves",
-    "description": "Lug Butterfly Valve 4 Inch is a valves product with size: 4 inch; connection: lug; pressure: 150 psi. Suitable for B2B industrial, maintenance, repair, and equipment assembly applications.",
+    "description": "This 4-inch lug-style butterfly valve features a 150 psi pressure rating suitable for flow control applications. The lug connection design allows for installation between flanges or at the end of a line.",
     "brand": "Generic",
     "specs": {
       "size": "4 inch",

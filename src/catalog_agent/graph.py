@@ -8,7 +8,7 @@ from src.catalog_agent.state import CatalogAgentState
 from src.catalog_agent.spec_checker import check_missing_specs
 from src.catalog_agent.uom import normalize_catalog_uom
 from src.catalog_agent.description_quality import check_description_quality
-from src.catalog_agent.description_rewriter import rewrite_weak_descriptions
+from src.catalog_agent.llm_description_rewriter import rewrite_weak_descriptions_with_llm
 from src.catalog_agent.dedup import find_duplicate_candidates
 from src.catalog_agent.report import build_catalog_health_report
 
@@ -64,7 +64,7 @@ def check_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
 
 
 def rewrite_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
-    rewritten_products = rewrite_weak_descriptions(
+    rewritten_products = rewrite_weak_descriptions_with_llm(
         products=state["normalized_products"],
         weak_skus=state["weak_skus"],
     )
