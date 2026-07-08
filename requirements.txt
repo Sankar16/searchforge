@@ -2,3 +2,7 @@ pydantic
 pandasrapidfuzz
 networkx
 streamlit
+langgraph==1.2.8
+langgraph-checkpoint==4.1.1
+langgraph-prebuilt==1.1.0
+langgraph-sdk==0.4.2
