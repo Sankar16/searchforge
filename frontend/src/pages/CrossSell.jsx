@@ -25,7 +25,20 @@ const REL_BADGE_MAP = {
 }
 
 function getRelationshipBadge(relationship) {
-  return REL_BADGE_MAP[relationship] || { label: 'Compatible', bg: '#F3F4F6', color: '#374151', border: '#E5E7EB' }
+  const map = {
+    "fits_housing":        { label: "Fits This Housing",   classes: "bg-red-100 text-red-700 border border-red-200" },
+    "fits_flange_housing": { label: "Fits Flange Housing", classes: "bg-red-100 text-red-700 border border-red-200" },
+    "requires_shaft":      { label: "Requires Shaft",      classes: "bg-orange-100 text-orange-700 border border-orange-200" },
+    "fits_shaft":          { label: "Fits This Shaft",     classes: "bg-blue-100 text-blue-700 border border-blue-200" },
+    "requires_hardware":   { label: "Required Hardware",   classes: "bg-red-100 text-red-700 border border-red-200" },
+    "pairs_with":          { label: "Commonly Paired",     classes: "bg-green-100 text-green-700 border border-green-200" },
+    "requires_sealant":    { label: "Recommended Add-on",  classes: "bg-purple-100 text-purple-700 border border-purple-200" },
+    "requires_nut":        { label: "Required Component",  classes: "bg-red-100 text-red-700 border border-red-200" },
+    "requires_washer":     { label: "Required Component",  classes: "bg-red-100 text-red-700 border border-red-200" },
+    "requires_housing":    { label: "Required Component",  classes: "bg-red-100 text-red-700 border border-red-200" },
+    "compatible_shaft":    { label: "Works With",          classes: "bg-blue-100 text-blue-700 border border-blue-200" },
+  }
+  return map[relationship] || { label: "Compatible", classes: "bg-gray-100 text-gray-600 border border-gray-200" }
 }
 
 // Bug 2: confidence label — handles both numeric (0.0–1.0) and string ("high"/"medium"/"low")
