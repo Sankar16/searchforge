@@ -1,3 +1,4 @@
+import os
 import json
 from pathlib import Path
 
@@ -7,7 +8,9 @@ from sentence_transformers import SentenceTransformer
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 encoder = SentenceTransformer("all-MiniLM-L6-v2")
-chroma_client = chromadb.Client()
+chroma_client = chromadb.PersistentClient(
+    path=str(PROJECT_ROOT / "data" / "chroma_db")
+)
 
 # Module-level index cache
 _indexes: dict = {}
