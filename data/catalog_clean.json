@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. Manufactured with a hexagonal head for wrench tightening.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. Designed with a hexagonal head for wrench tightening.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed from brass material for reliable performance in plumbing and industrial applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "Pressure relief valve from Generic.",
+    "description": "This is a pressure relief valve.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed for housing applications. Provides structural support for bearing installation.",
+    "description": "Cast iron bearing mount.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"

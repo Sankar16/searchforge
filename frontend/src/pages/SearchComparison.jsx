@@ -236,8 +236,8 @@ export default function SearchComparison() {
     }
   }
 
-  async function doSearch(q, m) {
-    const term = (q ?? query).trim()
+  async function handleSearch(overrideQuery) {
+    const term = (overrideQuery !== undefined ? overrideQuery : query).trim()
     if (!term) return
     setLoading(true)
     setError(null)
@@ -352,7 +352,7 @@ export default function SearchComparison() {
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && doSearch()}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
               placeholder="e.g. sealed bearing for motor shaft"
               style={{
                 flex: 1, padding: '10px 14px', borderRadius: 8,
@@ -363,7 +363,7 @@ export default function SearchComparison() {
               onBlur={e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.boxShadow = 'none' }}
             />
             <button
-              onClick={() => doSearch()}
+              onClick={() => handleSearch()}
               disabled={loading || !query.trim()}
               style={{
                 padding: '10px 24px', borderRadius: 8, border: 'none',
@@ -429,7 +429,7 @@ export default function SearchComparison() {
         {PILLS.map(p => (
           <button
             key={p}
-            onClick={() => { setQuery(p); doSearch(p, mode) }}
+            onClick={() => { setQuery(p); handleSearch(p) }}
             style={{
               padding: '6px 14px', borderRadius: 999, border: '1.5px solid #E5E7EB',
               background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',

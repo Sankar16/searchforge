@@ -260,6 +260,8 @@ export default function CatalogHealth() {
       setChangesApplied(true)
       setDownloadReady(true)
       showToast(`Applied ${data.applied} rewrites, reverted ${data.reverted}. catalog_final.json saved.`)
+      // Bug 5: fire-and-forget reindex so search reflects applied changes
+      fetch(`${API}/api/search/reindex`, { method: 'POST' }).catch(() => {})
     } catch (e) {
       showToast(e.message, false)
     } finally {
@@ -495,7 +497,7 @@ export default function CatalogHealth() {
                         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{r.sku}</div>
                       </div>
                       <div style={{ padding: '14px 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.55 }}>
-                        {r.original_description}
+                        {r.original_description || r.original || '—'}
                       </div>
                       <div style={{ padding: '14px 16px', fontSize: 13, color: '#0A1628', lineHeight: 1.55 }}>
                         {editing ? (
