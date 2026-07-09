@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -11,8 +12,6 @@ const STATUS_MSGS = [
   'Running quality gate…',
   'Generating health report…',
 ]
-
-// ── Shared tiny components ────────────────────────────────────────────────
 
 function StatCard({ label, value, sub, accent }) {
   return (
@@ -58,39 +57,41 @@ function StepIndicator({ step }) {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────
-
 export default function CatalogHealth() {
-  const [step, setStep] = useState('upload')
+  // ── Context state (persists across navigation) ─────────────────────────
+  const {
+    uploadSource, setUploadSource,
+    uploadedFile, setUploadedFile,
+    analysisResult, setAnalysisResult,
+    analysisRan, setAnalysisRan,
+    approvedSkus, rejectedSkus,
+    editedDescriptions,
+    approveSkus, rejectSkus, toggleApprove,
+    setEditedDescription,
+    changesApplied, setChangesApplied,
+    setDownloadReady,
+  } = useCatalog()
 
-  // Upload state
-  const [uploadSource, setUploadSource] = useState(null)
-  const [uploadResult, setUploadResult] = useState(null)
+  // ── Local transient UI state ───────────────────────────────────────────
+  const [loading, setLoading] = useState(false)
   const [uploadError, setUploadError] = useState(null)
   const [uploadLoading, setUploadLoading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
-  const fileInputRef = useRef(null)
-
-  // Analyze state
-  const [analysis, setAnalysis] = useState(null)
-  const [analyzing, setAnalyzing] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [statusIdx, setStatusIdx] = useState(0)
-
-  // Review state
-  const [reviewStates, setReviewStates] = useState({})   // {sku: 'approved'|'rejected'}
-  const [editMode, setEditMode] = useState({})             // {sku: bool}
-  const [editBuffer, setEditBuffer] = useState({})         // {sku: string}
-  const [savedEdits, setSavedEdits] = useState({})         // {sku: string}
+  const [editingSkus, setEditingSkus] = useState({})   // {sku: bool}
+  const [editBuffer, setEditBuffer] = useState({})      // {sku: string}
   const [dismissedPairs, setDismissedPairs] = useState(new Set())
-
-  // Apply state
   const [applyLoading, setApplyLoading] = useState(false)
   const [toast, setToast] = useState(null)
+  const fileInputRef = useRef(null)
+
+  // Derive step from context + loading
+  const step = !analysisRan ? 'upload' : loading ? 'analyze' : 'review'
 
   // Elapsed timer while analyzing
   useEffect(() => {
-    if (!analyzing) return
+    if (!loading) return
     setElapsed(0)
     setStatusIdx(0)
     const tick = setInterval(() => {
@@ -98,11 +99,48 @@ export default function CatalogHealth() {
       setStatusIdx(i => Math.min(i + 1, STATUS_MSGS.length - 1))
     }, 12000)
     return () => clearInterval(tick)
-  }, [analyzing])
+  }, [loading])
 
   function showToast(msg, ok = true) {
     setToast({ msg, ok })
     setTimeout(() => setToast(null), 3500)
+  }
+
+  // ── Helpers: review state ──────────────────────────────────────────────
+
+  // A SKU is rejected if it's in the rejectedSkus list
+  function isRejected(sku) { return rejectedSkus.includes(sku) }
+
+  function handleApproveAll() {
+    const all = (analysisResult?.description_rewrites || []).map(r => r.sku)
+    approveSkus(all)
+  }
+
+  function handleRejectAll() {
+    const all = (analysisResult?.description_rewrites || []).map(r => r.sku)
+    rejectSkus(all)
+  }
+
+  function startEdit(sku, optimized) {
+    setEditBuffer(b => ({ ...b, [sku]: editedDescriptions[sku] ?? optimized }))
+    setEditingSkus(m => ({ ...m, [sku]: true }))
+  }
+
+  function saveEdit(sku) {
+    setEditedDescription(sku, editBuffer[sku])
+    setEditingSkus(m => ({ ...m, [sku]: false }))
+    // Ensure the SKU is approved after editing
+    if (isRejected(sku)) toggleApprove(sku)
+  }
+
+  function cancelEdit(sku) {
+    setEditingSkus(m => ({ ...m, [sku]: false }))
+  }
+
+  function getApprovedSkuList() {
+    return (analysisResult?.description_rewrites || [])
+      .map(r => r.sku)
+      .filter(sku => !rejectedSkus.includes(sku))
   }
 
   // ── Upload ─────────────────────────────────────────────────────────────
@@ -117,7 +155,7 @@ export default function CatalogHealth() {
       const res = await fetch(`${API}/api/catalog/upload`, { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Upload failed')
-      setUploadResult(data)
+      setUploadedFile({ name: file.name, size: file.size, total_products: data.total_products, columns_detected: data.columns_detected, missing_optional: data.missing_optional })
       setUploadSource('file')
     } catch (e) {
       setUploadError(e.message)
@@ -135,15 +173,15 @@ export default function CatalogHealth() {
 
   function handleUseSample() {
     setUploadSource('sample')
-    setUploadResult({ total_products: 74, columns_detected: ['sku', 'name', 'category', 'description', 'price', 'brand'], missing_optional: [] })
+    setUploadedFile({ name: 'catalog_messy.json', total_products: 74, columns_detected: ['sku', 'name', 'category', 'description', 'price', 'brand'], missing_optional: [] })
     setUploadError(null)
   }
 
   // ── Analyze ────────────────────────────────────────────────────────────
 
   async function runAnalysis() {
-    setAnalyzing(true)
-    setStep('analyze')
+    setLoading(true)
+    setAnalysisRan(false)
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 3 * 60 * 1000)
     try {
@@ -154,48 +192,18 @@ export default function CatalogHealth() {
       })
       if (!res.ok) throw new Error((await res.json()).detail || 'Analysis failed')
       const data = await res.json()
-      setAnalysis(data)
-      const initial = {}
-      for (const r of (data.description_rewrites || [])) {
-        initial[r.sku] = 'approved'
-      }
-      setReviewStates(initial)
-      setStep('review')
+      setAnalysisResult(data)
+      setAnalysisRan(true)
+      // Default all rewrite SKUs to approved
+      const allSkus = (data.description_rewrites || []).map(r => r.sku)
+      approveSkus(allSkus)
     } catch (e) {
       if (e.name === 'AbortError') showToast('Analysis timed out. Please try again.', false)
       else showToast(e.message, false)
-      setStep('upload')
     } finally {
       clearTimeout(timeout)
-      setAnalyzing(false)
+      setLoading(false)
     }
-  }
-
-  // ── Review helpers ─────────────────────────────────────────────────────
-
-  function toggleReview(sku) {
-    setReviewStates(s => ({ ...s, [sku]: s[sku] === 'rejected' ? 'approved' : 'rejected' }))
-  }
-
-  function startEdit(sku, optimized) {
-    setEditBuffer(b => ({ ...b, [sku]: savedEdits[sku] ?? optimized }))
-    setEditMode(m => ({ ...m, [sku]: true }))
-  }
-
-  function saveEdit(sku) {
-    setSavedEdits(s => ({ ...s, [sku]: editBuffer[sku] }))
-    setEditMode(m => ({ ...m, [sku]: false }))
-    setReviewStates(s => ({ ...s, [sku]: 'approved' }))
-  }
-
-  function cancelEdit(sku) {
-    setEditMode(m => ({ ...m, [sku]: false }))
-  }
-
-  function getApprovedSkus() {
-    return (analysis?.description_rewrites || [])
-      .filter(r => reviewStates[r.sku] !== 'rejected')
-      .map(r => r.sku)
   }
 
   // ── Apply / Download ───────────────────────────────────────────────────
@@ -207,12 +215,14 @@ export default function CatalogHealth() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          approved_skus: getApprovedSkus(),
-          edited_descriptions: savedEdits,
+          approved_skus: getApprovedSkuList(),
+          edited_descriptions: editedDescriptions,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Apply failed')
+      setChangesApplied(true)
+      setDownloadReady(true)
       showToast(`Applied ${data.applied} rewrites, reverted ${data.reverted}. catalog_final.json saved.`)
     } catch (e) {
       showToast(e.message, false)
@@ -233,10 +243,12 @@ export default function CatalogHealth() {
     URL.revokeObjectURL(url)
   }
 
-  // ── Derived values ─────────────────────────────────────────────────────
+  // ── Derived ────────────────────────────────────────────────────────────
 
-  const totalRewrites = (analysis?.description_rewrites || []).length
-  const approvedCount = (analysis?.description_rewrites || []).filter(r => reviewStates[r.sku] !== 'rejected').length
+  const totalRewrites = (analysisResult?.description_rewrites || []).length
+  const approvedCount = totalRewrites - rejectedSkus.filter(s =>
+    (analysisResult?.description_rewrites || []).some(r => r.sku === s)
+  ).length
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -262,10 +274,10 @@ export default function CatalogHealth() {
               onDrop={handleDrop}
               onClick={() => !uploadLoading && fileInputRef.current?.click()}
               style={{
-                border: `2px dashed ${dragOver ? '#00C2E0' : uploadSource === 'file' && uploadResult ? '#00C2E0' : '#D1D5DB'}`,
+                border: `2px dashed ${dragOver ? '#00C2E0' : uploadSource === 'file' && uploadedFile ? '#00C2E0' : '#D1D5DB'}`,
                 borderRadius: 16, padding: 40, textAlign: 'center',
                 cursor: uploadLoading ? 'wait' : 'pointer',
-                background: dragOver ? 'rgba(0,194,224,0.04)' : uploadSource === 'file' && uploadResult ? 'rgba(0,194,224,0.04)' : '#fff',
+                background: dragOver ? 'rgba(0,194,224,0.04)' : uploadSource === 'file' && uploadedFile ? 'rgba(0,194,224,0.04)' : '#fff',
                 transition: 'border-color 0.15s, background 0.15s',
               }}
             >
@@ -274,10 +286,10 @@ export default function CatalogHealth() {
               <div style={{ fontSize: 36, marginBottom: 12 }}>📂</div>
               {uploadLoading ? (
                 <p style={{ color: '#6B7280', fontSize: 14 }}>Uploading…</p>
-              ) : uploadSource === 'file' && uploadResult ? (
+              ) : uploadSource === 'file' && uploadedFile ? (
                 <>
                   <div style={{ color: '#00C2E0', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>✓ Catalog uploaded</div>
-                  <div style={{ color: '#6B7280', fontSize: 13 }}>{uploadResult.total_products} products detected</div>
+                  <div style={{ color: '#6B7280', fontSize: 13 }}>{uploadedFile.total_products} products · {uploadedFile.name}</div>
                   <div style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Click to replace</div>
                 </>
               ) : (
@@ -322,12 +334,12 @@ export default function CatalogHealth() {
             </div>
           )}
 
-          {uploadResult && uploadSource === 'file' && (
+          {uploadedFile && uploadSource === 'file' && (
             <div style={{ marginTop: 16, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 16px', fontSize: 13 }}>
               <span style={{ color: '#15803D', fontWeight: 600 }}>Detected columns: </span>
-              <span style={{ color: '#374151' }}>{uploadResult.columns_detected?.join(', ')}</span>
-              {uploadResult.missing_optional?.length > 0 && (
-                <span style={{ color: '#9CA3AF' }}> · Optional missing: {uploadResult.missing_optional.join(', ')}</span>
+              <span style={{ color: '#374151' }}>{uploadedFile.columns_detected?.join(', ')}</span>
+              {uploadedFile.missing_optional?.length > 0 && (
+                <span style={{ color: '#9CA3AF' }}> · Optional missing: {uploadedFile.missing_optional.join(', ')}</span>
               )}
             </div>
           )}
@@ -367,19 +379,19 @@ export default function CatalogHealth() {
       )}
 
       {/* ── STEP 3: Review ─────────────────────────────────────────────── */}
-      {step === 'review' && analysis && (
+      {step === 'review' && analysisResult && (
         <div>
           {/* Metric cards */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
-            <StatCard label="Total Products" value={analysis.total_products} />
-            <StatCard label="Issues Remaining" value={analysis.total_issues} accent={analysis.total_issues > 0 ? '#EF4444' : '#10B981'} />
-            <StatCard label="Spec Issues Fixed" value={analysis.spec_issues_before - analysis.spec_issues_after} sub={`was ${analysis.spec_issues_before}`} accent="#00C2E0" />
-            <StatCard label="Descriptions Optimized" value={analysis.descriptions_passing_judge} sub={`avg score ${analysis.avg_judge_score}`} accent="#00C2E0" />
-            <StatCard label="Duplicate Pairs" value={analysis.duplicate_pairs} accent={analysis.duplicate_pairs > 0 ? '#F59E0B' : '#10B981'} />
+            <StatCard label="Total Products" value={analysisResult.total_products} />
+            <StatCard label="Issues Remaining" value={analysisResult.total_issues} accent={analysisResult.total_issues > 0 ? '#EF4444' : '#10B981'} />
+            <StatCard label="Spec Issues Fixed" value={analysisResult.spec_issues_before - analysisResult.spec_issues_after} sub={`was ${analysisResult.spec_issues_before}`} accent="#00C2E0" />
+            <StatCard label="Descriptions Optimized" value={analysisResult.descriptions_passing_judge} sub={`avg score ${analysisResult.avg_judge_score}`} accent="#00C2E0" />
+            <StatCard label="Duplicate Pairs" value={analysisResult.duplicate_pairs} accent={analysisResult.duplicate_pairs > 0 ? '#F59E0B' : '#10B981'} />
           </div>
 
           {/* Section A: Description rewrites */}
-          {analysis.description_rewrites?.length > 0 && (
+          {analysisResult.description_rewrites?.length > 0 && (
             <div style={{ marginBottom: 32 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', margin: 0 }}>
@@ -389,22 +401,12 @@ export default function CatalogHealth() {
                   </span>
                 </h2>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => {
-                      const all = {}
-                      analysis.description_rewrites.forEach(r => { all[r.sku] = 'approved' })
-                      setReviewStates(all)
-                    }}
-                    style={{ fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#374151' }}
-                  >Approve All</button>
-                  <button
-                    onClick={() => {
-                      const all = {}
-                      analysis.description_rewrites.forEach(r => { all[r.sku] = 'rejected' })
-                      setReviewStates(all)
-                    }}
-                    style={{ fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#374151' }}
-                  >Reject All</button>
+                  <button onClick={handleApproveAll} style={{ fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#374151' }}>
+                    Approve All
+                  </button>
+                  <button onClick={handleRejectAll} style={{ fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#374151' }}>
+                    Reject All
+                  </button>
                 </div>
               </div>
 
@@ -415,16 +417,16 @@ export default function CatalogHealth() {
                   ))}
                 </div>
 
-                {analysis.description_rewrites.map((r, i) => {
-                  const isRejected = reviewStates[r.sku] === 'rejected'
-                  const isEditing = editMode[r.sku]
-                  const displayOptimized = savedEdits[r.sku] ?? r.optimized_description
+                {analysisResult.description_rewrites.map((r, i) => {
+                  const rejected = isRejected(r.sku)
+                  const editing = editingSkus[r.sku]
+                  const displayOptimized = editedDescriptions[r.sku] ?? r.optimized_description
                   return (
                     <div key={r.sku} style={{
                       display: 'grid', gridTemplateColumns: '140px 1fr 1fr 140px',
-                      borderBottom: i < analysis.description_rewrites.length - 1 ? '1px solid #F3F4F6' : 'none',
-                      opacity: isRejected ? 0.45 : 1,
-                      background: isRejected ? '#F9FAFB' : '#fff',
+                      borderBottom: i < analysisResult.description_rewrites.length - 1 ? '1px solid #F3F4F6' : 'none',
+                      opacity: rejected ? 0.45 : 1,
+                      background: rejected ? '#F9FAFB' : '#fff',
                       transition: 'opacity 0.2s',
                     }}>
                       <div style={{ padding: '14px 16px' }}>
@@ -435,7 +437,7 @@ export default function CatalogHealth() {
                         {r.original_description}
                       </div>
                       <div style={{ padding: '14px 16px', fontSize: 13, color: '#0A1628', lineHeight: 1.55 }}>
-                        {isEditing ? (
+                        {editing ? (
                           <>
                             <textarea
                               value={editBuffer[r.sku] ?? displayOptimized}
@@ -454,22 +456,22 @@ export default function CatalogHealth() {
                         ) : (
                           <>
                             {displayOptimized}
-                            {savedEdits[r.sku] && <span style={{ marginLeft: 6, fontSize: 11, color: '#00C2E0', fontWeight: 600 }}>edited</span>}
+                            {editedDescriptions[r.sku] && <span style={{ marginLeft: 6, fontSize: 11, color: '#00C2E0', fontWeight: 600 }}>edited</span>}
                           </>
                         )}
                       </div>
                       <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
                         <button
-                          onClick={() => toggleReview(r.sku)}
+                          onClick={() => toggleApprove(r.sku)}
                           style={{
                             fontSize: 12, padding: '5px 0', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
-                            border: isRejected ? '1.5px solid #10B981' : '1.5px solid #EF4444',
-                            color: isRejected ? '#10B981' : '#EF4444', background: '#fff',
+                            border: rejected ? '1.5px solid #10B981' : '1.5px solid #EF4444',
+                            color: rejected ? '#10B981' : '#EF4444', background: '#fff',
                           }}
                         >
-                          {isRejected ? '✓ Approve' : '✕ Reject'}
+                          {rejected ? '✓ Approve' : '✕ Reject'}
                         </button>
-                        {!isRejected && !isEditing && (
+                        {!rejected && !editing && (
                           <button
                             onClick={() => startEdit(r.sku, r.optimized_description)}
                             style={{ fontSize: 12, padding: '5px 0', borderRadius: 6, cursor: 'pointer', border: '1.5px solid #D1D5DB', background: '#fff', color: '#6B7280' }}
@@ -483,8 +485,8 @@ export default function CatalogHealth() {
             </div>
           )}
 
-          {/* Section B: Quality gate scores */}
-          {analysis.description_evaluations?.length > 0 && (
+          {/* Section B: Quality gate */}
+          {analysisResult.description_evaluations?.length > 0 && (
             <div style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', marginBottom: 12 }}>Quality Gate Results</h2>
               <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
@@ -493,8 +495,8 @@ export default function CatalogHealth() {
                     <div key={h} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
                   ))}
                 </div>
-                {analysis.description_evaluations.map((e, i) => (
-                  <div key={e.sku} style={{ display: 'grid', gridTemplateColumns: '140px 80px 130px 80px 1fr', borderBottom: i < analysis.description_evaluations.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                {analysisResult.description_evaluations.map((e, i) => (
+                  <div key={e.sku} style={{ display: 'grid', gridTemplateColumns: '140px 80px 130px 80px 1fr', borderBottom: i < analysisResult.description_evaluations.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
                     <div style={{ padding: '12px 16px', fontSize: 13, color: '#374151', fontWeight: 500 }}>{e.sku}</div>
                     <div style={{ padding: '12px 16px', fontSize: 13, fontWeight: 700, color: e.judge_score >= 8 ? '#10B981' : e.judge_score >= 6 ? '#F59E0B' : '#EF4444' }}>{e.judge_score}</div>
                     <div style={{ padding: '12px 16px' }}>
@@ -516,12 +518,12 @@ export default function CatalogHealth() {
             </div>
           )}
 
-          {/* Section C: Duplicate candidates */}
-          {analysis.duplicate_candidates?.filter((_, i) => !dismissedPairs.has(i)).length > 0 && (
+          {/* Section C: Duplicates */}
+          {analysisResult.duplicate_candidates?.filter((_, i) => !dismissedPairs.has(i)).length > 0 && (
             <div style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', marginBottom: 12 }}>Potential Duplicates</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {analysis.duplicate_candidates.map((d, i) => dismissedPairs.has(i) ? null : (
+                {analysisResult.duplicate_candidates.map((d, i) => dismissedPairs.has(i) ? null : (
                   <div key={i} style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ fontSize: 13, color: '#374151' }}>
                       <span style={{ fontWeight: 600, color: '#0A1628' }}>{d.sku_a}</span>
@@ -554,7 +556,7 @@ export default function CatalogHealth() {
       )}
 
       {/* ── Sticky bottom bar ──────────────────────────────────────────── */}
-      {step === 'review' && analysis && (
+      {step === 'review' && analysisResult && (
         <div style={{
           position: 'fixed', bottom: 0, left: 240, right: 0, zIndex: 50,
           background: '#fff', borderTop: '1px solid #E5E7EB',
@@ -565,6 +567,7 @@ export default function CatalogHealth() {
           <div style={{ fontSize: 14, color: '#6B7280' }}>
             <span style={{ fontWeight: 700, color: '#0A1628' }}>{approvedCount}</span> of{' '}
             <span style={{ fontWeight: 700, color: '#0A1628' }}>{totalRewrites}</span> rewrites approved
+            {changesApplied && <span style={{ marginLeft: 16, color: '#10B981', fontWeight: 600 }}>✓ Changes applied</span>}
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <button

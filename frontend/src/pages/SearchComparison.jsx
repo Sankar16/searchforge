@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -10,6 +12,9 @@ const MODES = [
 ]
 
 export default function SearchComparison() {
+  const navigate = useNavigate()
+  const { analysisRan, changesApplied } = useCatalog()
+
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState('clean')
   const [results, setResults] = useState(null)
@@ -41,20 +46,40 @@ export default function SearchComparison() {
 
   function handleModeChange(newMode) {
     setMode(newMode)
-    if (searched && query.trim()) {
-      doSearch(query, newMode)
-    }
+    if (searched && query.trim()) doSearch(query, newMode)
   }
 
   return (
     <div style={{ padding: '32px 36px', fontFamily: 'Inter, sans-serif', maxWidth: 1000 }}>
 
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0A1628', margin: 0 }}>Search Preview</h1>
         <p style={{ fontSize: 14, color: '#6B7280', margin: '6px 0 0' }}>
           Compare search results between your original and AI-optimized catalog
         </p>
       </div>
+
+      {/* Context-aware banners */}
+      {analysisRan && changesApplied && (
+        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#15803D', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 700 }}>✓</span>
+          Catalog optimized — switch to <strong>Optimized Catalog</strong> to see improved search results.
+        </div>
+      )}
+      {analysisRan && !changesApplied && (
+        <div style={{ background: 'rgba(0,194,224,0.06)', border: '1px solid rgba(0,194,224,0.25)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>
+            <span style={{ color: '#00C2E0', fontWeight: 700 }}>ℹ</span>
+            {' '}Analysis complete — apply your changes in Catalog Optimizer to see improvements here.
+          </span>
+          <button
+            onClick={() => navigate('/app/catalog')}
+            style={{ fontSize: 12, fontWeight: 600, color: '#00C2E0', background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}
+          >
+            Go to Catalog Optimizer →
+          </button>
+        </div>
+      )}
 
       {/* Search bar + mode toggle */}
       <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 24, display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -119,7 +144,7 @@ export default function SearchComparison() {
         </div>
       </div>
 
-      {/* Mode banners */}
+      {/* Mode banners (post-search) */}
       {searched && mode === 'clean' && (
         <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>
@@ -152,14 +177,12 @@ export default function SearchComparison() {
         ))}
       </div>
 
-      {/* Error */}
       {error && (
         <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', padding: '12px 16px', borderRadius: 8, fontSize: 13, marginBottom: 16 }}>
           {error}
         </div>
       )}
 
-      {/* Zero results */}
       {searched && results?.results?.length === 0 && !loading && (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '40px', textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
@@ -170,7 +193,6 @@ export default function SearchComparison() {
         </div>
       )}
 
-      {/* Results grid */}
       {results?.results?.length > 0 && (
         <>
           <div style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 14 }}>

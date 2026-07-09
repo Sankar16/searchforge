@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useCatalog } from '../context/CatalogContext.jsx'
 
 const NAV = [
   {
@@ -32,6 +33,7 @@ const NAV = [
 
 export default function AppShell() {
   const navigate = useNavigate()
+  const { analysisRan, analysisResult, changesApplied } = useCatalog()
 
   function logout() {
     localStorage.removeItem('sf_authenticated')
@@ -116,6 +118,51 @@ export default function AppShell() {
               </NavLink>
             ))}
           </nav>
+
+          {/* Catalog status card */}
+          {analysisRan && (
+            <div style={{ marginTop: 16, padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)' }}>
+              {changesApplied ? (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#10B981', marginBottom: 4 }}>✓ Changes applied</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+                    {analysisResult?.descriptions_passing_judge ?? 0} descriptions optimized
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const res = await fetch('http://localhost:8000/api/catalog/download')
+                      if (!res.ok) return
+                      const blob = await res.blob()
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = 'optimized_catalog.csv'
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }}
+                    style={{
+                      width: '100%', fontSize: 11, padding: '6px 0', borderRadius: 6,
+                      border: '1px solid rgba(0,194,224,0.4)', background: 'rgba(0,194,224,0.1)',
+                      color: '#00C2E0', cursor: 'pointer', fontWeight: 600,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    }}
+                  >
+                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download CSV
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#00C2E0', marginBottom: 4 }}>✓ Analysis complete</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                    {analysisResult?.description_rewrites?.length ?? 0} descriptions reviewed
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>B2B Search Intelligence</p>

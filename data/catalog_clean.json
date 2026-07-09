@@ -26,7 +26,7 @@
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
-    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for general industrial applications requiring sealed ball bearing protection.",
+    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for applications requiring protection from contaminants while maintaining smooth rotation.",
     "brand": "Generic",
     "specs": {
       "bore": "25 mm",
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hex head design allows for secure tightening with standard wrenches or sockets.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. Designed with a hexagonal head for wrench tightening.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded pipe fitting constructed of brass for connecting pipes in plumbing and industrial systems.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial systems.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "This is a pressure relief valve.",
+    "description": "This Generic brand pressure relief valve is categorized as a valve product.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -898,7 +898,7 @@
     "sku": "FST-MOTOR-BOLT-KIT",
     "name": "Motor Mount Bolt Kit",
     "category": "Fasteners",
-    "description": "Motor mount bolt kit featuring M8 diameter zinc steel fasteners designed for securing motors to mounting surfaces.",
+    "description": "Motor mount bolt kit featuring M8 diameter fasteners constructed from zinc steel.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed of brass for general-purpose flow control applications.",
+    "description": "Industrial valve constructed of brass for general-purpose applications. Suitable for use in various fluid control systems.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed for housing applications. Provides structural support for bearing installation.",
+    "description": "Cast iron bearing mount designed to provide structural support and positioning for bearing assemblies in industrial applications.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
