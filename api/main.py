@@ -10,6 +10,9 @@ import os
 import csv
 import io
 import json
+import asyncio
+import uuid
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -31,6 +34,9 @@ import src.search.semantic_retriever as _sem_mod
 from src.crosssell_agent.llm_agent import get_cross_sell_with_explanation
 
 app = FastAPI(title="SearchForge API", version="1.0.0")
+
+jobs: dict = {}  # job_id -> {status, result, error, created_at}
+executor = ThreadPoolExecutor(max_workers=2)
 
 
 @app.on_event("startup")
@@ -153,8 +159,7 @@ async def upload_catalog(file: UploadFile = File(...)):
     }
 
 
-@app.post("/api/catalog/analyze")
-def analyze_catalog(source: str = Query("sample")):
+def run_catalog_pipeline(source: str) -> dict:
     uploaded_path = PROJECT_ROOT / "data" / "catalog_uploaded.json"
     if source == "uploaded" and uploaded_path.exists():
         input_path = str(uploaded_path)
@@ -174,7 +179,6 @@ def analyze_catalog(source: str = Query("sample")):
     weak_before = len(state.get("messy_description_issues", []))
     weak_after = len(state.get("final_description_issues", []))
 
-    # Build before/after description pairs for the review UI
     raw_by_sku = {p.sku: p for p in state.get("raw_products", [])}
     rewritten_by_sku = {p.sku: p for p in state.get("rewritten_products", [])}
     weak_skus = state.get("weak_skus", set()) or set()
@@ -226,6 +230,39 @@ def analyze_catalog(source: str = Query("sample")):
             }
             for d in dupes
         ],
+    }
+
+
+def run_pipeline_in_background(job_id: str, source: str):
+    try:
+        jobs[job_id]["status"] = "running"
+        result = run_catalog_pipeline(source)
+        jobs[job_id]["status"] = "complete"
+        jobs[job_id]["result"] = result
+    except Exception as e:
+        jobs[job_id]["status"] = "error"
+        jobs[job_id]["error"] = str(e)
+
+
+@app.post("/api/catalog/analyze")
+async def analyze_catalog(source: str = Query("sample")):
+    job_id = str(uuid.uuid4())
+    jobs[job_id] = {"status": "pending", "result": None, "error": None}
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(executor, run_pipeline_in_background, job_id, source)
+    return {"job_id": job_id, "status": "pending"}
+
+
+@app.get("/api/catalog/status/{job_id}")
+def get_job_status(job_id: str):
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+    job = jobs[job_id]
+    return {
+        "job_id": job_id,
+        "status": job["status"],
+        "result": job["result"],
+        "error": job["error"],
     }
 
 

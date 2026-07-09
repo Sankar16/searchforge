@@ -221,25 +221,52 @@ export default function CatalogHealth() {
   async function runAnalysis() {
     setLoading(true)
     setAnalysisRan(false)
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 3 * 60 * 1000)
+
+    let pollInterval = null
+
+    const cleanup = () => {
+      if (pollInterval) clearInterval(pollInterval)
+    }
+
     try {
       const src = uploadSource === 'file' ? 'uploaded' : 'sample'
-      const res = await fetch(`${API}/api/catalog/analyze?source=${src}`, {
-        method: 'POST',
-        signal: controller.signal,
+      const startRes = await fetch(`${API}/api/catalog/analyze?source=${src}`, { method: 'POST' })
+      if (!startRes.ok) throw new Error((await startRes.json()).detail || 'Failed to start analysis')
+      const { job_id } = await startRes.json()
+
+      await new Promise((resolve, reject) => {
+        pollInterval = setInterval(async () => {
+          try {
+            const statusRes = await fetch(`${API}/api/catalog/status/${job_id}`)
+            const statusData = await statusRes.json()
+
+            if (statusData.status === 'complete') {
+              cleanup()
+              setAnalysisResult(statusData.result)
+              setAnalysisRan(true)
+              const allSkus = (statusData.result.description_rewrites || []).map(r => r.sku)
+              approveSkus(allSkus)
+              resolve()
+            } else if (statusData.status === 'error') {
+              cleanup()
+              reject(new Error(statusData.error || 'Analysis failed'))
+            }
+            // pending or running — keep polling
+          } catch (err) {
+            cleanup()
+            reject(new Error('Lost connection to server'))
+          }
+        }, 2000)
+
+        // Safety timeout after 5 minutes
+        setTimeout(() => {
+          cleanup()
+          reject(new Error('Analysis timed out after 5 minutes'))
+        }, 300000)
       })
-      if (!res.ok) throw new Error((await res.json()).detail || 'Analysis failed')
-      const data = await res.json()
-      setAnalysisResult(data)
-      setAnalysisRan(true)
-      const allSkus = (data.description_rewrites || []).map(r => r.sku)
-      approveSkus(allSkus)
     } catch (e) {
-      if (e.name === 'AbortError') showToast('Analysis timed out. Please try again.', false)
-      else showToast(e.message, false)
+      showToast(e.message, false)
     } finally {
-      clearTimeout(timeout)
       setLoading(false)
     }
   }
