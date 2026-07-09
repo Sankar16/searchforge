@@ -395,6 +395,97 @@ def search(
     }
 
 
+class GapAnalysisRequest(BaseModel):
+    query: str
+
+
+@app.post("/api/search/gap-analysis")
+async def search_gap_analysis(body: GapAnalysisRequest):
+    query = body.query.strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query is required")
+
+    fallback = {
+        "gap_summary": f"No products found matching '{query}'",
+        "likely_intent": f"Products related to {query}",
+        "hidden_matches": [],
+        "suggested_keywords": [query],
+        "description_suggestion": None,
+    }
+
+    # Collect remotely related products from both catalogs at a low threshold
+    seen_skus: set = set()
+    candidate_products = []
+    for mode in ("clean", "messy"):
+        try:
+            collection = get_or_build_index(mode)
+            hits = semantic_search(collection, query, top_k=5, min_score=15)
+            for r in hits:
+                if r["sku"] not in seen_skus:
+                    seen_skus.add(r["sku"])
+                    candidate_products.append(r)
+        except Exception as exc:
+            print(f"Gap analysis index error ({mode}): {exc}")
+
+    if not candidate_products:
+        return fallback
+
+    products_json = json.dumps(
+        [
+            {
+                "sku": p["sku"],
+                "name": p["name"],
+                "category": p["category"],
+                "description": p.get("description", ""),
+                "score": p.get("score", 0),
+            }
+            for p in candidate_products[:8]
+        ],
+        indent=2,
+    )
+
+    prompt = (
+        f'A customer searched for "{query}" in a B2B product catalog and found no results.\n\n'
+        f"Here are the closest products we found (below normal relevance threshold):\n{products_json}\n\n"
+        "You are a B2B eCommerce merchandising expert.\n\n"
+        "Respond in JSON only, no markdown:\n"
+        "{\n"
+        '  "gap_summary": "One sentence explaining why this search finds nothing",\n'
+        '  "likely_intent": "What the customer is probably looking for",\n'
+        '  "hidden_matches": [\n'
+        "    {\n"
+        '      "sku": "SKU here",\n'
+        '      "name": "Product name",\n'
+        '      "reason": "Why this product probably matches the customer\'s intent even though the description doesn\'t say so"\n'
+        "    }\n"
+        "  ],\n"
+        '  "suggested_keywords": ["keyword1", "keyword2", "keyword3"],\n'
+        '  "description_suggestion": "Example of how to rewrite one product description to capture this search"\n'
+        "}"
+    )
+
+    try:
+        import anthropic as _anthropic
+        client = _anthropic.AsyncAnthropic()
+        message = await client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = message.content[0].text.strip()
+        # Strip markdown fences if Claude wraps the JSON
+        if raw.startswith("```"):
+            parts = raw.split("```")
+            raw = parts[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        result = json.loads(raw.strip())
+        return result
+    except Exception as exc:
+        print(f"Gap analysis LLM failed: {exc}")
+        return fallback
+
+
 @app.get("/api/crosssell/{sku}")
 async def crosssell(sku: str):
     result = await get_cross_sell_with_explanation(sku)

@@ -57,8 +57,8 @@ def build_semantic_index(catalog: list[dict], collection_name: str):
     return collection
 
 
-def semantic_search(collection, query: str, top_k: int = 5) -> list[dict]:
-    """Search using semantic similarity."""
+def semantic_search(collection, query: str, top_k: int = 5, min_score: float = 35) -> list[dict]:
+    """Search using semantic similarity. min_score filters out low-relevance results."""
     query_embedding = encoder.encode(query).tolist()
 
     results = collection.query(
@@ -72,6 +72,9 @@ def semantic_search(collection, query: str, top_k: int = 5) -> list[dict]:
         # ChromaDB cosine distance is 0-2, so normalise to 0-100
         score = round((1 - (distance / 2)) * 100, 1)
 
+        if score < min_score:
+            continue
+
         if score >= 80:
             match_label = "Strong match"
         elif score >= 65:
@@ -81,7 +84,7 @@ def semantic_search(collection, query: str, top_k: int = 5) -> list[dict]:
         elif score >= 35:
             match_label = "Partial match"
         else:
-            continue  # below threshold — skip
+            match_label = "Weak match"
 
         products.append({**metadata, "score": score, "match_label": match_label, "match_type": "semantic"})
 
