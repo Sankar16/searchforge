@@ -4,23 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SearchForge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: {
-              navy: {
-                800: "#1B2A4A",
-                900: "#131f38",
-              },
+              navy: { dark: '#0A1628', mid: '#112240' },
+              teal: { accent: '#00C2E0' },
+              purple: { accent: '#6C2BD9' },
             },
           },
         },
       };
     </script>
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      :root {
+        --navy-dark: #0A1628;
+        --navy-mid:  #112240;
+        --teal:      #00C2E0;
+        --purple:    #6C2BD9;
+        --bg:        #F4F6F9;
+        --card:      #FFFFFF;
+        --text:      #1A1A2E;
+        --muted:     #6B7280;
+        --success:   #10B981;
+        --warning:   #F59E0B;
+        --border:    #E5E7EB;
+      }
+    </style>
   </head>
-  <body class="bg-gray-50 text-gray-900">
+  <body style="background:#F4F6F9; color:#1A1A2E;">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
