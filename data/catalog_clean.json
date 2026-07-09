@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "6303 bearing with open seal type, suitable for general industrial applications.",
+    "description": "6303 bearing with open seal type.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and industrial applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -754,7 +754,7 @@
     "sku": "VAL-HALF-BRASS-BALL",
     "name": "Half Inch Brass Shutoff Ball Valve",
     "category": "Valve",
-    "description": "This 1/2 inch brass ball valve features female NPT connections and is rated for 600 psi working pressure. Suitable for shutoff applications in plumbing and industrial systems.",
+    "description": "This 1/2 inch brass ball valve features female NPT connections and is rated for 600 psi working pressure.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "This pressure relief valve is designed to protect systems from excessive pressure buildup. Suitable for industrial applications requiring automatic pressure regulation.",
+    "description": "Pressure relief valve from Generic.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -898,7 +898,7 @@
     "sku": "FST-MOTOR-BOLT-KIT",
     "name": "Motor Mount Bolt Kit",
     "category": "Fasteners",
-    "description": "Motor mount bolt kit featuring M8 diameter zinc steel fasteners designed for securing motors in industrial applications.",
+    "description": "Motor mount bolt kit featuring M8 diameter zinc steel fasteners designed for securing motors to mounting surfaces.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -1224,7 +1224,7 @@
     "sku": "MNT-KEY-NOSPEC",
     "name": "Shaft Key",
     "category": "Fasteners",
-    "description": "Steel shaft key designed for securing components to rotating shafts and transmitting torque in mechanical assemblies.",
+    "description": "Steel key for shafts.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Machine screw manufactured from steel for general fastening applications.",
+    "description": "Machine screw manufactured from steel.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed of brass for fluid control applications. Suitable for general-purpose industrial use.",
+    "description": "Industrial valve constructed of brass for fluid control applications. Suitable for general industrial use.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed to provide structural support and positioning for bearing assemblies in industrial applications.",
+    "description": "Cast iron bearing mount.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"

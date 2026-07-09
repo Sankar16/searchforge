@@ -9,7 +9,10 @@ from src.catalog_agent.state import CatalogAgentState
 from src.catalog_agent.spec_checker import check_missing_specs
 from src.catalog_agent.uom import normalize_catalog_uom
 from src.catalog_agent.description_quality import check_description_quality
-from src.catalog_agent.llm_description_rewriter import rewrite_weak_descriptions_with_llm_async
+from src.catalog_agent.llm_description_rewriter import (
+    rewrite_weak_descriptions_with_llm_async,
+    repair_failed_rewrites_with_llm_async,
+)
 from src.catalog_agent.llm_evaluator import evaluate_rewritten_descriptions_async
 from src.catalog_agent.dedup import find_duplicate_candidates
 from src.catalog_agent.report import build_catalog_health_report
@@ -65,6 +68,18 @@ def check_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
     }
 
 
+def route_after_description_check(state: CatalogAgentState) -> str:
+    """
+    If no weak descriptions exist, skip rewriting/evaluation.
+    Otherwise, continue to LLM rewriting.
+    """
+
+    if len(state["weak_skus"]) == 0:
+        return "skip_rewrite"
+
+    return "rewrite"
+
+
 def rewrite_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
     rewritten_products = asyncio.run(
         rewrite_weak_descriptions_with_llm_async(
@@ -81,15 +96,27 @@ def rewrite_descriptions_node(state: CatalogAgentState) -> Dict[str, Any]:
     }
 
 
-def detect_duplicates_node(state: CatalogAgentState) -> Dict[str, Any]:
-    duplicate_candidates = find_duplicate_candidates(
-        state["rewritten_products"],
-        threshold=88,
-    )
+def find_failed_description_evaluations(
+    description_evaluations: list[dict],
+) -> list[dict]:
+    """
+    Treat failed quality gate, high risk, and medium risk as needing repair.
+    Medium risk is included because product catalog copy should be conservative.
+    """
 
-    return {
-        "duplicate_candidates": duplicate_candidates,
-    }
+    failed = []
+
+    for item in description_evaluations:
+        if not item["passes_quality_gate"]:
+            failed.append(item)
+            continue
+
+        if item["hallucination_risk"] in ["medium", "high"]:
+            failed.append(item)
+            continue
+
+    return failed
+
 
 def evaluate_rewrites_node(state: CatalogAgentState) -> Dict[str, Any]:
     description_evaluations = asyncio.run(
@@ -100,9 +127,92 @@ def evaluate_rewrites_node(state: CatalogAgentState) -> Dict[str, Any]:
         )
     )
 
+    failed_description_evaluations = find_failed_description_evaluations(
+        description_evaluations
+    )
+
     return {
         "description_evaluations": description_evaluations,
+        "failed_description_evaluations": failed_description_evaluations,
+        "initial_failed_description_evaluations": failed_description_evaluations,
     }
+
+
+def route_after_evaluation(state: CatalogAgentState) -> str:
+    """
+    If any rewrites failed or were medium/high hallucination risk,
+    repair them before continuing.
+    """
+
+    if len(state["failed_description_evaluations"]) > 0:
+        return "repair"
+
+    return "continue"
+
+
+def repair_failed_rewrites_node(state: CatalogAgentState) -> Dict[str, Any]:
+    repaired_products = asyncio.run(
+        repair_failed_rewrites_with_llm_async(
+            original_products=state["normalized_products"],
+            rewritten_products=state["rewritten_products"],
+            failed_evaluations=state["failed_description_evaluations"],
+        )
+    )
+
+    final_description_issues = check_description_quality(repaired_products)
+
+    return {
+        "repaired_products": repaired_products,
+        "rewritten_products": repaired_products,
+        "final_description_issues": final_description_issues,
+    }
+
+
+def evaluate_rewrites_after_repair_node(state: CatalogAgentState) -> Dict[str, Any]:
+    repair_description_evaluations = asyncio.run(
+        evaluate_rewritten_descriptions_async(
+            original_products=state["normalized_products"],
+            rewritten_products=state["rewritten_products"],
+            weak_skus=state["weak_skus"],
+        )
+    )
+
+    failed_after_repair = find_failed_description_evaluations(
+        repair_description_evaluations
+    )
+
+    return {
+        "repair_description_evaluations": repair_description_evaluations,
+        "description_evaluations": repair_description_evaluations,
+        "failed_description_evaluations": failed_after_repair,
+    }
+
+
+def prepare_products_without_rewrite_node(state: CatalogAgentState) -> Dict[str, Any]:
+    """
+    If no weak descriptions exist, use normalized products as the final rewritten products.
+    This ensures downstream nodes always read from rewritten_products.
+    """
+
+    return {
+        "rewritten_products": state["normalized_products"],
+        "final_description_issues": [],
+        "description_evaluations": [],
+        "failed_description_evaluations": [],
+        "repair_description_evaluations": [],
+    }
+
+
+def detect_duplicates_node(state: CatalogAgentState) -> Dict[str, Any]:
+    duplicate_candidates = find_duplicate_candidates(
+        state["rewritten_products"],
+        threshold=88,
+    )
+
+    return {
+        "duplicate_candidates": duplicate_candidates,
+    }
+
 
 def generate_report_node(state: CatalogAgentState) -> Dict[str, Any]:
     report = build_catalog_health_report(
@@ -136,8 +246,11 @@ def build_catalog_intelligence_graph():
     graph.add_node("normalize_uom", normalize_uom_node)
     graph.add_node("check_specs_after", check_specs_after_node)
     graph.add_node("check_descriptions", check_descriptions_node)
+    graph.add_node("prepare_products_without_rewrite", prepare_products_without_rewrite_node)
     graph.add_node("rewrite_descriptions", rewrite_descriptions_node)
     graph.add_node("evaluate_rewrites", evaluate_rewrites_node)
+    graph.add_node("repair_failed_rewrites", repair_failed_rewrites_node)
+    graph.add_node("evaluate_rewrites_after_repair", evaluate_rewrites_after_repair_node)
     graph.add_node("detect_duplicates", detect_duplicates_node)
     graph.add_node("generate_report", generate_report_node)
     graph.add_node("save_clean_catalog", save_clean_catalog_node)
@@ -147,9 +260,30 @@ def build_catalog_intelligence_graph():
     graph.add_edge("check_specs_before", "normalize_uom")
     graph.add_edge("normalize_uom", "check_specs_after")
     graph.add_edge("check_specs_after", "check_descriptions")
-    graph.add_edge("check_descriptions", "rewrite_descriptions")
+
+    graph.add_conditional_edges(
+        "check_descriptions",
+        route_after_description_check,
+        {
+            "rewrite": "rewrite_descriptions",
+            "skip_rewrite": "prepare_products_without_rewrite",
+        },
+    )
+
+    graph.add_edge("prepare_products_without_rewrite", "detect_duplicates")
     graph.add_edge("rewrite_descriptions", "evaluate_rewrites")
-    graph.add_edge("evaluate_rewrites", "detect_duplicates")
+
+    graph.add_conditional_edges(
+        "evaluate_rewrites",
+        route_after_evaluation,
+        {
+            "repair": "repair_failed_rewrites",
+            "continue": "detect_duplicates",
+        },
+    )
+
+    graph.add_edge("repair_failed_rewrites", "evaluate_rewrites_after_repair")
+    graph.add_edge("evaluate_rewrites_after_repair", "detect_duplicates")
     graph.add_edge("detect_duplicates", "generate_report")
     graph.add_edge("generate_report", "save_clean_catalog")
     graph.add_edge("save_clean_catalog", END)

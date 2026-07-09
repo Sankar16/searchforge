@@ -23,6 +23,10 @@ class CatalogAgentState(TypedDict):
     normalized_description_issues: List[CatalogIssue]
     final_description_issues: List[CatalogIssue]
     description_evaluations: List[Dict[str, Any]]
+    initial_failed_description_evaluations: List[Dict[str, Any]]
+    failed_description_evaluations: List[Dict[str, Any]]
+    repaired_products: List[Product]
+    repair_description_evaluations: List[Dict[str, Any]]
 
     weak_skus: Set[str]
 

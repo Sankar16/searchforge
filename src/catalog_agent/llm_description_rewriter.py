@@ -179,24 +179,45 @@ async def rewrite_weak_descriptions_with_llm_async(
     Preserves original product order.
     """
 
-    client = get_async_anthropic_client()
+    api_key = os.getenv("ANTHROPIC_API_KEY")
     semaphore = asyncio.Semaphore(get_llm_concurrency())
 
-    tasks = []
+    if not api_key:
+        client = None
 
-    for product in products:
-        if product.sku in weak_skus:
-            tasks.append(
-                rewrite_description_with_claude_async(
-                    product=product,
-                    client=client,
-                    semaphore=semaphore,
+        tasks = []
+
+        for product in products:
+            if product.sku in weak_skus:
+                tasks.append(
+                    rewrite_description_with_claude_async(
+                        product=product,
+                        client=client,
+                        semaphore=semaphore,
+                    )
                 )
-            )
-        else:
-            tasks.append(asyncio.sleep(0, result=product.description))
+            else:
+                tasks.append(asyncio.sleep(0, result=product.description))
 
-    rewritten_descriptions = await asyncio.gather(*tasks)
+        rewritten_descriptions = await asyncio.gather(*tasks)
+
+    else:
+        async with AsyncAnthropic(api_key=api_key) as client:
+            tasks = []
+
+            for product in products:
+                if product.sku in weak_skus:
+                    tasks.append(
+                        rewrite_description_with_claude_async(
+                            product=product,
+                            client=client,
+                            semaphore=semaphore,
+                        )
+                    )
+                else:
+                    tasks.append(asyncio.sleep(0, result=product.description))
+
+            rewritten_descriptions = await asyncio.gather(*tasks)
 
     updated_products = []
 
@@ -206,3 +227,113 @@ async def rewrite_weak_descriptions_with_llm_async(
         updated_products.append(updated_product)
 
     return updated_products
+
+async def repair_failed_rewrites_with_llm_async(
+    original_products: List[Product],
+    rewritten_products: List[Product],
+    failed_evaluations: List[dict],
+) -> List[Product]:
+    """
+    Repairs only descriptions that failed or were flagged by the LLM judge.
+    Products that passed remain unchanged.
+    """
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    semaphore = asyncio.Semaphore(get_llm_concurrency())
+
+    failed_skus = {item["sku"] for item in failed_evaluations}
+
+    failed_notes_by_sku = {
+        item["sku"]: item.get("notes", [])
+        for item in failed_evaluations
+    }
+
+    async def repair_one_product(
+        original_product: Product,
+        current_rewritten_product: Product,
+    ) -> str:
+        if original_product.sku not in failed_skus:
+            return current_rewritten_product.description
+
+        if client is None:
+            return rewrite_description(original_product)
+
+        model = os.getenv("ANTHROPIC_REWRITE_MODEL", "claude-sonnet-4-5")
+        judge_notes = failed_notes_by_sku.get(original_product.sku, [])
+
+        repair_prompt = f"""
+You are repairing a rewritten B2B industrial product description that was flagged by an LLM judge.
+
+The previous rewrite may have included unsupported claims or weak grounding.
+
+Rules:
+1. Use only explicitly provided product data.
+2. Do not infer applications, suitability, materials, brands, or performance claims unless directly present in the product data.
+3. Do not invent missing specs.
+4. Keep the description factual and concise.
+5. Write 1-2 sentences.
+6. Return only the repaired description.
+
+Product data:
+{product_to_prompt_context(original_product)}
+
+Current rewritten description:
+{current_rewritten_product.description}
+
+Judge notes:
+{json.dumps(judge_notes, indent=2)}
+
+Return only the repaired description.
+"""
+
+        async with semaphore:
+            try:
+                response = await client.messages.create(
+                    model=model,
+                    max_tokens=220,
+                    temperature=0.1,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": repair_prompt,
+                        }
+                    ],
+                )
+
+                text = response.content[0].text.strip()
+
+                if not text:
+                    return rewrite_description(original_product)
+
+                return text
+
+            except Exception:
+                return rewrite_description(original_product)
+
+    if not api_key:
+        client = None
+
+        tasks = [
+            repair_one_product(original, rewritten)
+            for original, rewritten in zip(original_products, rewritten_products)
+        ]
+
+        repaired_descriptions = await asyncio.gather(*tasks)
+
+    else:
+        async with AsyncAnthropic(api_key=api_key) as client:
+            tasks = [
+                repair_one_product(original, rewritten)
+                for original, rewritten in zip(original_products, rewritten_products)
+            ]
+
+            repaired_descriptions = await asyncio.gather(*tasks)
+
+    repaired_products = []
+
+    for product, repaired_description in zip(rewritten_products, repaired_descriptions):
+        updated_product = deepcopy(product)
+        updated_product.description = repaired_description
+        repaired_products.append(updated_product)
+
+    return repaired_products

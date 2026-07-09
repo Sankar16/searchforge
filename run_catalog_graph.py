@@ -16,6 +16,10 @@ def main() -> None:
         "messy_description_issues": [],
         "normalized_description_issues": [],
         "final_description_issues": [],
+        "initial_failed_description_evaluations": [],
+        "failed_description_evaluations": [],
+        "repaired_products": [],
+        "repair_description_evaluations": [],
         "weak_skus": set(),
         "duplicate_candidates": [],
         "health_report": {},
@@ -26,6 +30,11 @@ def main() -> None:
     report = final_state["health_report"]
     duplicate_candidates = final_state["duplicate_candidates"]
     description_evaluations = final_state["description_evaluations"]
+    failed_description_evaluations = final_state["failed_description_evaluations"]
+    repair_description_evaluations = final_state["repair_description_evaluations"]
+    initial_failed_description_evaluations = final_state[
+        "initial_failed_description_evaluations"
+    ]
 
     print("\nLANGGRAPH CATALOG INTELLIGENCE REPORT")
     print("-------------------------------------")
@@ -47,8 +56,15 @@ def main() -> None:
         else 0
     )
 
-    print(f"Description evaluations: {len(description_evaluations)}")
-    print(f"Descriptions passing judge: {len(passed_evals)}")
+    print(
+        f"Descriptions initially needing repair: "
+        f"{len(initial_failed_description_evaluations)}"
+    )
+    print(
+        f"Descriptions still needing repair after repair loop: "
+        f"{len(failed_description_evaluations)}"
+    )
+    print(f"Repair evaluations generated: {len(repair_description_evaluations)}")
     print(f"Average judge score: {avg_judge_score:.2f}/10")
     print("\nDESCRIPTION JUDGE SAMPLE")
     print("------------------------")

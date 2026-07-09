@@ -22,15 +22,6 @@ def get_anthropic_client() -> Anthropic | None:
     return Anthropic(api_key=api_key)
 
 
-def get_async_anthropic_client() -> AsyncAnthropic | None:
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-
-    if not api_key:
-        return None
-
-    return AsyncAnthropic(api_key=api_key)
-
-
 def get_llm_concurrency() -> int:
     try:
         return int(os.getenv("LLM_CONCURRENCY", "5"))
@@ -222,6 +213,11 @@ async def evaluate_rewritten_description_async(
     client: AsyncAnthropic | None,
     semaphore: asyncio.Semaphore,
 ) -> Dict[str, Any]:
+    """
+    Async single-product LLM judge call.
+    Falls back to heuristic evaluation if client is unavailable or judge call fails.
+    """
+
     if client is None:
         return heuristic_description_eval(product, rewritten_description)
 
@@ -253,7 +249,7 @@ async def evaluate_rewritten_description_async(
         except Exception as error:
             fallback = heuristic_description_eval(product, rewritten_description)
             fallback["notes"].append(
-                f"LLM judge fallback used because of error: {error}"
+                f"Async LLM judge fallback used because of error: {error}"
             )
             return fallback
 
@@ -268,16 +264,22 @@ async def evaluate_rewritten_descriptions_async(
     Runs judge calls concurrently with bounded concurrency.
     """
 
-    client = get_async_anthropic_client()
+    api_key = os.getenv("ANTHROPIC_API_KEY")
     semaphore = asyncio.Semaphore(get_llm_concurrency())
 
-    tasks = []
+    weak_products = [
+        (original, rewritten)
+        for original, rewritten in zip(original_products, rewritten_products)
+        if original.sku in weak_skus
+    ]
 
-    for original, rewritten in zip(original_products, rewritten_products):
-        if original.sku not in weak_skus:
-            continue
+    if not weak_products:
+        return []
 
-        tasks.append(
+    if not api_key:
+        client = None
+
+        tasks = [
             evaluate_rewritten_description_async(
                 product=original,
                 original_description=original.description,
@@ -285,17 +287,27 @@ async def evaluate_rewritten_descriptions_async(
                 client=client,
                 semaphore=semaphore,
             )
-        )
+            for original, rewritten in weak_products
+        ]
 
-    raw_evaluations = await asyncio.gather(*tasks)
+        raw_evaluations = await asyncio.gather(*tasks)
+
+    else:
+        async with AsyncAnthropic(api_key=api_key) as client:
+            tasks = [
+                evaluate_rewritten_description_async(
+                    product=original,
+                    original_description=original.description,
+                    rewritten_description=rewritten.description,
+                    client=client,
+                    semaphore=semaphore,
+                )
+                for original, rewritten in weak_products
+            ]
+
+            raw_evaluations = await asyncio.gather(*tasks)
 
     enriched_evaluations = []
-
-    weak_products = [
-        (original, rewritten)
-        for original, rewritten in zip(original_products, rewritten_products)
-        if original.sku in weak_skus
-    ]
 
     for (original, rewritten), evaluation in zip(weak_products, raw_evaluations):
         enriched_evaluations.append(
