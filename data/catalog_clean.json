@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed bearing is suitable for applications requiring protection from contaminants.",
+    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed bearing provides protection against contaminants in industrial applications.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "6303 bearing with open seal type.",
+    "description": "6303 bearing with open seal type from Generic.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -315,7 +315,7 @@
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
-    "description": "Steel motor base plate designed for 56C frame motors. Provides secure mounting for compatible motor installations.",
+    "description": "Steel motor base plate designed for 56C frame motors, providing secure mounting and support.",
     "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head for wrench installation.",
+    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head suitable for general fastening applications.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and industrial applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Machine screw manufactured from steel.",
+    "description": "Machine screw manufactured from steel, suitable for general fastening applications in industrial and mechanical assemblies.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed of brass for use in fluid control applications.",
+    "description": "Industrial valve constructed of brass for fluid control applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"

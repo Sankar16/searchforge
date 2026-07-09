@@ -6,6 +6,7 @@ import AppShell from './components/AppShell.jsx'
 import CatalogHealth from './pages/CatalogHealth.jsx'
 import SearchComparison from './pages/SearchComparison.jsx'
 import CrossSell from './pages/CrossSell.jsx'
+import Analytics from './pages/Analytics.jsx'
 
 function RequireAuth({ children }) {
   const authed = localStorage.getItem('sf_authenticated') === 'true'
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="catalog"   element={<CatalogHealth />} />
           <Route path="search"    element={<SearchComparison />} />
           <Route path="crosssell" element={<CrossSell />} />
+          <Route path="analytics" element={<Analytics />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

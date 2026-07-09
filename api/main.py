@@ -12,7 +12,9 @@ import io
 import json
 import asyncio
 import uuid
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +40,14 @@ app = FastAPI(title="SearchForge API", version="1.0.0")
 
 jobs: dict = {}  # job_id -> {status, result, error, created_at}
 executor = ThreadPoolExecutor(max_workers=2)
+
+analytics: dict = {
+    "searches": [],
+    "gap_analyses": [],
+    "analyses_run": 0,
+    "descriptions_approved": 0,
+    "descriptions_rejected": 0,
+}
 
 
 @app.on_event("startup")
@@ -242,6 +252,7 @@ def run_pipeline_in_background(job_id: str, source: str):
         result = run_catalog_pipeline(source)
         jobs[job_id]["status"] = "complete"
         jobs[job_id]["result"] = result
+        analytics["analyses_run"] += 1
     except Exception as e:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
@@ -318,6 +329,9 @@ def apply_changes(body: ApplyChangesRequest):
     # Clear search indexes so the next search picks up the updated catalog
     _sem_mod._indexes.clear()
 
+    analytics["descriptions_approved"] += applied
+    analytics["descriptions_rejected"] += reverted
+
     return {
         "success": True,
         "applied": applied,
@@ -387,6 +401,13 @@ def search(
         try:
             collection = get_or_build_index(mode)
             results = semantic_search(collection, q, top_k=5)
+            analytics["searches"].append({
+                "query": q,
+                "mode": mode,
+                "result_count": len(results),
+                "timestamp": datetime.utcnow().isoformat(),
+                "top_match_score": results[0]["score"] if results else 0,
+            })
             return {
                 "query": q,
                 "mode": mode,
@@ -417,6 +438,13 @@ def search(
         catalog = json.load(f)
 
     results = search_catalog(catalog, q, top_k=5)
+    analytics["searches"].append({
+        "query": q,
+        "mode": mode,
+        "result_count": len(results),
+        "timestamp": datetime.utcnow().isoformat(),
+        "top_match_score": results[0]["score"] if results else 0,
+    })
     return {
         "query": q,
         "mode": mode,
@@ -521,6 +549,11 @@ async def search_gap_analysis(body: GapAnalysisRequest):
             if raw.startswith("json"):
                 raw = raw[4:]
         result = json.loads(raw.strip())
+        analytics["gap_analyses"].append({
+            "query": query,
+            "hidden_match_count": len(result.get("hidden_matches", [])),
+            "timestamp": datetime.utcnow().isoformat(),
+        })
         return result
     except Exception as exc:
         print(f"Gap analysis LLM failed: {exc}")
@@ -533,3 +566,47 @@ async def crosssell(sku: str):
     if not result.get("cart_product"):
         raise HTTPException(status_code=404, detail=f"Product not found: {sku}")
     return result
+
+
+@app.get("/api/analytics")
+def get_analytics():
+    searches = analytics["searches"]
+    gap_analyses = analytics["gap_analyses"]
+
+    total_searches = len(searches)
+    zero_result_searches = sum(1 for s in searches if s["result_count"] == 0)
+    zero_result_rate = round(zero_result_searches / total_searches * 100, 1) if total_searches else 0
+
+    query_counts = Counter(s["query"] for s in searches)
+    top_queries = [{"query": q, "count": c} for q, c in query_counts.most_common(10)]
+
+    scores = [s["top_match_score"] for s in searches if s["result_count"] > 0]
+    avg_top_score = round(sum(scores) / len(scores), 1) if scores else 0
+
+    total_decisions = analytics["descriptions_approved"] + analytics["descriptions_rejected"]
+    approval_rate = round(
+        analytics["descriptions_approved"] / total_decisions * 100, 1
+    ) if total_decisions else 0
+
+    recent_searches = sorted(searches, key=lambda s: s["timestamp"], reverse=True)[:20]
+    recent_gaps = sorted(gap_analyses, key=lambda g: g["timestamp"], reverse=True)[:10]
+
+    return {
+        "searches": {
+            "total": total_searches,
+            "zero_result_rate": zero_result_rate,
+            "avg_top_score": avg_top_score,
+            "top_queries": top_queries,
+            "recent": recent_searches,
+        },
+        "gap_analyses": {
+            "total": len(gap_analyses),
+            "recent": recent_gaps,
+        },
+        "catalog": {
+            "analyses_run": analytics["analyses_run"],
+            "descriptions_approved": analytics["descriptions_approved"],
+            "descriptions_rejected": analytics["descriptions_rejected"],
+            "approval_rate": approval_rate,
+        },
+    }
