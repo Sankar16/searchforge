@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -17,6 +18,15 @@ function relLabel(rel) {
   return REL_MAP[rel] || rel?.replace(/_/g, ' ') || 'Related'
 }
 
+function confidenceLabel(level) {
+  const map = {
+    high: 'High Confidence',
+    medium: 'Medium Confidence',
+    low: 'Lower Confidence',
+  }
+  return map[level] || 'Medium Confidence'
+}
+
 function ConfidenceBadge({ level }) {
   const map = {
     high: { bg: '#D1FAE5', color: '#065F46', label: 'High Confidence' },
@@ -32,13 +42,12 @@ function ConfidenceBadge({ level }) {
 }
 
 export default function CrossSell() {
+  const { savedPairings, savePairing, removePairing } = useCatalog()
+
   const [sku, setSku] = useState('')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  // Saved pairings: [{cart_sku, cart_name, rec_sku, rec_name, reason}]
-  const [savedPairings, setSavedPairings] = useState([])
 
   async function lookup(s) {
     const term = (s ?? sku).trim().toUpperCase()
@@ -60,29 +69,43 @@ export default function CrossSell() {
     }
   }
 
-  function saveRule(rec) {
-    const cart = data?.cart_product
+  function toggleSave(rec) {
     const cartSku = data?.cart_sku
-    const key = `${cartSku}|${rec.sku}`
-    if (savedPairings.some(p => `${p.cart_sku}|${p.rec_sku}` === key)) return
-    setSavedPairings(s => [...s, {
-      cart_sku: cartSku,
-      cart_name: cart?.name || cartSku,
-      rec_sku: rec.sku,
-      rec_name: rec.name,
-      reason: rec.reason || rec.original_reason || '',
-    }])
-  }
-
-  function removeRule(idx) {
-    setSavedPairings(s => s.filter((_, i) => i !== idx))
+    const cart = data?.cart_product
+    const isSaved = savedPairings.some(
+      p => p.cart_sku === cartSku && p.recommended_sku === rec.sku
+    )
+    if (isSaved) {
+      removePairing(cartSku, rec.sku)
+    } else {
+      savePairing({
+        cart_sku: cartSku,
+        cart_product_name: cart?.name || cartSku,
+        recommended_sku: rec.sku,
+        recommended_name: rec.name,
+        relationship: rec.relationship_type || '',
+        relationship_label: relLabel(rec.relationship_type),
+        confidence_label: confidenceLabel(rec.confidence),
+        llm_explanation: rec.reason || rec.original_reason || '',
+        saved_at: new Date().toISOString(),
+      })
+    }
   }
 
   function exportPairings() {
     if (!savedPairings.length) return
-    const header = 'Cart SKU,Cart Product,Recommendation SKU,Recommendation,Reason\n'
+    const header = 'cart_sku,cart_name,rec_sku,rec_name,relationship,confidence,explanation,saved_at\n'
     const rows = savedPairings.map(p =>
-      [p.cart_sku, p.cart_name, p.rec_sku, p.rec_name, `"${p.reason.replace(/"/g, '""')}"`].join(',')
+      [
+        p.cart_sku,
+        `"${(p.cart_product_name || '').replace(/"/g, '""')}"`,
+        p.recommended_sku,
+        `"${(p.recommended_name || '').replace(/"/g, '""')}"`,
+        p.relationship_label,
+        p.confidence_label,
+        `"${(p.llm_explanation || '').replace(/"/g, '""')}"`,
+        p.saved_at,
+      ].join(',')
     ).join('\n')
     const blob = new Blob([header + rows], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -208,13 +231,15 @@ export default function CrossSell() {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16, marginBottom: 32 }}>
             {recs.map(r => {
-              const key = `${data?.cart_sku}|${r.sku}`
-              const isSaved = savedPairings.some(p => `${p.cart_sku}|${p.rec_sku}` === key)
+              const isSaved = savedPairings.some(
+                p => p.cart_sku === data?.cart_sku && p.recommended_sku === r.sku
+              )
               return (
                 <div key={r.sku} style={{
-                  background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB',
+                  background: '#fff', borderRadius: 12, border: `1px solid ${isSaved ? 'rgba(0,194,224,0.3)' : '#E5E7EB'}`,
                   padding: '20px', display: 'flex', flexDirection: 'column', gap: 12,
                   boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  transition: 'border-color 0.15s',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                     <div>
@@ -252,20 +277,21 @@ export default function CrossSell() {
                     {r.price ? (
                       <span style={{ fontSize: 16, fontWeight: 700, color: '#0A1628' }}>${r.price.toFixed(2)}</span>
                     ) : <span />}
+                    {/* FIX 3d: toggle button with tooltip */}
                     <button
-                      onClick={() => saveRule(r)}
-                      disabled={isSaved}
+                      onClick={() => toggleSave(r)}
+                      title="Save this product pairing to your session. Export all saved pairings as CSV to import into your merchandising platform."
                       style={{
                         fontSize: 13, padding: '7px 16px', borderRadius: 7,
                         border: isSaved ? 'none' : '1.5px solid #00C2E0',
                         background: isSaved ? '#D1FAE5' : '#fff',
                         color: isSaved ? '#065F46' : '#00C2E0',
-                        cursor: isSaved ? 'default' : 'pointer',
+                        cursor: 'pointer',
                         fontWeight: 600, fontFamily: 'Inter, sans-serif',
                         transition: 'all 0.15s',
                       }}
                     >
-                      {isSaved ? '✓ Rule Saved' : 'Save Rule'}
+                      {isSaved ? '✓ Saved' : 'Save Rule'}
                     </button>
                   </div>
                 </div>
@@ -275,10 +301,10 @@ export default function CrossSell() {
         </>
       )}
 
-      {/* Saved Pairings panel */}
+      {/* FIX 3c: Saved Pairings panel — full details */}
       {savedPairings.length > 0 && (
         <div style={{ marginTop: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', margin: 0 }}>
               Saved Cross-Sell Rules
               <span style={{ fontWeight: 400, color: '#9CA3AF', fontSize: 13, marginLeft: 8 }}>{savedPairings.length} rule{savedPairings.length !== 1 ? 's' : ''}</span>
@@ -295,30 +321,51 @@ export default function CrossSell() {
             </button>
           </div>
 
+          <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12 }}>
+            These pairings have been saved to your session. Export CSV to use in your merchandising platform.
+          </div>
+
           <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-              {['Cart Product', 'Recommendation', 'Reason', ''].map(h => (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 100px auto', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+              {['Cart Product', 'Recommended Product', 'Relationship', 'Confidence', ''].map(h => (
                 <div key={h} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
               ))}
             </div>
             {savedPairings.map((p, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', borderBottom: i < savedPairings.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
-                <div style={{ padding: '12px 16px' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.cart_name}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace' }}>{p.cart_sku}</div>
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 100px auto', borderBottom: i < savedPairings.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'start' }}>
+                <div style={{ padding: '14px 16px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.cart_product_name}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace', marginTop: 2 }}>{p.cart_sku}</div>
                 </div>
-                <div style={{ padding: '12px 16px' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.rec_name}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace' }}>{p.rec_sku}</div>
+                <div style={{ padding: '14px 16px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.recommended_name}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace', marginTop: 2 }}>{p.recommended_sku}</div>
+                  {p.llm_explanation && (
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 6, lineHeight: 1.5 }}>
+                      {p.llm_explanation.length > 90 ? p.llm_explanation.slice(0, 90) + '…' : p.llm_explanation}
+                    </div>
+                  )}
                 </div>
-                <div style={{ padding: '12px 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>
-                  {p.reason.length > 100 ? p.reason.slice(0, 100) + '…' : p.reason}
+                <div style={{ padding: '14px 16px' }}>
+                  <span style={{ fontSize: 12, background: 'rgba(0,194,224,0.1)', color: '#0A1628', padding: '2px 8px', borderRadius: 5, fontWeight: 500 }}>
+                    {p.relationship_label || 'Related'}
+                  </span>
                 </div>
-                <div style={{ padding: '12px 16px' }}>
+                <div style={{ padding: '14px 16px' }}>
+                  <span style={{
+                    fontSize: 12, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
+                    background: p.confidence_label?.startsWith('High') ? '#D1FAE5' : p.confidence_label?.startsWith('Medium') ? '#FEF3C7' : '#FEE2E2',
+                    color: p.confidence_label?.startsWith('High') ? '#065F46' : p.confidence_label?.startsWith('Medium') ? '#92400E' : '#991B1B',
+                  }}>
+                    {p.confidence_label || 'Medium Confidence'}
+                  </span>
+                </div>
+                <div style={{ padding: '14px 16px' }}>
                   <button
-                    onClick={() => removeRule(i)}
-                    style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid #FECACA', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
-                  >Remove</button>
+                    onClick={() => removePairing(p.cart_sku, p.recommended_sku)}
+                    title="Remove from saved pairings"
+                    style={{ fontSize: 13, padding: '4px 8px', borderRadius: 6, border: '1px solid #FECACA', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer', fontWeight: 600 }}
+                  >✕</button>
                 </div>
               </div>
             ))}

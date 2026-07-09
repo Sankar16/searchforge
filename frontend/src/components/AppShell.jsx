@@ -33,7 +33,7 @@ const NAV = [
 
 export default function AppShell() {
   const navigate = useNavigate()
-  const { analysisRan, analysisResult, changesApplied } = useCatalog()
+  const { analysisRan, analysisResult, changesApplied, savedPairings } = useCatalog()
 
   function logout() {
     localStorage.removeItem('sf_authenticated')
@@ -161,6 +161,26 @@ export default function AppShell() {
                   </div>
                 </>
               )}
+            </div>
+          )}
+
+          {/* FIX 3b: Saved pairings count */}
+          {savedPairings.length > 0 && (
+            <div
+              onClick={() => navigate('/app/crosssell')}
+              style={{
+                marginTop: 12, padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.2)',
+                display: 'flex', alignItems: 'center', gap: 8,
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,194,224,0.14)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,194,224,0.08)'}
+            >
+              <span style={{ fontSize: 14 }}>🛒</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#00C2E0' }}>
+                {savedPairings.length} saved pairing{savedPairings.length !== 1 ? 's' : ''}
+              </span>
             </div>
           )}
 

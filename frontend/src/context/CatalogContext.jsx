@@ -10,6 +10,7 @@ const defaultState = {
   editedDescriptions: {},
   changesApplied: false,
   downloadReady: false,
+  savedPairings: [],
 }
 
 const CatalogContext = createContext(null)
@@ -24,6 +25,7 @@ export function CatalogProvider({ children }) {
   const [editedDescriptions, setEditedDescriptions] = useState(defaultState.editedDescriptions)
   const [changesApplied, setChangesApplied] = useState(defaultState.changesApplied)
   const [downloadReady, setDownloadReady] = useState(defaultState.downloadReady)
+  const [savedPairings, setSavedPairings] = useState(defaultState.savedPairings)
 
   function approveSkus(skuList) {
     setApprovedSkus(prev => [...new Set([...prev, ...skuList])])
@@ -49,6 +51,25 @@ export function CatalogProvider({ children }) {
     setEditedDescriptions(prev => ({ ...prev, [sku]: text }))
   }
 
+  function savePairing(pairing) {
+    setSavedPairings(prev => {
+      const exists = prev.some(
+        p => p.cart_sku === pairing.cart_sku && p.recommended_sku === pairing.recommended_sku
+      )
+      return exists ? prev : [...prev, pairing]
+    })
+  }
+
+  function removePairing(cart_sku, rec_sku) {
+    setSavedPairings(prev =>
+      prev.filter(p => !(p.cart_sku === cart_sku && p.recommended_sku === rec_sku))
+    )
+  }
+
+  function clearPairings() {
+    setSavedPairings([])
+  }
+
   function resetAll() {
     setUploadSource(defaultState.uploadSource)
     setUploadedFile(defaultState.uploadedFile)
@@ -59,6 +80,7 @@ export function CatalogProvider({ children }) {
     setEditedDescriptions(defaultState.editedDescriptions)
     setChangesApplied(defaultState.changesApplied)
     setDownloadReady(defaultState.downloadReady)
+    // Note: savedPairings intentionally NOT reset — they persist across analyses
   }
 
   return (
@@ -73,6 +95,7 @@ export function CatalogProvider({ children }) {
       setEditedDescription,
       changesApplied, setChangesApplied,
       downloadReady, setDownloadReady,
+      savedPairings, savePairing, removePairing, clearPairings,
       resetAll,
     }}>
       {children}

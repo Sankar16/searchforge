@@ -4,13 +4,10 @@ import { useCatalog } from '../context/CatalogContext.jsx'
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const STATUS_MSGS = [
-  'Loading catalog data…',
-  'Normalizing specifications…',
-  'Detecting duplicate SKUs…',
-  'Evaluating descriptions with AI…',
-  'Rewriting weak descriptions…',
-  'Running quality gate…',
-  'Generating health report…',
+  'Detecting duplicate listings…',
+  'Analyzing description quality…',
+  'Rewriting with AI…',
+  'Running quality checks…',
 ]
 
 function StatCard({ label, value, sub, accent }) {
@@ -58,7 +55,6 @@ function StepIndicator({ step }) {
 }
 
 export default function CatalogHealth() {
-  // ── Context state (persists across navigation) ─────────────────────────
   const {
     uploadSource, setUploadSource,
     uploadedFile, setUploadedFile,
@@ -70,45 +66,93 @@ export default function CatalogHealth() {
     setEditedDescription,
     changesApplied, setChangesApplied,
     setDownloadReady,
+    resetAll,
   } = useCatalog()
 
-  // ── Local transient UI state ───────────────────────────────────────────
   const [loading, setLoading] = useState(false)
   const [uploadError, setUploadError] = useState(null)
   const [uploadLoading, setUploadLoading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [statusIdx, setStatusIdx] = useState(0)
-  const [editingSkus, setEditingSkus] = useState({})   // {sku: bool}
-  const [editBuffer, setEditBuffer] = useState({})      // {sku: string}
+  const [editingSkus, setEditingSkus] = useState({})
+  const [editBuffer, setEditBuffer] = useState({})
   const [dismissedPairs, setDismissedPairs] = useState(new Set())
   const [applyLoading, setApplyLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const fileInputRef = useRef(null)
 
-  // Derive step from context + loading
-  const step = !analysisRan ? 'upload' : loading ? 'analyze' : 'review'
-
-  // Elapsed timer while analyzing
+  // Elapsed timer: ticks every 1 second, cycles status every 8 seconds
   useEffect(() => {
     if (!loading) return
     setElapsed(0)
     setStatusIdx(0)
     const tick = setInterval(() => {
-      setElapsed(s => s + 1)
-      setStatusIdx(i => Math.min(i + 1, STATUS_MSGS.length - 1))
-    }, 12000)
+      setElapsed(s => {
+        const next = s + 1
+        if (next % 8 === 0) setStatusIdx(i => (i + 1) % STATUS_MSGS.length)
+        return next
+      })
+    }, 1000)
     return () => clearInterval(tick)
   }, [loading])
+
+  // FIX 1: loading check comes BEFORE step derivation — always shows loading UI
+  if (loading) {
+    return (
+      <div style={{ padding: '32px 36px', fontFamily: 'Inter, sans-serif' }}>
+        <style>{`
+          @keyframes sf-spin { to { transform: rotate(360deg) } }
+          .sf-spinner { animation: sf-spin 0.9s linear infinite; }
+        `}</style>
+
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0A1628', margin: 0 }}>Catalog Optimizer</h1>
+          <p style={{ fontSize: 14, color: '#6B7280', margin: '6px 0 0' }}>Upload your catalog, analyze issues, review AI suggestions</p>
+        </div>
+
+        <StepIndicator step="analyze" />
+
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          {/* Spinner */}
+          <div className="sf-spinner" style={{
+            width: 48, height: 48, borderRadius: '50%',
+            border: '4px solid #E5E7EB',
+            borderTopColor: '#00C2E0',
+            margin: '0 auto 24px',
+          }} />
+
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#0A1628', margin: '0 0 8px' }}>
+            Analyzing your catalog…
+          </h2>
+          <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 28, minHeight: 22 }}>
+            {STATUS_MSGS[statusIdx]}
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ width: 400, margin: '0 auto', background: '#E5E7EB', borderRadius: 999, height: 8, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', width: `${Math.min((elapsed / 90) * 100, 95)}%`,
+              background: 'linear-gradient(90deg, #00C2E0, #6C2BD9)',
+              borderRadius: 999, transition: 'width 1s linear',
+            }} />
+          </div>
+          <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 12 }}>
+            {elapsed}s elapsed — typically 1–3 minutes
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Derive step only when not loading
+  const step = !analysisRan ? 'upload' : 'review'
 
   function showToast(msg, ok = true) {
     setToast({ msg, ok })
     setTimeout(() => setToast(null), 3500)
   }
 
-  // ── Helpers: review state ──────────────────────────────────────────────
-
-  // A SKU is rejected if it's in the rejectedSkus list
   function isRejected(sku) { return rejectedSkus.includes(sku) }
 
   function handleApproveAll() {
@@ -129,7 +173,6 @@ export default function CatalogHealth() {
   function saveEdit(sku) {
     setEditedDescription(sku, editBuffer[sku])
     setEditingSkus(m => ({ ...m, [sku]: false }))
-    // Ensure the SKU is approved after editing
     if (isRejected(sku)) toggleApprove(sku)
   }
 
@@ -142,8 +185,6 @@ export default function CatalogHealth() {
       .map(r => r.sku)
       .filter(sku => !rejectedSkus.includes(sku))
   }
-
-  // ── Upload ─────────────────────────────────────────────────────────────
 
   async function handleFileUpload(file) {
     if (!file) return
@@ -177,8 +218,6 @@ export default function CatalogHealth() {
     setUploadError(null)
   }
 
-  // ── Analyze ────────────────────────────────────────────────────────────
-
   async function runAnalysis() {
     setLoading(true)
     setAnalysisRan(false)
@@ -194,7 +233,6 @@ export default function CatalogHealth() {
       const data = await res.json()
       setAnalysisResult(data)
       setAnalysisRan(true)
-      // Default all rewrite SKUs to approved
       const allSkus = (data.description_rewrites || []).map(r => r.sku)
       approveSkus(allSkus)
     } catch (e) {
@@ -205,8 +243,6 @@ export default function CatalogHealth() {
       setLoading(false)
     }
   }
-
-  // ── Apply / Download ───────────────────────────────────────────────────
 
   async function applyChanges() {
     setApplyLoading(true)
@@ -243,14 +279,14 @@ export default function CatalogHealth() {
     URL.revokeObjectURL(url)
   }
 
-  // ── Derived ────────────────────────────────────────────────────────────
-
   const totalRewrites = (analysisResult?.description_rewrites || []).length
   const approvedCount = totalRewrites - rejectedSkus.filter(s =>
     (analysisResult?.description_rewrites || []).some(r => r.sku === s)
   ).length
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  const catalogLabel = uploadSource === 'file' && uploadedFile
+    ? uploadedFile.name
+    : 'Sample Catalog'
 
   return (
     <div style={{ padding: '32px 36px', paddingBottom: step === 'review' ? 120 : 32, fontFamily: 'Inter, sans-serif', maxWidth: 1100 }}>
@@ -267,7 +303,6 @@ export default function CatalogHealth() {
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
 
-            {/* Option A: CSV upload */}
             <div
               onDragOver={e => { e.preventDefault(); setDragOver(true) }}
               onDragLeave={() => setDragOver(false)}
@@ -301,7 +336,6 @@ export default function CatalogHealth() {
               )}
             </div>
 
-            {/* Option B: Sample catalog */}
             <div
               onClick={handleUseSample}
               style={{
@@ -361,26 +395,53 @@ export default function CatalogHealth() {
         </div>
       )}
 
-      {/* ── STEP 2: Analyzing ──────────────────────────────────────────── */}
-      {step === 'analyze' && (
-        <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 20 }}>{STATUS_MSGS[statusIdx]}</div>
-          <div style={{ width: 400, margin: '0 auto', background: '#E5E7EB', borderRadius: 999, height: 8, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${Math.min((elapsed / 90) * 100, 95)}%`,
-              background: 'linear-gradient(90deg, #00C2E0, #6C2BD9)',
-              borderRadius: 999, transition: 'width 1s linear',
-            }} />
-          </div>
-          <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 12 }}>
-            Analyzing… ({elapsed}s) — typically 1–3 minutes
-          </div>
-        </div>
-      )}
-
       {/* ── STEP 3: Review ─────────────────────────────────────────────── */}
       {step === 'review' && analysisResult && (
         <div>
+          {/* FIX 2: New analysis header bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <button
+              onClick={resetAll}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 13, fontWeight: 600, color: '#6B7280',
+                background: 'none', border: '1px solid #E5E7EB', borderRadius: 7,
+                padding: '7px 14px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                transition: 'border-color 0.15s, color 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#0A1628'; e.currentTarget.style.color = '#0A1628' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#6B7280' }}
+            >
+              ← New Analysis
+            </button>
+            <div style={{ fontSize: 13, color: '#9CA3AF' }}>
+              Using: <span style={{ color: '#374151', fontWeight: 500 }}>{catalogLabel}</span>
+            </div>
+          </div>
+
+          {/* FIX 2: changesApplied banner */}
+          {changesApplied && (
+            <div style={{
+              background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10,
+              padding: '14px 18px', marginBottom: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <div style={{ fontSize: 13, color: '#15803D', fontWeight: 600 }}>
+                ✓ Changes have been applied and downloaded.
+              </div>
+              <button
+                onClick={resetAll}
+                style={{
+                  fontSize: 13, fontWeight: 600, color: '#fff',
+                  background: '#00C2E0', border: 'none', borderRadius: 7,
+                  padding: '7px 16px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Run New Analysis →
+              </button>
+            </div>
+          )}
+
           {/* Metric cards */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
             <StatCard label="Total Products" value={analysisResult.total_products} />
@@ -543,7 +604,7 @@ export default function CatalogHealth() {
         </div>
       )}
 
-      {/* ── Toast ──────────────────────────────────────────────────────── */}
+      {/* Toast */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: step === 'review' ? 100 : 24, left: '50%', transform: 'translateX(-50%)',
@@ -555,7 +616,7 @@ export default function CatalogHealth() {
         </div>
       )}
 
-      {/* ── Sticky bottom bar ──────────────────────────────────────────── */}
+      {/* Sticky bottom bar */}
       {step === 'review' && analysisResult && (
         <div style={{
           position: 'fixed', bottom: 0, left: 240, right: 0, zIndex: 50,
