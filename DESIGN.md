@@ -233,7 +233,7 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 
 **Rejected:** direct Python imports (`from src.crosssell_agent.recommender import recommend_cross_sell`). This works and is simpler, but it hardwires the agent to one specific data retrieval implementation. The MCP version demonstrates the architecture you'd actually want at scale.
 
-### Decision 3: ChromaDB in-memory vs persistent
+### Decision 3: ChromaDB persistent vs in-memory
 
 **Chose:** in-memory ChromaDB (`chromadb.Client()`, no path argument).
 

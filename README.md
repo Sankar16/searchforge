@@ -155,6 +155,7 @@ cd frontend && npm install && npm run dev
 
 ```bash
 # Run tests
+source venv/bin/activate  # activate venv first
 python -m pytest tests/ -v
 ```
 

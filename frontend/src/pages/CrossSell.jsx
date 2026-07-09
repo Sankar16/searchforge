@@ -268,7 +268,7 @@ export default function CrossSell() {
                 p => p.cart_sku === data?.cart_sku && p.recommended_sku === r.sku
               )
               // Bug 1: proper relationship badge
-              const relBadge = getRelationshipBadge(r.relationship_type)
+              const relBadge = getRelationshipBadge(r.relationship)
               // Bug 2: proper confidence label
               const conf = r.confidence != null ? getConfidenceLabel(r.confidence) : null
 
