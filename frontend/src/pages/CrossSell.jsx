@@ -2,65 +2,56 @@ import { useState } from 'react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-const DEMO_SKUS = [
-  { sku: 'BRG-6205-2RS',      label: 'SKF 6205-2RS Bearing' },
-  { sku: 'FST-M8-40-ZN',      label: 'M8x40 Zinc Hex Bolt' },
-  { sku: 'VAL-BALL-1-2-BRASS', label: '1/2 Brass Ball Valve' },
-  { sku: 'MNT-MOTOR-BASE-56C', label: '56C Motor Mount Base' },
-  { sku: 'PIP-ELBOW-90-1IN',  label: '1 inch 90 Degree Elbow' },
-]
+const DEMO_SKUS = ['BRG-6205-2RS', 'BRG-6206-2RS', 'SEAL-V-55', 'BELT-AX42', 'CPL-JAW-28']
 
 const REL_MAP = {
-  requires_housing:  { label: 'Required Component', style: { background: '#FEE2E2', color: '#DC2626' } },
-  fits_housing:      { label: 'Required Component', style: { background: '#FEE2E2', color: '#DC2626' } },
-  compatible_shaft:  { label: 'Works With',         style: { background: '#DBEAFE', color: '#2563EB' } },
-  fits_shaft:        { label: 'Works With',         style: { background: '#DBEAFE', color: '#2563EB' } },
-  pairs_with:        { label: 'Commonly Paired',    style: { background: '#DCFCE7', color: '#16A34A' } },
-  requires_fastener: { label: 'Recommended Add-on', style: { background: '#F3E8FF', color: '#7C3AED' } },
-  requires_sealant:  { label: 'Recommended Add-on', style: { background: '#F3E8FF', color: '#7C3AED' } },
+  fits_with: 'Fits with',
+  compatible_with: 'Compatible with',
+  requires: 'Required for',
+  recommended_with: 'Recommended with',
+  alternative_to: 'Alternative to',
+  frequently_bought_with: 'Frequently bought with',
 }
 
-function relBadge(rel) {
-  return REL_MAP[rel] || { label: 'Compatible Product', style: { background: '#F3F4F6', color: '#6B7280' } }
+function relLabel(rel) {
+  return REL_MAP[rel] || rel?.replace(/_/g, ' ') || 'Related'
 }
 
-function confidenceLabel(conf) {
-  if (conf >= 0.9) return 'Highly Compatible'
-  if (conf >= 0.75) return 'Often Paired Together'
-  return 'Compatible'
-}
-
-function SpecPills({ specs }) {
-  if (!specs || Object.keys(specs).length === 0) return null
-  const entries = Object.entries(specs).slice(0, 6)
+function ConfidenceBadge({ level }) {
+  const map = {
+    high: { bg: '#D1FAE5', color: '#065F46', label: 'High Confidence' },
+    medium: { bg: '#FEF3C7', color: '#92400E', label: 'Medium Confidence' },
+    low: { bg: '#FEE2E2', color: '#991B1B', label: 'Lower Confidence' },
+  }
+  const style = map[level] || map['medium']
   return (
-    <div className="flex flex-wrap gap-1.5 mt-3">
-      {entries.map(([k, v]) => (
-        <span
-          key={k}
-          className="text-xs px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}
-        >
-          {k.replace(/_/g, ' ')}: {v}
-        </span>
-      ))}
-    </div>
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, background: style.bg, color: style.color }}>
+      {style.label}
+    </span>
   )
 }
 
 export default function CrossSell() {
-  const [selectedSku, setSelectedSku] = useState(DEMO_SKUS[0].sku)
+  const [sku, setSku] = useState('')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  async function getRecs() {
+  // Saved pairings: [{cart_sku, cart_name, rec_sku, rec_name, reason}]
+  const [savedPairings, setSavedPairings] = useState([])
+
+  async function lookup(s) {
+    const term = (s ?? sku).trim().toUpperCase()
+    if (!term) return
     setLoading(true)
     setError(null)
     setData(null)
     try {
-      const res = await fetch(`${API}/api/crosssell/${selectedSku}`)
-      if (!res.ok) throw new Error(`Server error: ${res.status}`)
+      const res = await fetch(`${API}/api/crosssell/${encodeURIComponent(term)}`)
+      if (!res.ok) {
+        const d = await res.json()
+        throw new Error(d.detail || 'Lookup failed')
+      }
       setData(await res.json())
     } catch (e) {
       setError(e.message)
@@ -69,168 +60,269 @@ export default function CrossSell() {
     }
   }
 
+  function saveRule(rec) {
+    const cart = data?.cart_product
+    const cartSku = data?.cart_sku
+    const key = `${cartSku}|${rec.sku}`
+    if (savedPairings.some(p => `${p.cart_sku}|${p.rec_sku}` === key)) return
+    setSavedPairings(s => [...s, {
+      cart_sku: cartSku,
+      cart_name: cart?.name || cartSku,
+      rec_sku: rec.sku,
+      rec_name: rec.name,
+      reason: rec.reason || rec.original_reason || '',
+    }])
+  }
+
+  function removeRule(idx) {
+    setSavedPairings(s => s.filter((_, i) => i !== idx))
+  }
+
+  function exportPairings() {
+    if (!savedPairings.length) return
+    const header = 'Cart SKU,Cart Product,Recommendation SKU,Recommendation,Reason\n'
+    const rows = savedPairings.map(p =>
+      [p.cart_sku, p.cart_name, p.rec_sku, p.rec_name, `"${p.reason.replace(/"/g, '""')}"`].join(',')
+    ).join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'cross_sell_rules.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const cart = data?.cart_product
+  const recs = data?.recommendations || []
+
   return (
-    <div className="max-w-4xl mx-auto px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: '#1A1A2E' }}>Smart Recommendations</h1>
-        <p style={{ color: '#6B7280', fontSize: 14 }}>
-          AI-powered product pairings that increase order value.
+    <div style={{ padding: '32px 36px', fontFamily: 'Inter, sans-serif', maxWidth: 1100 }}>
+
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0A1628', margin: 0 }}>Smart Recommendations</h1>
+        <p style={{ fontSize: 14, color: '#6B7280', margin: '6px 0 0' }}>
+          AI-powered cross-sell suggestions grounded in product compatibility data
         </p>
       </div>
 
-      {/* Selector */}
-      <div className="flex flex-col gap-3 mb-8" style={{ maxWidth: 480 }}>
-        <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#6B7280' }}>
-          Select a product to see recommendations
+      {/* Search bar */}
+      <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 24 }}>
+        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6B7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Enter Cart SKU
         </label>
-        <div className="relative">
-          <select
-            value={selectedSku}
-            onChange={e => setSelectedSku(e.target.value)}
-            className="w-full appearance-none px-4 py-3 pr-10 rounded-xl text-sm font-medium outline-none"
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={sku}
+            onChange={e => setSku(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === 'Enter' && lookup()}
+            placeholder="e.g. BRG-6205-2RS"
             style={{
-              background: '#fff',
-              border: '1.5px solid #E5E7EB',
-              color: '#1A1A2E',
-              cursor: 'pointer',
+              flex: 1, padding: '10px 14px', borderRadius: 8,
+              border: '1.5px solid #E5E7EB', fontSize: 14, color: '#1A1A2E',
+              fontFamily: 'Inter, monospace', outline: 'none',
+            }}
+            onFocus={e => { e.target.style.borderColor = '#00C2E0'; e.target.style.boxShadow = '0 0 0 3px rgba(0,194,224,0.1)' }}
+            onBlur={e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.boxShadow = 'none' }}
+          />
+          <button
+            onClick={() => lookup()}
+            disabled={loading || !sku.trim()}
+            style={{
+              padding: '10px 24px', borderRadius: 8, border: 'none',
+              background: loading || !sku.trim() ? '#E5E7EB' : '#00C2E0',
+              color: loading || !sku.trim() ? '#9CA3AF' : '#fff',
+              fontSize: 14, fontWeight: 600, cursor: loading || !sku.trim() ? 'not-allowed' : 'pointer',
+              fontFamily: 'Inter, sans-serif', transition: 'background 0.15s',
             }}
           >
-            {DEMO_SKUS.map(item => (
-              <option key={item.sku} value={item.sku}>
-                {item.label} ({item.sku})
-              </option>
-            ))}
-          </select>
-          <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            width="16" height="16" fill="none" stroke="#9CA3AF" strokeWidth="2" viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
-          </svg>
+            {loading ? 'Loading…' : 'Get Recommendations'}
+          </button>
         </div>
-        <button
-          onClick={getRecs}
-          disabled={loading}
-          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: '#00C2E0' }}
-        >
-          {loading ? 'Fetching…' : 'Get Recommendations'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+          {DEMO_SKUS.map(s => (
+            <button
+              key={s}
+              onClick={() => { setSku(s); lookup(s) }}
+              style={{
+                padding: '5px 12px', borderRadius: 999, border: '1.5px solid #E5E7EB',
+                background: '#fff', color: '#374151', fontSize: 12, cursor: 'pointer',
+                fontFamily: 'monospace', transition: 'border-color 0.15s, color 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#00C2E0'; e.currentTarget.style.color = '#00C2E0' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg px-4 py-3 mb-6 text-sm" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', padding: '12px 16px', borderRadius: 8, fontSize: 13, marginBottom: 20 }}>
           {error}
         </div>
       )}
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex justify-center py-16">
-          <svg className="animate-spin h-8 w-8" style={{ color: '#00C2E0' }} viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-          </svg>
-        </div>
-      )}
-
-      {/* Results */}
-      {data && !loading && (
-        <div className="space-y-6">
-          {/* Cart product card */}
-          <div className="rounded-xl p-6" style={{ background: '#112240' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Selected Product
-            </p>
-            <p className="text-xl font-bold text-white">{data.cart_product?.name}</p>
-            <p className="font-mono text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>{data.cart_sku}</p>
-            <SpecPills specs={data.cart_product?.specs} />
-          </div>
-
-          {/* Recommendations */}
-          {data.recommendations?.length === 0 ? (
-            <div
-              className="rounded-xl py-16 text-center text-sm"
-              style={{ border: '1.5px dashed #E5E7EB', color: '#9CA3AF' }}
-            >
-              No recommendations found for this product.
+      {/* Cart product card */}
+      {cart && (
+        <div style={{
+          background: '#0A1628', borderRadius: 14, padding: '20px 24px', marginBottom: 24,
+          display: 'flex', alignItems: 'flex-start', gap: 20,
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: 'rgba(0,194,224,0.7)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+              In Cart · {cart.category}
             </div>
-          ) : (
-            <>
-              <h2 className="text-sm font-semibold" style={{ color: '#6B7280' }}>
-                {data.recommendations.length} Recommended Product{data.recommendations.length !== 1 ? 's' : ''}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {data.recommendations.map(rec => {
-                  const badge = relBadge(rec.relationship)
-                  return (
-                    <div
-                      key={rec.sku}
-                      className="rounded-xl p-5 flex flex-col gap-3"
-                      style={{ background: '#fff', border: '1px solid #E5E7EB' }}
-                    >
-                      {/* Relationship badge */}
-                      <span
-                        className="text-xs font-semibold px-2.5 py-1 rounded-full self-start"
-                        style={badge.style}
-                      >
-                        {badge.label}
-                      </span>
-
-                      {/* Product name + SKU + price */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-sm" style={{ color: '#1A1A2E' }}>{rec.name}</p>
-                          <p className="font-mono text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{rec.sku}</p>
-                        </div>
-                        {rec.price != null && (
-                          <span className="font-bold text-sm flex-shrink-0" style={{ color: '#1A1A2E' }}>
-                            ${rec.price}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Compatibility label */}
-                      {rec.confidence != null && (
-                        <p className="text-xs font-medium" style={{ color: '#6B7280' }}>
-                          {confidenceLabel(rec.confidence)}
-                        </p>
-                      )}
-
-                      {/* LLM explanation */}
-                      {rec.llm_explanation && (
-                        <div
-                          className="rounded-lg p-3 text-sm leading-relaxed"
-                          style={{
-                            background: '#E0F7FA',
-                            borderLeft: '3px solid #00C2E0',
-                            color: '#0A1628',
-                          }}
-                        >
-                          <p className="text-xs font-semibold mb-1" style={{ color: '#00C2E0' }}>
-                            Why this product?
-                          </p>
-                          {rec.llm_explanation}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 6 }}>{cart.name}</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', marginBottom: 10 }}>{data.cart_sku}</div>
+            {cart.description && (
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: 12 }}>{cart.description}</div>
+            )}
+            {cart.specs && Object.keys(cart.specs).length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {Object.entries(cart.specs).map(([k, v]) => (
+                  <span key={k} style={{ fontSize: 12, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', padding: '3px 10px', borderRadius: 6, fontWeight: 500 }}>
+                    {k}: {v}
+                  </span>
+                ))}
               </div>
-            </>
+            )}
+          </div>
+          {cart.price && (
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#00C2E0' }}>${cart.price.toFixed(2)}</div>
+            </div>
           )}
         </div>
       )}
 
-      {/* Empty state */}
-      {!data && !loading && !error && (
-        <div className="flex flex-col items-center justify-center py-24" style={{ color: '#9CA3AF' }}>
-          <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" className="mb-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9M17 19a1 1 0 100 2 1 1 0 000-2zm-8 0a1 1 0 100 2 1 1 0 000-2z"/>
-          </svg>
-          <p className="font-medium mb-1">Select a product and click Get Recommendations</p>
+      {/* Recommendations grid */}
+      {recs.length > 0 && (
+        <>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', marginBottom: 16 }}>
+            Recommended Add-ons
+            <span style={{ fontWeight: 400, color: '#9CA3AF', fontSize: 13, marginLeft: 8 }}>{recs.length} suggestions</span>
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16, marginBottom: 32 }}>
+            {recs.map(r => {
+              const key = `${data?.cart_sku}|${r.sku}`
+              const isSaved = savedPairings.some(p => `${p.cart_sku}|${p.rec_sku}` === key)
+              return (
+                <div key={r.sku} style={{
+                  background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB',
+                  padding: '20px', display: 'flex', flexDirection: 'column', gap: 12,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+                        {relLabel(r.relationship_type)} · {r.category}
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#0A1628' }}>{r.name}</div>
+                      <div style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'monospace', marginTop: 2 }}>{r.sku}</div>
+                    </div>
+                    {r.confidence && <ConfidenceBadge level={r.confidence} />}
+                  </div>
+
+                  {r.specs && Object.keys(r.specs).length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {Object.entries(r.specs).slice(0, 3).map(([k, v]) => (
+                        <span key={k} style={{ fontSize: 11, background: '#F3F4F6', color: '#374151', padding: '2px 8px', borderRadius: 5, fontWeight: 500 }}>
+                          {k}: {v}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {(r.reason || r.original_reason) && (
+                    <div style={{ background: 'rgba(0,194,224,0.06)', border: '1px solid rgba(0,194,224,0.2)', borderRadius: 8, padding: '10px 12px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#00C2E0', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Why this product?
+                      </div>
+                      <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>
+                        {r.reason || r.original_reason}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 4 }}>
+                    {r.price ? (
+                      <span style={{ fontSize: 16, fontWeight: 700, color: '#0A1628' }}>${r.price.toFixed(2)}</span>
+                    ) : <span />}
+                    <button
+                      onClick={() => saveRule(r)}
+                      disabled={isSaved}
+                      style={{
+                        fontSize: 13, padding: '7px 16px', borderRadius: 7,
+                        border: isSaved ? 'none' : '1.5px solid #00C2E0',
+                        background: isSaved ? '#D1FAE5' : '#fff',
+                        color: isSaved ? '#065F46' : '#00C2E0',
+                        cursor: isSaved ? 'default' : 'pointer',
+                        fontWeight: 600, fontFamily: 'Inter, sans-serif',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      {isSaved ? '✓ Rule Saved' : 'Save Rule'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Saved Pairings panel */}
+      {savedPairings.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', margin: 0 }}>
+              Saved Cross-Sell Rules
+              <span style={{ fontWeight: 400, color: '#9CA3AF', fontSize: 13, marginLeft: 8 }}>{savedPairings.length} rule{savedPairings.length !== 1 ? 's' : ''}</span>
+            </h2>
+            <button
+              onClick={exportPairings}
+              style={{
+                fontSize: 13, padding: '8px 18px', borderRadius: 8,
+                border: '1.5px solid #0A1628', background: '#fff', color: '#0A1628',
+                fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Export CSV
+            </button>
+          </div>
+
+          <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+              {['Cart Product', 'Recommendation', 'Reason', ''].map(h => (
+                <div key={h} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+              ))}
+            </div>
+            {savedPairings.map((p, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', borderBottom: i < savedPairings.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+                <div style={{ padding: '12px 16px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.cart_name}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace' }}>{p.cart_sku}</div>
+                </div>
+                <div style={{ padding: '12px 16px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{p.rec_name}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace' }}>{p.rec_sku}</div>
+                </div>
+                <div style={{ padding: '12px 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>
+                  {p.reason.length > 100 ? p.reason.slice(0, 100) + '…' : p.reason}
+                </div>
+                <div style={{ padding: '12px 16px' }}>
+                  <button
+                    onClick={() => removeRule(i)}
+                    style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid #FECACA', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
+                  >Remove</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

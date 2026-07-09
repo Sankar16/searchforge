@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "SKF 6205-2RS is a deep groove ball bearing constructed from chrome steel with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. This sealed ball bearing is designed for applications requiring protection against contaminants while maintaining reliable rotational performance.",
+    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed bearing is suitable for applications requiring protection from contaminants.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -26,7 +26,7 @@
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
-    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for applications requiring protection from contaminants while maintaining smooth rotation.",
+    "description": "This 6205 bearing features rubber seals and measures 25 mm bore, 52 mm outer diameter, and 15 mm width. Suitable for general industrial applications requiring sealed ball bearing protection.",
     "brand": "Generic",
     "specs": {
       "bore": "25 mm",
@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "6303 bearing with open seal type from Generic.",
+    "description": "6303 bearing with open seal type.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -315,7 +315,7 @@
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
-    "description": "Steel motor base plate designed for mounting 56C frame motors. Provides a stable mounting surface for motor installation and positioning.",
+    "description": "Steel motor base plate designed for mounting 56C frame motors. Provides a stable mounting surface for secure motor installation.",
     "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head for use with standard wrenches and sockets.",
+    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter shaft with hexagonal drive head suitable for general fastening applications.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for secure tightening with standard wrenches or sockets.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hex head design allows for secure tightening with standard wrenches or sockets.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial applications.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipes in plumbing and industrial systems.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "This pressure relief valve is a valve designed to release pressure from a system.",
+    "description": "This is a pressure relief valve.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Steel machine screw manufactured by Generic.",
+    "description": "Machine screw manufactured from steel.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed of brass for fluid control applications. Suitable for general industrial use.",
+    "description": "Industrial valve constructed of brass for general-purpose flow control applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
