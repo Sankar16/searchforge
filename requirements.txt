@@ -12,3 +12,5 @@ python-dotenv==1.2.2
 mcp
 chromadb
 sentence-transformers
+python-multipart
+email-validator

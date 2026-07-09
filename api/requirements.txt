@@ -3,3 +3,5 @@ uvicorn[standard]
 python-dotenv
 chromadb
 sentence-transformers
+python-multipart
+email-validator
