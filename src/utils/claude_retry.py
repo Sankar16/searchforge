@@ -2,6 +2,9 @@ import asyncio
 
 from anthropic import RateLimitError, APITimeoutError, APIConnectionError
 
+# Note: pydantic-ai Agent has built-in retry logic; this helper is only needed
+# for raw AsyncAnthropic client calls (sync evaluator path, etc.).
+
 
 async def claude_call_with_retry(
     client,

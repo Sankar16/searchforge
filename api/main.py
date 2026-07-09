@@ -34,7 +34,7 @@ from src.search.retriever import search_catalog
 from src.search.semantic_retriever import get_or_build_index, semantic_search
 import src.search.semantic_retriever as _sem_mod
 from src.crosssell_agent.llm_agent import get_cross_sell_with_explanation
-from src.utils.claude_retry import claude_call_with_retry
+from pydantic_ai import Agent
 
 app = FastAPI(title="SearchForge API", version="1.0.0")
 
@@ -48,6 +48,26 @@ analytics: dict = {
     "descriptions_approved": 0,
     "descriptions_rejected": 0,
 }
+
+
+class GapAnalysis(BaseModel):
+    gap_summary: str
+    likely_intent: str
+    hidden_matches: list[dict]
+    suggested_keywords: list[str]
+    description_suggestion: str | None = None
+
+
+gap_agent = Agent(
+    "anthropic:claude-haiku-4-5-20251001",
+    output_type=GapAnalysis,
+    system_prompt=(
+        "You are a B2B eCommerce merchandising expert. "
+        "When a customer search finds no results, analyze the closest candidate products "
+        "and explain the gap, identify likely intent, surface hidden matches, "
+        "and suggest keywords and description improvements."
+    ),
+)
 
 
 @app.on_event("startup")
@@ -533,28 +553,14 @@ async def search_gap_analysis(body: GapAnalysisRequest):
     )
 
     try:
-        import anthropic as _anthropic
-        client = _anthropic.AsyncAnthropic()
-        message = await claude_call_with_retry(
-            client,
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = message.content[0].text.strip()
-        # Strip markdown fences if Claude wraps the JSON
-        if raw.startswith("```"):
-            parts = raw.split("```")
-            raw = parts[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        result = json.loads(raw.strip())
+        run = await gap_agent.run(prompt)
+        result = run.data
         analytics["gap_analyses"].append({
             "query": query,
-            "hidden_match_count": len(result.get("hidden_matches", [])),
+            "hidden_match_count": len(result.hidden_matches),
             "timestamp": datetime.utcnow().isoformat(),
         })
-        return result
+        return result.model_dump()
     except Exception as exc:
         print(f"Gap analysis LLM failed: {exc}")
         return fallback

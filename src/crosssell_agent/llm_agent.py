@@ -7,17 +7,30 @@ then calls Claude to generate a natural explanation for each recommendation.
 
 import asyncio
 import os
-from pathlib import Path
 
-from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from pydantic_ai import Agent
 
 load_dotenv()
 
 from src.mcp_server.catalog_client import CatalogMCPClient
-from src.utils.claude_retry import claude_call_with_retry
 
-_MODEL = "claude-haiku-4-5-20251001"
+
+class CrossSellExplanation(BaseModel):
+    explanation: str
+    specs_referenced: list[str]
+
+
+explanation_agent = Agent(
+    "anthropic:claude-haiku-4-5-20251001",
+    output_type=CrossSellExplanation,
+    system_prompt=(
+        "You explain why two B2B industrial products go together for a procurement buyer. "
+        "Be specific and technical. Do NOT invent specs or measurements not present in the provided data. "
+        "Plain text only — no markdown formatting or headings. Keep it to 1-2 sentences."
+    ),
+)
 
 
 def _spec_summary(specs: dict) -> str:
@@ -31,7 +44,6 @@ def _spec_summary(specs: dict) -> str:
 
 
 async def _explain_one(
-    client: AsyncAnthropic,
     cart_name: str,
     cart_specs: str,
     rec_name: str,
@@ -43,19 +55,10 @@ async def _explain_one(
         f"Cart product specs: {cart_specs}\n\n"
         f"Recommended product: {rec_name}\n"
         f"Relationship type: {relationship}\n"
-        f"Existing graph note: {original_reason}\n\n"
-        "Write 1-2 sentences explaining why these two products go together "
-        "for a B2B industrial buyer. Be specific and technical. "
-        "Do NOT invent any specs or measurements that are not present in the provided data. "
-        "Do NOT use any markdown formatting or headings. Plain text only."
+        f"Existing graph note: {original_reason}"
     )
-    response = await claude_call_with_retry(
-        client,
-        model=_MODEL,
-        max_tokens=150,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.content[0].text.strip()
+    result = await explanation_agent.run(prompt)
+    return result.data.explanation.strip()
 
 
 async def get_cross_sell_with_explanation(cart_sku: str) -> dict:
@@ -79,12 +82,9 @@ async def get_cross_sell_with_explanation(cart_sku: str) -> dict:
     cart_name = cart_product.get("name", cart_sku)
     cart_specs = _spec_summary(cart_product.get("specs", {}))
 
-    anthropic = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-
     async def enrich(rec: dict) -> dict:
         try:
             explanation = await _explain_one(
-                client=anthropic,
                 cart_name=cart_name,
                 cart_specs=cart_specs,
                 rec_name=rec.get("name") or rec["sku"],

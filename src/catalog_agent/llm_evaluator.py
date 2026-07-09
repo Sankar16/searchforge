@@ -1,25 +1,45 @@
 import os
 import json
-import re
 import asyncio
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Literal
 
 from dotenv import load_dotenv
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import Anthropic
+from pydantic import BaseModel, Field
+from pydantic_ai import Agent
 
 from src.schemas import Product
-from src.utils.claude_retry import claude_call_with_retry
 
 
 load_dotenv()
 
 
+class JudgeResult(BaseModel):
+    score: int = Field(ge=0, le=10)
+    hallucination_risk: Literal["low", "medium", "high"]
+    passes: bool
+    notes: list[str]
+    specs_verified: list[str]
+
+
+_judge_model = f"anthropic:{os.getenv('ANTHROPIC_JUDGE_MODEL', 'claude-haiku-4-5-20251001')}"
+
+judge_agent = Agent(
+    _judge_model,
+    output_type=JudgeResult,
+    system_prompt=(
+        "You evaluate rewritten B2B industrial product descriptions. "
+        "Penalize invented specs, materials, applications, or brands not present in the product data. "
+        "Score 0-10; mark hallucination_risk low/medium/high; set passes=true if score >= 7 and risk != high. "
+        "List only spec keys that appear in both the product data and the rewritten description."
+    ),
+)
+
+
 def get_anthropic_client() -> Anthropic | None:
     api_key = os.getenv("ANTHROPIC_API_KEY")
-
     if not api_key:
         return None
-
     return Anthropic(api_key=api_key)
 
 
@@ -28,23 +48,6 @@ def get_llm_concurrency() -> int:
         return int(os.getenv("LLM_CONCURRENCY", "5"))
     except ValueError:
         return 5
-
-
-def extract_json_from_text(text: str) -> Dict[str, Any]:
-    cleaned = text.strip()
-    cleaned = cleaned.replace("```json", "").replace("```", "").strip()
-
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
-
-    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-
-    if not match:
-        raise ValueError(f"No JSON object found in LLM response: {cleaned}")
-
-    return json.loads(match.group(0))
 
 
 def heuristic_description_eval(
@@ -134,37 +137,11 @@ def build_evaluation_prompt(
     original_description: str,
     rewritten_description: str,
 ) -> str:
-    return f"""
-You are evaluating a rewritten B2B industrial product description.
-
-Your task:
-Check whether the rewritten description is accurate, useful for search, and grounded only in the product data.
-
-Important:
-- Penalize invented specs, invented materials, invented applications, or invented brands.
-- If the rewritten description adds details not present in product data, mark hallucination_risk as medium or high.
-- This is a rubric-based quality score, not statistical confidence.
-- Return JSON only.
-- Do not include markdown.
-- Do not include explanation outside JSON.
-
-Product data:
-{json.dumps(product.model_dump(), indent=2)}
-
-Original weak description:
-{original_description}
-
-Rewritten description:
-{rewritten_description}
-
-Return exactly this JSON shape:
-{{
-  "score": 8,
-  "hallucination_risk": "low",
-  "passes": true,
-  "notes": ["Short reason here"]
-}}
-"""
+    return (
+        f"Product data:\n{json.dumps(product.model_dump(), indent=2)}\n\n"
+        f"Original weak description:\n{original_description}\n\n"
+        f"Rewritten description:\n{rewritten_description}"
+    )
 
 
 def evaluate_rewritten_description(
@@ -173,34 +150,33 @@ def evaluate_rewritten_description(
     rewritten_description: str,
 ) -> Dict[str, Any]:
     client = get_anthropic_client()
-
     if client is None:
         return heuristic_description_eval(product, rewritten_description)
 
     model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-haiku-4-5")
-
     try:
         response = client.messages.create(
             model=model,
             max_tokens=300,
             temperature=0,
-            messages=[
-                {
-                    "role": "user",
-                    "content": build_evaluation_prompt(
-                        product=product,
-                        original_description=original_description,
-                        rewritten_description=rewritten_description,
-                    ),
-                }
-            ],
+            messages=[{
+                "role": "user",
+                "content": build_evaluation_prompt(
+                    product=product,
+                    original_description=original_description,
+                    rewritten_description=rewritten_description,
+                ),
+            }],
         )
-
         raw_text = response.content[0].text.strip()
-        parsed = extract_json_from_text(raw_text)
-
+        import json as _json, re as _re
+        cleaned = raw_text.replace("```json", "").replace("```", "").strip()
+        try:
+            parsed = _json.loads(cleaned)
+        except Exception:
+            m = _re.search(r"\{.*\}", cleaned, _re.DOTALL)
+            parsed = _json.loads(m.group(0)) if m else {}
         return normalize_eval_result(parsed)
-
     except Exception as error:
         fallback = heuristic_description_eval(product, rewritten_description)
         fallback["notes"].append(f"LLM judge fallback used because of error: {error}")
@@ -211,43 +187,28 @@ async def evaluate_rewritten_description_async(
     product: Product,
     original_description: str,
     rewritten_description: str,
-    client: AsyncAnthropic | None,
     semaphore: asyncio.Semaphore,
 ) -> Dict[str, Any]:
-    """
-    Async single-product LLM judge call.
-    Falls back to heuristic evaluation if client is unavailable or judge call fails.
-    """
-
-    if client is None:
+    """Async single-product LLM judge call using pydantic-ai agent with built-in retry."""
+    if not os.getenv("ANTHROPIC_API_KEY"):
         return heuristic_description_eval(product, rewritten_description)
-
-    model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-haiku-4-5")
 
     async with semaphore:
         try:
-            response = await claude_call_with_retry(
-                client,
-                model=model,
-                max_tokens=300,
-                temperature=0,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": build_evaluation_prompt(
-                            product=product,
-                            original_description=original_description,
-                            rewritten_description=rewritten_description,
-                        ),
-                    }
-                ],
+            result = await judge_agent.run(
+                build_evaluation_prompt(
+                    product=product,
+                    original_description=original_description,
+                    rewritten_description=rewritten_description,
+                )
             )
-
-            raw_text = response.content[0].text.strip()
-            parsed = extract_json_from_text(raw_text)
-
-            return normalize_eval_result(parsed)
-
+            j = result.data
+            return {
+                "score": j.score,
+                "hallucination_risk": j.hallucination_risk,
+                "passes": j.passes,
+                "notes": j.notes,
+            }
         except Exception as error:
             fallback = heuristic_description_eval(product, rewritten_description)
             fallback["notes"].append(
@@ -261,12 +222,7 @@ async def evaluate_rewritten_descriptions_async(
     rewritten_products: List[Product],
     weak_skus: set[str],
 ) -> List[Dict[str, Any]]:
-    """
-    Evaluates only products that were rewritten.
-    Runs judge calls concurrently with bounded concurrency.
-    """
-
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    """Evaluates only products that were rewritten. Runs judge calls concurrently with bounded concurrency."""
     semaphore = asyncio.Semaphore(get_llm_concurrency())
 
     weak_products = [
@@ -278,36 +234,17 @@ async def evaluate_rewritten_descriptions_async(
     if not weak_products:
         return []
 
-    if not api_key:
-        client = None
+    tasks = [
+        evaluate_rewritten_description_async(
+            product=original,
+            original_description=original.description,
+            rewritten_description=rewritten.description,
+            semaphore=semaphore,
+        )
+        for original, rewritten in weak_products
+    ]
 
-        tasks = [
-            evaluate_rewritten_description_async(
-                product=original,
-                original_description=original.description,
-                rewritten_description=rewritten.description,
-                client=client,
-                semaphore=semaphore,
-            )
-            for original, rewritten in weak_products
-        ]
-
-        raw_evaluations = await asyncio.gather(*tasks)
-
-    else:
-        async with AsyncAnthropic(api_key=api_key) as client:
-            tasks = [
-                evaluate_rewritten_description_async(
-                    product=original,
-                    original_description=original.description,
-                    rewritten_description=rewritten.description,
-                    client=client,
-                    semaphore=semaphore,
-                )
-                for original, rewritten in weak_products
-            ]
-
-            raw_evaluations = await asyncio.gather(*tasks)
+    raw_evaluations = await asyncio.gather(*tasks)
 
     enriched_evaluations = []
 

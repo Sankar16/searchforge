@@ -1,4 +1,5 @@
 pydantic
+pydantic-ai
 pandas
 rapidfuzz
 networkx
