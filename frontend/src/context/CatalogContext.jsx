@@ -11,6 +11,7 @@ const defaultState = {
   changesApplied: false,
   downloadReady: false,
   savedPairings: [],
+  activeJobId: null,
 }
 
 const CatalogContext = createContext(null)
@@ -26,6 +27,7 @@ export function CatalogProvider({ children }) {
   const [changesApplied, setChangesApplied] = useState(defaultState.changesApplied)
   const [downloadReady, setDownloadReady] = useState(defaultState.downloadReady)
   const [savedPairings, setSavedPairings] = useState(defaultState.savedPairings)
+  const [activeJobId, setActiveJobId] = useState(defaultState.activeJobId)
 
   function approveSkus(skuList) {
     setApprovedSkus(prev => [...new Set([...prev, ...skuList])])
@@ -96,6 +98,7 @@ export function CatalogProvider({ children }) {
       changesApplied, setChangesApplied,
       downloadReady, setDownloadReady,
       savedPairings, savePairing, removePairing, clearPairings,
+      activeJobId, setActiveJobId,
       resetAll,
     }}>
       {children}

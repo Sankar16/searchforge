@@ -66,6 +66,7 @@ export default function CatalogHealth() {
     setEditedDescription,
     changesApplied, setChangesApplied,
     setDownloadReady,
+    activeJobId, setActiveJobId,
     resetAll,
   } = useCatalog()
 
@@ -226,6 +227,7 @@ export default function CatalogHealth() {
 
     const cleanup = () => {
       if (pollInterval) clearInterval(pollInterval)
+      setActiveJobId(null)
     }
 
     try {
@@ -233,6 +235,7 @@ export default function CatalogHealth() {
       const startRes = await fetch(`${API}/api/catalog/analyze?source=${src}`, { method: 'POST' })
       if (!startRes.ok) throw new Error((await startRes.json()).detail || 'Failed to start analysis')
       const { job_id } = await startRes.json()
+      setActiveJobId(job_id)
 
       await new Promise((resolve, reject) => {
         pollInterval = setInterval(async () => {
@@ -312,6 +315,7 @@ export default function CatalogHealth() {
   const approvedCount = totalRewrites - rejectedSkus.filter(s =>
     (analysisResult?.description_rewrites || []).some(r => r.sku === s)
   ).length
+  const repairedCount = (analysisResult?.description_rewrites || []).filter(r => r.was_repaired).length
 
   const catalogLabel = uploadSource === 'file' && uploadedFile
     ? uploadedFile.name
@@ -411,10 +415,13 @@ export default function CatalogHealth() {
             <div style={{ marginTop: 28 }}>
               <button
                 onClick={runAnalysis}
+                disabled={loading || activeJobId !== null}
                 style={{
-                  background: '#00C2E0', color: '#fff', border: 'none',
+                  background: loading || activeJobId !== null ? 'rgba(0,194,224,0.5)' : '#00C2E0',
+                  color: '#fff', border: 'none',
                   padding: '13px 36px', borderRadius: 10, fontSize: 15, fontWeight: 600,
-                  cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                  cursor: loading || activeJobId !== null ? 'not-allowed' : 'pointer',
+                  fontFamily: 'Inter, sans-serif',
                 }}
               >
                 Run Analysis →
@@ -477,6 +484,7 @@ export default function CatalogHealth() {
             <StatCard label="Issues Remaining" value={analysisResult.total_issues} accent={analysisResult.total_issues > 0 ? '#EF4444' : '#10B981'} />
             <StatCard label="Spec Issues Fixed" value={analysisResult.spec_issues_before - analysisResult.spec_issues_after} sub={`was ${analysisResult.spec_issues_before}`} accent="#00C2E0" />
             <StatCard label="Descriptions Optimized" value={analysisResult.descriptions_passing_judge} sub={`avg score ${analysisResult.avg_judge_score}`} accent="#00C2E0" />
+            <StatCard label="Descriptions Repaired" value={repairedCount} sub="Failed first quality check, automatically fixed" accent={repairedCount > 0 ? '#D97706' : '#10B981'} />
             <StatCard label="Duplicate Pairs" value={analysisResult.duplicate_pairs} accent={analysisResult.duplicate_pairs > 0 ? '#F59E0B' : '#10B981'} />
           </div>
 
@@ -520,7 +528,17 @@ export default function CatalogHealth() {
                       transition: 'opacity 0.2s',
                     }}>
                       <div style={{ padding: '14px 16px' }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628' }}>{r.name}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#0A1628', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          {r.name}
+                          {r.was_repaired && (
+                            <span
+                              title="This description failed the first quality check and was automatically repaired by the AI"
+                              style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', cursor: 'help', whiteSpace: 'nowrap' }}
+                            >
+                              🔄 Repaired
+                            </span>
+                          )}
+                        </div>
                         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{r.sku}</div>
                       </div>
                       <div style={{ padding: '14px 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.55 }}>

@@ -32,6 +32,7 @@ from src.search.retriever import search_catalog
 from src.search.semantic_retriever import get_or_build_index, semantic_search
 import src.search.semantic_retriever as _sem_mod
 from src.crosssell_agent.llm_agent import get_cross_sell_with_explanation
+from src.utils.claude_retry import claude_call_with_retry
 
 app = FastAPI(title="SearchForge API", version="1.0.0")
 
@@ -182,6 +183,7 @@ def run_catalog_pipeline(source: str) -> dict:
     raw_by_sku = {p.sku: p for p in state.get("raw_products", [])}
     rewritten_by_sku = {p.sku: p for p in state.get("rewritten_products", [])}
     weak_skus = state.get("weak_skus", set()) or set()
+    repaired_skus = {e.get("sku") for e in state.get("initial_failed_description_evaluations", [])}
 
     description_rewrites = []
     for sku in weak_skus:
@@ -193,6 +195,7 @@ def run_catalog_pipeline(source: str) -> dict:
                 "name": raw.name,
                 "original_description": raw.description,
                 "optimized_description": rewritten.description,
+                "was_repaired": sku in repaired_skus,
             })
 
     passing = [e for e in evals if e.get("passes_quality_gate")]
@@ -504,7 +507,8 @@ async def search_gap_analysis(body: GapAnalysisRequest):
     try:
         import anthropic as _anthropic
         client = _anthropic.AsyncAnthropic()
-        message = await client.messages.create(
+        message = await claude_call_with_retry(
+            client,
             model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],

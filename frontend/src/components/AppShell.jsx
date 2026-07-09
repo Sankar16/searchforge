@@ -33,7 +33,7 @@ const NAV = [
 
 export default function AppShell() {
   const navigate = useNavigate()
-  const { analysisRan, analysisResult, changesApplied, savedPairings } = useCatalog()
+  const { analysisRan, analysisResult, changesApplied, savedPairings, activeJobId } = useCatalog()
 
   function logout() {
     localStorage.removeItem('sf_authenticated')
@@ -118,6 +118,15 @@ export default function AppShell() {
               </NavLink>
             ))}
           </nav>
+
+          {/* Analysis running indicator */}
+          {activeJobId && (
+            <div style={{ marginTop: 16, padding: '10px 12px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <style>{`@keyframes sf-pulse { 0%,100%{opacity:1} 50%{opacity:.4} } .sf-pulse{animation:sf-pulse 1.5s ease-in-out infinite}`}</style>
+              <div className="sf-pulse" style={{ width: 8, height: 8, borderRadius: '50%', background: '#FBBF24', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#FBBF24' }}>Analysis running…</span>
+            </div>
+          )}
 
           {/* Catalog status card */}
           {analysisRan && (

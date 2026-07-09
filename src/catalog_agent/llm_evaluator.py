@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from anthropic import Anthropic, AsyncAnthropic
 
 from src.schemas import Product
+from src.utils.claude_retry import claude_call_with_retry
 
 
 load_dotenv()
@@ -225,7 +226,8 @@ async def evaluate_rewritten_description_async(
 
     async with semaphore:
         try:
-            response = await client.messages.create(
+            response = await claude_call_with_retry(
+                client,
                 model=model,
                 max_tokens=300,
                 temperature=0,

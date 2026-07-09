@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.mcp_server.catalog_client import CatalogMCPClient
+from src.utils.claude_retry import claude_call_with_retry
 
 _MODEL = "claude-haiku-4-5-20251001"
 
@@ -48,7 +49,8 @@ async def _explain_one(
         "Do NOT invent any specs or measurements that are not present in the provided data. "
         "Do NOT use any markdown formatting or headings. Plain text only."
     )
-    response = await client.messages.create(
+    response = await claude_call_with_retry(
+        client,
         model=_MODEL,
         max_tokens=150,
         messages=[{"role": "user", "content": prompt}],

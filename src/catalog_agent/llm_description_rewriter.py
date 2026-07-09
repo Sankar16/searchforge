@@ -9,6 +9,7 @@ from anthropic import Anthropic, AsyncAnthropic
 
 from src.schemas import Product
 from src.catalog_agent.description_rewriter import rewrite_description
+from src.utils.claude_retry import claude_call_with_retry
 
 
 load_dotenv()
@@ -126,7 +127,8 @@ async def rewrite_description_with_claude_async(
 
     async with semaphore:
         try:
-            response = await client.messages.create(
+            response = await claude_call_with_retry(
+                client,
                 model=model,
                 max_tokens=220,
                 temperature=0.2,
@@ -288,7 +290,8 @@ Return only the repaired description.
 
         async with semaphore:
             try:
-                response = await client.messages.create(
+                response = await claude_call_with_retry(
+                    client,
                     model=model,
                     max_tokens=220,
                     temperature=0.1,
