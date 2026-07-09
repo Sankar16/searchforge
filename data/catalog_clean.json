@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. Constructed from chrome steel, this sealed bearing is suitable for applications requiring protection from contaminants.",
+    "description": "SKF 6205-2RS is a deep groove ball bearing constructed from chrome steel with double rubber seals (2RS), featuring a 25mm inner diameter, 52mm outer diameter, and 15mm width. This sealed ball bearing is designed for applications requiring protection against contaminants while maintaining reliable rotational performance.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "6303 bearing with open seal type.",
+    "description": "6303 bearing with open seal type from Generic.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "M8 hexagon bolt manufactured from zinc-plated steel with a 40mm length. Features a standard hexagon head design suitable for general fastening applications.",
+    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head for use with standard wrenches and sockets.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for standard wrench or socket installation.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for secure tightening with standard wrenches or sockets.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and industrial applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial systems.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "Pressure relief valve from Generic.",
+    "description": "This pressure relief valve is a valve designed to release pressure from a system.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -1224,7 +1224,7 @@
     "sku": "MNT-KEY-NOSPEC",
     "name": "Shaft Key",
     "category": "Fasteners",
-    "description": "Steel key for shafts.",
+    "description": "Steel shaft key for shafts.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Machine screw manufactured from steel.",
+    "description": "Steel machine screw manufactured by Generic.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount.",
+    "description": "Cast iron bearing mount designed for housing applications. Provides structural support for bearing installation.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
@@ -1380,7 +1380,7 @@
     "sku": "VAL-BUTTERFLY-LUG",
     "name": "Lug Butterfly Valve 4 Inch",
     "category": "Valves",
-    "description": "This 4-inch lug-style butterfly valve features a 150 psi pressure rating suitable for flow control applications. The lug connection design allows for installation between flanges or at the end of a line.",
+    "description": "This 4 inch lug-style butterfly valve features a 150 psi pressure rating suitable for flow control applications. The lug connection design allows for installation between flanges or at the end of a line.",
     "brand": "Generic",
     "specs": {
       "size": "4 inch",

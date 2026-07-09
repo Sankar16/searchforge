@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "SearchForge Frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "frontend",
+      "port": 5173
+    },
+    {
+      "name": "SearchForge API",
+      "runtimeExecutable": "venv/bin/uvicorn",
+      "runtimeArgs": ["api.main:app", "--reload", "--port", "8000"],
+      "port": 8000
+    }
+  ]
+}
