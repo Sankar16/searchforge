@@ -1,394 +1,223 @@
-SearchForge — B2B Search Quality Platform
+# SearchForge
 
-SearchForge is a B2B eCommerce search quality platform that improves messy industrial product catalogs and generates spec-aware cross-sell recommendations.
+> AI-powered B2B catalog intelligence — automatically fix product data
+> issues, improve search relevance, and increase order value with
+> reasoning-based cross-sell recommendations.
 
-The project demonstrates how catalog intelligence, search quality improvement, and reasoning-based recommendations can work together to improve product discoverability and buyer experience in B2B commerce.
+---
 
-⸻
+## What It Does
 
-Problem
+Industrial B2B distributors lose revenue when messy product catalogs cause customers to search for products that exist but can't be found. SearchForge runs an AI pipeline over your catalog CSV to fix spec gaps, rewrite vague descriptions, and surface duplicate listings — then gives merchandisers a review UI to approve every change before it ships. The same cleaned catalog powers semantic search and spec-grounded cross-sell recommendations, so improvements to the data immediately improve what customers find and buy.
 
-B2B product catalogs often contain messy and incomplete data:
+---
 
-* Missing technical specifications
-* Inconsistent units of measurement
-* Weak or generic product descriptions
-* Duplicate or near-duplicate SKUs
-* Poor search relevance
-* Cross-sell recommendations that do not explain compatibility
+## Features
 
-For industrial products, search quality depends heavily on structured specifications such as size, thread type, material, pressure rating, voltage, shaft diameter, and compatible bearing series.
+### 🗂 Catalog Optimizer
+- Detects duplicate listings using embedding similarity
+- Identifies missing required specs per product category
+- Rewrites vague descriptions using Claude with spec-grounded prompts
+- LLM-as-judge scores every rewrite for hallucination risk
+- Repair loop re-prompts on failed evaluations (max 1 pass)
+- Per-row approve / edit / reject UI with apply + CSV export
 
-SearchForge solves this by cleaning the catalog first, then using the improved product data for better search and recommendation experiences.
+### 🔍 Search Preview
+- Semantic search using ChromaDB + all-MiniLM-L6-v2
+- Side-by-side toggle: original vs optimized catalog
+- Match quality labels (Strong match / Good match / Related / Partial)
+- **Search Gap Detector**: when optimized catalog returns zero results,
+  Claude Haiku analyzes why and suggests which product descriptions
+  need which keywords — turns a failure state into a merchandising insight
 
-⸻
+### 🛒 Smart Recommendations
+- Compatibility knowledge graph (NetworkX) with 15 product relationships
+- MCP-powered data access: cross-sell agent calls catalog tools via
+  Model Context Protocol instead of direct imports
+- Claude Haiku generates spec-grounded explanations for why products
+  pair together (not correlation — reasoning)
+- Save pairings to session, export as CSV for merchandising platform
 
-Project Overview
+---
 
-SearchForge has three main layers:
+## Architecture
 
-1. Catalog Intelligence Agent
-2. Search Quality Layer
-3. Cross-Sell Reasoning Agent
+```
+Browser (React 18 + Vite)
+        │
+        │  fetch()
+        ▼
+FastAPI Backend  (api/main.py · port 8000)
+        │
+        ├─── POST /api/catalog/analyze
+        │         │
+        │         ▼
+        │    LangGraph Catalog Agent  (13 nodes)
+        │    load → spec check → UOM normalize → spec recheck
+        │    → description check
+        │         ├─[weak descriptions found]──▶ rewrite (Claude Sonnet)
+        │         │                              → judge (Claude Haiku)
+        │         │                              → [failures] repair → re-judge
+        │         └─[none]──────────────────────▶ skip rewrite
+        │    → dedup (rapidfuzz) → report → save catalog_clean.json
+        │
+        ├─── GET  /api/search?q=…&mode=clean|messy
+        │         │
+        │         ▼
+        │    ChromaDB  (in-memory, all-MiniLM-L6-v2)
+        │    Two indexes built at startup: catalog_messy + catalog_clean
+        │    Score = (1 − distance/2) × 100  →  match labels
+        │
+        ├─── POST /api/search/gap-analysis
+        │         │
+        │         ▼
+        │    Low-threshold search (min_score=15) across both indexes
+        │    → Claude Haiku: gap summary, hidden matches, keyword suggestions
+        │
+        └─── GET  /api/crosssell/{sku}
+                  │
+                  ▼
+             CatalogMCPClient  (spawns subprocess)
+                  │  stdio transport
+                  ▼
+             MCP Catalog Server  (FastMCP)
+             Tools: search_products · get_product
+                    get_compatibility · get_catalog_health
+                  │
+                  ▼
+             NetworkX DiGraph  (15 compatibility edges)
+             + Claude Haiku  (spec-grounded explanation)
 
-1. Catalog Intelligence Agent
+Data layer
+──────────
+data/catalog_messy.json    ← source / uploaded CSV
+data/catalog_clean.json    ← pipeline output
+data/catalog_final.json    ← merchandiser-approved
+```
 
-The Catalog Intelligence Agent analyzes and improves product catalog quality.
+---
 
-Current capabilities:
+## Tech Stack
 
-* Detects missing required specifications
-* Normalizes units of measurement
-* Detects weak product descriptions
-* Rewrites weak descriptions using structured product data
-* Detects possible duplicate products
-* Generates a cleaned catalog
-* Produces a catalog health report
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18 + Vite, Tailwind CSS (CDN) |
+| Routing / state | React Router v6, React Context |
+| Backend | FastAPI + Pydantic |
+| Agent orchestration | LangGraph `StateGraph` |
+| LLM — rewrite / judge | Claude Sonnet 4.5 |
+| LLM — cross-sell / gap | Claude Haiku 4.5 |
+| Tool protocol | MCP via FastMCP (stdio transport) |
+| Vector search | ChromaDB + all-MiniLM-L6-v2 |
+| Compatibility graph | NetworkX DiGraph |
+| Fuzzy dedup | rapidfuzz (threshold 88) |
+| Tests | pytest — 47 tests across UOM, dedup, spec checker, knowledge graph |
 
-2. Search Quality Layer
+---
 
-The Search Quality Layer compares search results between the messy catalog and the cleaned catalog.
+## Results on the 74-product demo catalog
 
-It shows how better catalog data improves search visibility and relevance.
+```
+Spec issues before UOM normalization:  41
+Spec issues after UOM normalization:   33
+Weak descriptions before rewrite:      22
+Weak descriptions after rewrite:        0
+Descriptions passing judge:            21 / 22
+Average judge score:                    8.09 / 10
+Duplicate pairs detected:               6
+```
 
-Current capabilities:
+---
 
-* Weighted keyword search
-* Field-level scoring
-* Messy vs clean catalog comparison
-* Search result ranking based on product name, category, specs, description, and search terms
+## Quick Start
 
-3. Cross-Sell Reasoning Agent
-
-The Cross-Sell Reasoning Agent recommends compatible products based on industrial product relationships.
-
-Unlike simple “customers also bought” recommendations, this agent explains why a product is compatible.
-
-Current capabilities:
-
-* Compatibility graph
-* Cart-based recommendations
-* Relationship types
-* Confidence scores
-* Human-readable reasoning
-
-Example:
-
-Cart Item: 6205-2RS Sealed Ball Bearing
-Recommended Product: P205 Pillow Block Housing
-Reason:
-6205-series bearings are compatible with P205 pillow block housings for 25mm shaft support.
-
-⸻
-
-Demo Features
-
-The Streamlit app includes three tabs:
-
-Catalog Health
-
-Shows catalog quality metrics:
-
-* Total products
-* Missing spec issues
-* UOM-related fixes
-* Weak description fixes
-* Possible duplicate pairs
-* Sample rewritten descriptions
-
-Search Comparison
-
-Compares search results before and after catalog cleaning.
-
-Example queries:
-
-25mm sealed bearing
-bolt for motor mount
-half inch brass valve
-pillow block for 6205 bearing
-thread sealant for pipe fitting
-
-Cart + Cross-Sell
-
-Shows spec-aware product recommendations for selected cart items.
-
-Example:
-
-Cart Item: FST-M8-40-ZN
-Recommendations:
-- M8 Flat Washer Zinc
-- M8 Zinc Hex Nut
-
-⸻
-
-Current Results
-
-Catalog Intelligence output:
-
-Total products: 74
-Spec issues before UOM normalization: 41
-Spec issues after UOM normalization: 33
-UOM-related issues fixed: 8
-Weak descriptions before rewrite: 22
-Weak descriptions after rewrite: 0
-Possible duplicate pairs: 6
-
-Duplicate detection was tuned from a noisy first version to a cleaner candidate set:
-
-173 possible duplicate pairs → 9 → 6
-
-Example duplicate candidates:
-
-BRG-6303-OPEN ↔ BRG-6303-NO-SPEC
-FST-M8-40-ZN ↔ FST-M8-40-HEXAGON
-FST-M8-40-ZN ↔ FST-HEX-M8X40
-VAL-BUTTERFLY-4IN ↔ VAL-BUTTERFLY-LUG
-FST-MOTOR-KIT-M8 ↔ FST-MOTOR-BOLT-KIT
-
-⸻
-
-Tech Stack
-
-* Python
-* Pydantic
-* RapidFuzz
-* NetworkX
-* Streamlit
-* JSON-based mock catalog
-* Rule-based catalog validation
-* Weighted keyword search
-* Graph-based recommendation logic
-
-Planned upgrades:
-
-* LangGraph workflow orchestration
-* LLM-based product type fallback
-* LLM-based natural description rewriting
-* Vector search with embeddings
-* ChromaDB or similar vector database
-* More advanced cross-sell reasoning
-* Human review workflow for duplicate candidates
-
-⸻
-
-Project Structure
-
-searchforge/
-├── data/
-│   ├── catalog_messy.json
-│   └── catalog_clean.json
-│
-├── src/
-│   ├── schemas.py
-│   │
-│   ├── catalog_agent/
-│   │   ├── spec_checker.py
-│   │   ├── uom.py
-│   │   ├── description_quality.py
-│   │   ├── description_rewriter.py
-│   │   ├── dedup.py
-│   │   └── report.py
-│   │
-│   ├── search/
-│   │   └── retriever.py
-│   │
-│   └── crosssell_agent/
-│       ├── knowledge_graph.py
-│       └── recommender.py
-│
-├── app.py
-├── run_catalog_check.py
-├── run_search_comparison.py
-├── run_dedup_check.py
-├── run_crosssell_demo.py
-├── requirements.txt
-└── README.md
-
-⸻
-
-How to Run
-
-1. Clone the repository
-
+```bash
+# 1. Clone
 git clone https://github.com/Sankar16/searchforge.git
 cd searchforge
 
-2. Create a virtual environment
+# 2. Python dependencies
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
 
-python -m venv venv
-source venv/bin/activate
+# 3. Environment variables  (.env in project root)
+echo "ANTHROPIC_API_KEY=your_key_here" > .env
 
-3. Install dependencies
+# 4. Start backend  (Terminal 1)
+uvicorn api.main:app --reload --port 8000
 
-python -m pip install -r requirements.txt
+# 5. Start frontend  (Terminal 2)
+cd frontend && npm install && npm run dev
+# → http://localhost:5173
+```
 
-4. Run the Streamlit app
+**Demo credentials:** `demo@searchforge.com` / `demo123`
 
-python -m streamlit run app.py
+```bash
+# Run tests
+python -m pytest tests/ -v
+```
 
-The app will open in your browser at:
+### Environment variables
 
-http://localhost:8501
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ANTHROPIC_API_KEY` | — | Required for analyze, cross-sell, and gap analysis |
+| `ANTHROPIC_REWRITE_MODEL` | `claude-sonnet-4-5` | Model used for description rewrites |
+| `ANTHROPIC_JUDGE_MODEL` | `claude-haiku-4-5` | Model used for LLM-as-judge evaluation |
+| `LLM_CONCURRENCY` | `5` | Max parallel LLM calls during rewrite batch |
 
-⸻
+> **Without an API key:** spec checking, UOM normalization, dedup, and all tests run fine. The analyze, cross-sell, and gap analysis endpoints require a key.
 
-Run Individual Scripts
+---
 
-Catalog health check
+## Project Structure
 
-python run_catalog_check.py
+```
+searchforge/
+├── api/
+│   └── main.py                   # FastAPI endpoints
+├── src/
+│   ├── catalog_agent/
+│   │   ├── graph.py              # LangGraph pipeline (13 nodes)
+│   │   ├── spec_checker.py
+│   │   ├── uom.py
+│   │   ├── description_quality.py
+│   │   ├── llm_description_rewriter.py
+│   │   ├── llm_evaluator.py
+│   │   ├── dedup.py
+│   │   └── report.py
+│   ├── mcp_server/
+│   │   ├── catalog_server.py     # FastMCP tool server
+│   │   └── catalog_client.py     # Subprocess client
+│   ├── search/
+│   │   ├── semantic_retriever.py # ChromaDB + sentence-transformers
+│   │   └── retriever.py          # Keyword fallback
+│   └── crosssell_agent/
+│       ├── knowledge_graph.py    # NetworkX compatibility graph
+│       ├── recommender.py
+│       └── llm_agent.py          # Claude Haiku explanation generator
+├── frontend/
+│   └── src/pages/
+│       ├── CatalogHealth.jsx
+│       ├── SearchComparison.jsx
+│       └── CrossSell.jsx
+├── data/
+│   └── catalog_messy.json        # 74-product demo catalog
+├── tests/                        # 47 pytest tests
+└── DESIGN.md                     # Architecture deep-dive
+```
 
-Search comparison
+---
 
-python run_search_comparison.py
+## Design Decisions
 
-Duplicate detection
+**Why LangGraph?** The pipeline has two conditional branches — skip rewrite when no weak descriptions exist, and run a repair loop when the judge flags failures. LangGraph's `StateGraph` makes these branches explicit and auditable without manual state plumbing.
 
-python run_dedup_check.py
+**Why MCP for cross-sell?** The cross-sell agent accesses catalog data via Model Context Protocol rather than direct Python imports. This decouples the agent from the data retrieval implementation — if catalog data later moved to a database or separate service, the agent code wouldn't change.
 
-Cross-sell reasoning demo
+**Why two ChromaDB indexes?** Both `catalog_messy` and `catalog_clean` are built at startup and kept in memory. The Search Preview page queries both simultaneously and renders a side-by-side comparison in a single request, making the before/after difference immediately visible.
 
-python run_crosssell_demo.py
+**Why Haiku for gap analysis and cross-sell, Sonnet for rewrites?** Rewrites are stored permanently in the catalog — quality matters. Gap analysis and cross-sell explanations are ephemeral, grounded-generation tasks where speed and cost matter more than output quality ceiling.
 
-⸻
-
-Why This Project Matters
-
-B2B search is different from normal eCommerce search.
-
-In consumer eCommerce, a buyer may search for broad terms like:
-
-running shoes
-black backpack
-wireless headphones
-
-In B2B commerce, buyers often search using technical details:
-
-6205 sealed bearing
-1/2 inch NPT brass ball valve
-M8 x 40mm zinc hex bolt
-P205 pillow block housing
-24V solenoid valve
-
-If specs are missing, inconsistent, or poorly written, the right products may not appear in search results.
-
-SearchForge shows how better catalog intelligence can improve:
-
-* Search relevance
-* Product discoverability
-* Buyer confidence
-* Cross-sell quality
-* Catalog operations
-* Data quality workflows
-
-⸻
-
-Agentic AI Design
-
-The current version uses modular Python tools that perform specific catalog intelligence tasks.
-
-Current flow:
-
-Load catalog
-↓
-Check missing specs
-↓
-Normalize units
-↓
-Check description quality
-↓
-Rewrite weak descriptions
-↓
-Detect duplicates
-↓
-Generate health report
-↓
-Save clean catalog
-
-This is the foundation for an agentic workflow.
-
-The next planned upgrade is to convert this pipeline into a LangGraph-based agent where each step becomes a graph node and the workflow state is managed centrally.
-
-Planned LangGraph flow:
-
-START
-↓
-load_catalog
-↓
-check_specs_before
-↓
-normalize_uom
-↓
-check_specs_after
-↓
-check_descriptions
-↓
-rewrite_weak_descriptions
-↓
-detect_duplicates
-↓
-generate_health_report
-↓
-save_clean_catalog
-↓
-END
-
-This will allow the agent to make conditional decisions such as:
-
-If weak descriptions are found → rewrite them
-If no weak descriptions are found → skip rewriting
-If duplicate candidates are found → generate duplicate review report
-If product type is unknown → use LLM fallback classification
-
-⸻
-
-Key Design Principle
-
-SearchForge follows a hybrid AI design:
-
-Rules handle deterministic catalog checks.
-LLMs handle fuzzy language and reasoning tasks.
-Agents orchestrate the workflow.
-
-This makes the system practical for B2B use cases where technical accuracy matters.
-
-⸻
-
-Future Improvements
-
-Planned improvements include:
-
-* LangGraph orchestration for the Catalog Intelligence Agent
-* LLM-based product type classification
-* LLM-based natural product description rewriting
-* Embedding-based semantic search
-* Vector database integration
-* More detailed compatibility reasoning
-* SKU merge suggestions for duplicate products
-* Admin review workflow
-* Exportable catalog quality reports
-* Larger industrial product catalog
-* Evaluation metrics for search improvement
-
-⸻
-
-Status
-
-Current status: Demo-ready V1
-
-Completed:
-
-* Catalog health report
-* Missing spec detection
-* UOM normalization
-* Weak description detection
-* Description rewriting
-* Duplicate detection
-* Clean catalog generation
-* Weighted search comparison
-* Cross-sell compatibility graph
-* Streamlit demo UI
-
-Next milestone:
-
-Upgrade Catalog Intelligence Agent to LangGraph workflow
+See [DESIGN.md](DESIGN.md) for the full architecture deep-dive, including what's production-ready vs demo-only, known limitations, and what a production system would need.
