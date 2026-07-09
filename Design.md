@@ -30,7 +30,7 @@ src/
 │   ├── dedup.py               fuzzy duplicate detection (rapidfuzz)
 │   ├── report.py              health report aggregation
 │   ├── state.py               CatalogAgentState (LangGraph TypedDict)
-│   └── graph.py               LangGraph workflow (linear, 10 nodes)
+│   └── graph.py               LangGraph workflow (conditional, 13 nodes, repair loop)
 ├── search/                    Layer 2: Search Quality
 │   ├── retriever.py            weighted in-memory keyword search
 │   └── indexer.py              scaffold/empty or not meaningfully implemented yet
@@ -205,6 +205,14 @@ SKF 6205-2RS is a deep groove ball bearing with double rubber seals (2RS), featu
 
 This is now the primary rewrite path used by the LangGraph workflow.
 
+`llm_description_rewriter.py` also implements a targeted repair path used by the graph's conditional retry loop (see §5):
+
+```python
+repair_failed_rewrites_with_llm_async(original_products, rewritten_products, failed_evaluations)
+```
+
+This re-prompts Claude only for the SKUs the judge flagged (failed the quality gate, or `medium`/`high` hallucination risk), passing the judge's notes back in as repair context. Products that already passed are left untouched — it does not re-rewrite the whole batch.
+
 ### 4.6 LLM-as-judge evaluator (`llm_evaluator.py`)
 
 `llm_evaluator.py` implements Claude-based evaluation of rewritten descriptions.
@@ -346,12 +354,16 @@ messy_description_issues
 normalized_description_issues
 final_description_issues
 description_evaluations
+initial_failed_description_evaluations
+failed_description_evaluations
+repaired_products
+repair_description_evaluations
 weak_skus
 duplicate_candidates
 health_report
 ```
 
-`build_catalog_intelligence_graph()` wires the current graph:
+`build_catalog_intelligence_graph()` now wires a **conditional** graph with two decision points and a repair loop (added in "Add conditional LangGraph rewrite repair loop"):
 
 ```text
 START
@@ -360,15 +372,21 @@ START
  → normalize_uom
  → check_specs_after
  → check_descriptions
- → rewrite_descriptions
- → evaluate_rewrites
+ → route_after_description_check
+     "rewrite"      → rewrite_descriptions → evaluate_rewrites → route_after_evaluation
+     "skip_rewrite" → prepare_products_without_rewrite → detect_duplicates
+
+ route_after_evaluation (from evaluate_rewrites):
+     "continue" → detect_duplicates
+     "repair"   → repair_failed_rewrites → evaluate_rewrites_after_repair → detect_duplicates
+
  → detect_duplicates
  → generate_report
  → save_clean_catalog
  → END
 ```
 
-Current graph nodes:
+Current graph nodes (13 total):
 
 ```text
 load_catalog
@@ -376,23 +394,29 @@ check_specs_before
 normalize_uom
 check_specs_after
 check_descriptions
+prepare_products_without_rewrite   (new — skip branch when weak_skus is empty)
 rewrite_descriptions
 evaluate_rewrites
+repair_failed_rewrites             (new — retries only judge-flagged SKUs)
+evaluate_rewrites_after_repair     (new — re-judges the repaired batch)
 detect_duplicates
 generate_report
 save_clean_catalog
 ```
 
+Routing logic:
+
+- `route_after_description_check(state)` — returns `"skip_rewrite"` if `weak_skus` is empty, else `"rewrite"`. Avoids paying for LLM rewrite/judge calls when the catalog has no weak descriptions.
+- `route_after_evaluation(state)` — returns `"repair"` if `failed_description_evaluations` is non-empty, else `"continue"`. A description is treated as failing if it fails `passes_quality_gate` **or** its `hallucination_risk` is `"medium"` or `"high"` (`find_failed_description_evaluations` in `graph.py`) — medium risk is intentionally included because catalog copy should be conservative, not just "technically passing."
+- The repair loop runs exactly **once** (no re-check after `evaluate_rewrites_after_repair` routes back into `route_after_evaluation`) — if repaired descriptions still fail the judge, they proceed to `detect_duplicates` as-is rather than looping indefinitely. There is no retry-count cap in state because there's only ever one repair pass.
+
 Current status:
 
-- The graph is fully implemented.
-- The graph is currently linear.
-- All edges are unconditional `add_edge` calls.
-- There are no conditional branches yet.
-- There is no `add_conditional_edges` usage yet.
-- The graph uses sync node functions; async LLM work is currently invoked inside nodes through `asyncio.run(...)`.
+- The graph is fully implemented, including conditional branching via `add_conditional_edges` (two decision points, described above).
+- The graph uses sync node functions; async LLM work is invoked inside nodes through `asyncio.run(...)`.
+- `prepare_products_without_rewrite_node` exists so that downstream nodes (`detect_duplicates`, `generate_report`) can always read from `rewritten_products` regardless of which branch ran — it copies `normalized_products` into `rewritten_products` and zeroes out the evaluation/repair fields.
 
-The pre-LangGraph direct pipeline (`run_catalog_check.py`) still exists in parallel with the graph-based path (`run_catalog_graph.py`).
+The pre-LangGraph direct pipeline (`run_catalog_check.py`) still exists in parallel with the graph-based path (`run_catalog_graph.py`), though it does not have the conditional skip/repair behavior — that logic lives only in `graph.py`.
 
 Current verified `run_catalog_graph.py` output:
 
@@ -550,17 +574,11 @@ It displays:
 - Sample description rewrites
 - Duplicate candidate table
 - Static LangGraph workflow checklist
+- LLM judge metrics: descriptions evaluated, average judge score, failed/needs-review count, and a per-SKU table of judge score / hallucination risk / pass-fail (added in "Show LLM judge metrics in Streamlit")
 
-The workflow checklist is hardcoded and mirrors the graph nodes. It is not currently driven by actual `graph.stream()` node execution events.
+The workflow checklist is hardcoded and mirrors the graph nodes. It is not currently driven by actual `graph.stream()` node execution events, so it still won't visually distinguish a run that hit the skip-rewrite branch or the repair loop from a "normal" run — it always renders the same static list regardless of which conditional path actually executed.
 
-If the UI has not yet been updated after the LLM judge addition, it may not display:
-
-- Description evaluation count
-- Average judge score
-- Hallucination risk counts
-- Judge pass/fail table
-
-Those are available in the graph state and CLI output but may still need UI wiring.
+The judge metrics table reads `pipeline["description_evaluations"]` from the invoked graph's final state. Note that after a repair pass runs, `description_evaluations` is overwritten with `repair_description_evaluations` (see `evaluate_rewrites_after_repair_node` in `graph.py`), so the UI currently shows only the **post-repair** judge results, not the original pre-repair failures — there's no UI surface yet for "N descriptions needed repair before passing."
 
 ### Tab 2 — Search Comparison
 
@@ -707,20 +725,19 @@ Recommended verification:
 python -m pip install -r requirements.txt
 ```
 
-### 12.2 Linear LangGraph flow
+### 12.2 LangGraph flow is conditional, but only partially
 
-The graph is real but still linear.
+The graph now branches (see §5): it skips the rewrite/evaluate path when there are no weak descriptions, and it runs one repair pass when the judge flags a rewrite as failing or medium/high hallucination risk.
 
-There are no conditional edges yet.
-
-Missing conditional behaviors:
+Still missing conditional behaviors:
 
 ```text
-If no weak descriptions → skip rewrite/evaluate
-If judge fails → repair failed rewrites or fall back to deterministic rewrite
 If duplicate candidates exist → generate duplicate review report
 If product type is unknown → use LLM fallback classifier
+If repair still fails the judge after one pass → currently proceeds anyway rather than falling back to the deterministic template rewriter
 ```
+
+The last point is worth flagging: `repair_failed_rewrites_with_llm_async` (like the original rewriter) only falls back to the deterministic template in `description_rewriter.py` on an API error or missing key — if the repaired description still fails the judge on a *successful* Claude call, there is no second repair attempt and no re-check; the graph proceeds to `detect_duplicates` with whatever the repair pass produced.
 
 ### 12.3 Search is still keyword-based
 
@@ -747,7 +764,7 @@ The judge can catch obvious grounding issues, but it is still an LLM. It should 
 | Target capability | Current status |
 |---|---|
 | LangGraph Catalog Intelligence Agent | Implemented |
-| Conditional LangGraph branches | Not implemented |
+| Conditional LangGraph branches (skip-rewrite, repair loop) | Implemented |
 | LLM description rewriting | Implemented |
 | Async parallel LLM rewriting | Implemented |
 | LLM-as-judge description evaluation | Implemented |
@@ -767,22 +784,21 @@ The judge can catch obvious grounding issues, but it is still an LLM. It should 
 Given the current implementation, the highest-leverage next steps are:
 
 1. Fix and verify `requirements.txt`.
-2. Add conditional edges to `graph.py`.
-3. Add a repair loop for failed or high-risk description rewrites.
-4. Wire LLM judge metrics into the Streamlit Catalog Health tab.
-5. Add deterministic unit tests for rule-based modules.
-6. Add MCP catalog server for cross-sell/catalog access.
-7. Add LLM-generated cross-sell explanations.
-8. Replace Streamlit with FastAPI + React.
-9. Add embeddings + ChromaDB semantic search.
-10. Add semantic search evaluation metrics.
+2. Add deterministic unit tests for rule-based modules (spec_checker, uom, description_quality, dedup) and the new routing functions (`route_after_description_check`, `route_after_evaluation`, `find_failed_description_evaluations`) — these are now the parts of the graph most likely to silently regress.
+3. Decide on a bounded retry policy for the repair loop (currently exactly one pass, then ships regardless of judge outcome) — either cap-and-fallback-to-template, or surface unresolved failures in the health report/UI instead of silently accepting them.
+4. Surface pre-repair vs. post-repair judge results in the Streamlit UI (`description_evaluations` is currently overwritten by the repair pass, losing the "N needed repair" signal — see §8).
+5. Add MCP catalog server for cross-sell/catalog access.
+6. Add LLM-generated cross-sell explanations.
+7. Replace Streamlit with FastAPI + React.
+8. Add embeddings + ChromaDB semantic search.
+9. Add semantic search evaluation metrics.
 
 ## 15. Current Honest Technical Summary
 
 Current accurate summary:
 
 ```text
-SearchForge is a LangGraph-orchestrated B2B catalog intelligence and search quality platform. It cleans messy industrial product catalogs using deterministic validation, unit normalization, fuzzy duplicate detection, and Claude-based async description rewriting. Rewrites are evaluated by a separately configurable LLM-as-judge for hallucination risk and search usefulness. The cleaned catalog powers keyword-based before/after search comparison and a NetworkX-based cross-sell recommendation demo.
+SearchForge is a LangGraph-orchestrated B2B catalog intelligence and search quality platform. It cleans messy industrial product catalogs using deterministic validation, unit normalization, fuzzy duplicate detection, and Claude-based async description rewriting, with conditional branching that skips the LLM path when there's nothing to rewrite and runs a single automatic repair pass when the LLM-as-judge flags a rewrite as failing or hallucination-prone. The cleaned catalog powers keyword-based before/after search comparison and a NetworkX-based cross-sell recommendation demo.
 ```
 
 Current honest limitation:
