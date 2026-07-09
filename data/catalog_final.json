@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "M8 x 40mm hexagon head bolt manufactured from zinc-plated steel for corrosion resistance. Features an 8mm diameter thread and hexagonal drive head suitable for general fastening applications.",
+    "description": "M8 hexagon bolt manufactured from zinc-plated steel with a 40mm length. Features a standard hexagon head design suitable for general fastening applications.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length.",
+    "description": "This plain steel hex bolt features a 1/2 inch diameter and 2 inch length, suitable for general fastening applications. The hexagonal head design allows for secure tightening with standard wrenches or sockets.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in pipe fitting applications.",
+    "description": "This 1/2 inch brass elbow fitting features NPT threading for secure pipe connections. Constructed of brass material for reliable performance in plumbing and fluid transfer applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial systems.",
+    "description": "Threaded pipe fitting constructed of brass for connecting pipe sections in plumbing and industrial applications.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "This pressure relief valve is a Generic brand valve in the Valves category.",
+    "description": "This is a pressure relief valve.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Industrial valve constructed from brass for fluid control applications. Suitable for general industrial use.",
+    "description": "Industrial valve constructed of brass for fluid control applications. Suitable for general-purpose industrial use.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed for housing applications. Provides structural support for bearing installation.",
+    "description": "Cast iron bearing mount.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
@@ -1380,7 +1380,7 @@
     "sku": "VAL-BUTTERFLY-LUG",
     "name": "Lug Butterfly Valve 4 Inch",
     "category": "Valves",
-    "description": "This 4-inch lug-style butterfly valve features a 150 psi pressure rating suitable for flow control applications. The lug connection design allows for installation between flanges or at the end of a line.",
+    "description": "This 4-inch lug-style butterfly valve features a 150 psi pressure rating suitable for flow control applications. The lug connection design allows for installation between flanges without requiring through-bolts.",
     "brand": "Generic",
     "specs": {
       "size": "4 inch",

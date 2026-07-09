@@ -69,8 +69,21 @@ def semantic_search(collection, query: str, top_k: int = 5) -> list[dict]:
     products = []
     for i, metadata in enumerate(results["metadatas"][0]):
         distance = results["distances"][0][i]
-        similarity = round((1 - distance) * 100, 1)
-        products.append({**metadata, "score": similarity, "match_type": "semantic"})
+        # ChromaDB cosine distance is 0-2, so normalise to 0-100
+        score = round((1 - (distance / 2)) * 100, 1)
+
+        if score >= 80:
+            match_label = "Strong match"
+        elif score >= 65:
+            match_label = "Good match"
+        elif score >= 50:
+            match_label = "Related"
+        elif score >= 35:
+            match_label = "Partial match"
+        else:
+            continue  # below threshold — skip
+
+        products.append({**metadata, "score": score, "match_label": match_label, "match_type": "semantic"})
 
     return products
 

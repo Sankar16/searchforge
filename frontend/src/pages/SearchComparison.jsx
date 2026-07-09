@@ -4,12 +4,36 @@ import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-const PILLS = ['bearing 6205', 'hydraulic fitting', 'v-belt', 'industrial seal', 'shaft coupling']
+// Fix 4: queries designed to surface the semantic difference between messy/clean
+const PILLS = [
+  'sealed bearing for motor shaft',
+  'automated valve for fluid control',
+  'anti-corrosion pipe fitting',
+  'fastener for concrete',
+  'shaft mounting component',
+]
 
 const MODES = [
   { value: 'clean', label: 'Optimized Catalog' },
   { value: 'messy', label: 'Original Catalog' },
 ]
+
+// Fix 3: match_label badge styles
+const BADGE = {
+  'Strong match': { bg: '#D1FAE5', color: '#065F46' },
+  'Good match':   { bg: 'rgba(0,194,224,0.12)', color: '#007A8F' },
+  'Related':      { bg: '#DBEAFE', color: '#1E40AF' },
+  'Partial match':{ bg: '#F3F4F6', color: '#6B7280' },
+}
+
+function MatchBadge({ label }) {
+  const style = BADGE[label] || BADGE['Partial match']
+  return (
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, background: style.bg, color: style.color }}>
+      {label}
+    </span>
+  )
+}
 
 export default function SearchComparison() {
   const navigate = useNavigate()
@@ -17,25 +41,42 @@ export default function SearchComparison() {
 
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState('clean')
-  const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searched, setSearched] = useState(false)
 
+  // Fix 5: track both result sets simultaneously
+  const [cleanResults, setCleanResults] = useState(null)
+  const [messyResults, setMessyResults] = useState(null)
+
+  const activeResults = mode === 'clean' ? cleanResults : messyResults
+
   async function doSearch(q, m) {
     const term = (q ?? query).trim()
-    const searchMode = m ?? mode
     if (!term) return
     setLoading(true)
     setError(null)
     setSearched(false)
+
+    // Fix 5: fetch both modes in parallel
     try {
-      const res = await fetch(`${API}/api/search?q=${encodeURIComponent(term)}&mode=${searchMode}&search_type=semantic`)
-      if (!res.ok) {
-        const d = await res.json()
+      const [cleanRes, messyRes] = await Promise.all([
+        fetch(`${API}/api/search?q=${encodeURIComponent(term)}&mode=clean&search_type=semantic`),
+        fetch(`${API}/api/search?q=${encodeURIComponent(term)}&mode=messy&search_type=semantic`),
+      ])
+
+      if (!cleanRes.ok) {
+        const d = await cleanRes.json()
         throw new Error(d.detail || 'Search failed')
       }
-      setResults(await res.json())
+      if (!messyRes.ok) {
+        const d = await messyRes.json()
+        throw new Error(d.detail || 'Search failed')
+      }
+
+      const [cleanData, messyData] = await Promise.all([cleanRes.json(), messyRes.json()])
+      setCleanResults(cleanData)
+      setMessyResults(messyData)
       setSearched(true)
     } catch (e) {
       setError(e.message)
@@ -46,7 +87,34 @@ export default function SearchComparison() {
 
   function handleModeChange(newMode) {
     setMode(newMode)
-    if (searched && query.trim()) doSearch(query, newMode)
+  }
+
+  // Fix 5: comparison banner logic
+  function ComparisonBanner() {
+    if (!searched || !cleanResults || !messyResults) return null
+    const cleanCount = cleanResults.results?.length ?? 0
+    const messyCount = messyResults.results?.length ?? 0
+    const diff = cleanCount - messyCount
+    if (diff <= 0 && cleanCount === messyCount) {
+      if (cleanCount === 0) return null
+      // same count — check if optimized is showing the active mode
+      if (mode !== 'clean') return null
+      return (
+        <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628' }}>
+          <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>{' '}
+          Optimized catalog surfaces more relevant products for this query
+        </div>
+      )
+    }
+    if (diff > 0) {
+      return (
+        <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628' }}>
+          <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>{' '}
+          Optimized catalog found <strong>{diff} more relevant product{diff !== 1 ? 's' : ''}</strong> for this query
+        </div>
+      )
+    }
+    return null
   }
 
   return (
@@ -93,7 +161,7 @@ export default function SearchComparison() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && doSearch()}
-              placeholder="e.g. bearing 6205 or hydraulic fitting"
+              placeholder="e.g. sealed bearing for motor shaft"
               style={{
                 flex: 1, padding: '10px 14px', borderRadius: 8,
                 border: '1.5px solid #E5E7EB', fontSize: 14, color: '#1A1A2E',
@@ -147,6 +215,9 @@ export default function SearchComparison() {
         </div>
       </div>
 
+      {/* Fix 5: comparison banner */}
+      <ComparisonBanner />
+
       {/* Mode banners (post-search) */}
       {searched && mode === 'clean' && (
         <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -186,23 +257,27 @@ export default function SearchComparison() {
         </div>
       )}
 
-      {searched && results?.results?.length === 0 && !loading && (
+      {/* Fix 3: empty state with merchandiser context */}
+      {searched && activeResults?.results?.length === 0 && !loading && (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '40px', textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
-          <div style={{ fontWeight: 600, fontSize: 15, color: '#0A1628', marginBottom: 8 }}>No results found</div>
-          <div style={{ fontSize: 13, color: '#9CA3AF' }}>
-            Try switching to the <strong>Optimized Catalog</strong> or refining your search terms.
+          <div style={{ fontWeight: 600, fontSize: 15, color: '#0A1628', marginBottom: 8 }}>
+            No relevant products found for "{activeResults.query}"
+          </div>
+          <div style={{ fontSize: 13, color: '#9CA3AF', maxWidth: 420, margin: '0 auto' }}>
+            This query returned no results — consider adding relevant keywords to your product descriptions.
           </div>
         </div>
       )}
 
-      {results?.results?.length > 0 && (
+      {/* Fix 3: results with match_label badges instead of raw score */}
+      {activeResults?.results?.length > 0 && (
         <>
           <div style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 14 }}>
-            {results.results.length} result{results.results.length !== 1 ? 's' : ''} for "<strong style={{ color: '#374151' }}>{results.query}</strong>"
+            {activeResults.results.length} result{activeResults.results.length !== 1 ? 's' : ''} for "<strong style={{ color: '#374151' }}>{activeResults.query}</strong>"
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-            {results.results.map(r => (
+            {activeResults.results.map(r => (
               <div key={r.sku} style={{
                 background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB',
                 padding: '20px', display: 'flex', flexDirection: 'column', gap: 10,
@@ -219,13 +294,11 @@ export default function SearchComparison() {
                 <div style={{ fontWeight: 700, fontSize: 15, color: '#0A1628' }}>{r.name}</div>
                 <div style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'monospace' }}>{r.sku}</div>
                 <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, flex: 1 }}>{r.description}</div>
-                {r.price && (
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0A1628', paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
-                    ${r.price.toFixed(2)}
-                  </div>
-                )}
-                <div style={{ fontSize: 12, color: '#D1D5DB' }}>
-                  Relevance: <span style={{ color: '#9CA3AF', fontWeight: 600 }}>{(r.score * 100).toFixed(0)}%</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
+                  {r.price ? (
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#0A1628' }}>${r.price.toFixed(2)}</span>
+                  ) : <span />}
+                  {r.match_label && <MatchBadge label={r.match_label} />}
                 </div>
               </div>
             ))}

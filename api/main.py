@@ -359,6 +359,7 @@ def search(
                         "description": r["description"],
                         "price": float(r["price"]) if r.get("price") else None,
                         "score": r.get("score", 0),
+                        "match_label": r.get("match_label", ""),
                     }
                     for r in results
                 ],
