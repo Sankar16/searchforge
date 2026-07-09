@@ -26,9 +26,30 @@ from pydantic import BaseModel
 
 from src.catalog_agent.graph import build_catalog_intelligence_graph
 from src.search.retriever import search_catalog
+from src.search.semantic_retriever import get_or_build_index, semantic_search
+import src.search.semantic_retriever as _sem_mod
 from src.crosssell_agent.llm_agent import get_cross_sell_with_explanation
 
 app = FastAPI(title="SearchForge API", version="1.0.0")
+
+
+@app.on_event("startup")
+async def startup_event():
+    import asyncio
+    import concurrent.futures
+
+    def build_indexes():
+        try:
+            get_or_build_index("messy")
+            get_or_build_index("clean")
+            print("Search indexes built successfully")
+        except Exception as e:
+            print(f"Index build failed (non-fatal): {e}")
+
+    loop = asyncio.get_event_loop()
+    executor = concurrent.futures.ThreadPoolExecutor()
+    loop.run_in_executor(executor, build_indexes)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -254,6 +275,9 @@ def apply_changes(body: ApplyChangesRequest):
     with open(final_path, "w") as f:
         json.dump(final, f, indent=2)
 
+    # Clear search indexes so the next search picks up the updated catalog
+    _sem_mod._indexes.clear()
+
     return {
         "success": True,
         "applied": applied,
@@ -298,14 +322,52 @@ def download_catalog():
     )
 
 
+@app.post("/api/search/reindex")
+def reindex():
+    """Clear and rebuild semantic search indexes for messy and clean catalogs."""
+    _sem_mod._indexes.clear()
+    try:
+        get_or_build_index("messy")
+        get_or_build_index("clean")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reindex failed: {e}")
+    return {"success": True, "message": "Indexes rebuilt"}
+
+
 @app.get("/api/search")
 def search(
     q: str = Query(..., description="Search query"),
     mode: str = Query("clean", description="'messy' or 'clean'"),
+    search_type: str = Query("semantic", description="'semantic' or 'keyword'"),
 ):
     if mode not in ("messy", "clean"):
         raise HTTPException(status_code=400, detail="mode must be 'messy' or 'clean'")
 
+    if search_type == "semantic":
+        try:
+            collection = get_or_build_index(mode)
+            results = semantic_search(collection, q, top_k=5)
+            return {
+                "query": q,
+                "mode": mode,
+                "search_type": "semantic",
+                "results": [
+                    {
+                        "sku": r["sku"],
+                        "name": r["name"],
+                        "category": r["category"],
+                        "description": r["description"],
+                        "price": float(r["price"]) if r.get("price") else None,
+                        "score": r.get("score", 0),
+                    }
+                    for r in results
+                ],
+            }
+        except Exception as e:
+            # Fall through to keyword search if semantic fails
+            print(f"Semantic search failed, falling back to keyword: {e}")
+
+    # Keyword fallback
     catalog_path = PROJECT_ROOT / "data" / f"catalog_{mode}.json"
     if not catalog_path.exists():
         raise HTTPException(status_code=404, detail=f"Catalog not found: {catalog_path.name}")
@@ -317,6 +379,7 @@ def search(
     return {
         "query": q,
         "mode": mode,
+        "search_type": "keyword",
         "results": [
             {
                 "sku": r["sku"],

@@ -30,7 +30,7 @@ export default function SearchComparison() {
     setError(null)
     setSearched(false)
     try {
-      const res = await fetch(`${API}/api/search?q=${encodeURIComponent(term)}&mode=${searchMode}`)
+      const res = await fetch(`${API}/api/search?q=${encodeURIComponent(term)}&mode=${searchMode}&search_type=semantic`)
       if (!res.ok) {
         const d = await res.json()
         throw new Error(d.detail || 'Search failed')
@@ -141,6 +141,9 @@ export default function SearchComparison() {
               </button>
             ))}
           </div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, textAlign: 'center' }}>
+            Powered by semantic search — finds products by meaning, not just keywords
+          </div>
         </div>
       </div>
 
@@ -148,13 +151,13 @@ export default function SearchComparison() {
       {searched && mode === 'clean' && (
         <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>
-          Showing results from the <strong>AI-optimized catalog</strong> — descriptions have been rewritten for better search relevance.
+          <strong>Optimized catalog</strong> — enriched descriptions help customers find more relevant products.
         </div>
       )}
       {searched && mode === 'messy' && (
         <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#92400E', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontWeight: 700 }}>⚠</span>
-          Showing results from the <strong>original catalog</strong> — results may be less relevant due to data quality issues.
+          <strong>Original catalog</strong> — vague descriptions limit what customers can find via semantic search.
         </div>
       )}
 
