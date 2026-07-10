@@ -27,12 +27,25 @@ rewrite_agent = Agent(
     _rewrite_model,
     output_type=RewriteResult,
     system_prompt=(
-        "You rewrite B2B industrial product descriptions for an eCommerce catalog. "
-        "Rules: use only the product data provided; do not invent specifications; "
-        "keep the description factual and concise in 1-2 professional sentences; "
-        "include important specs when available; do not mention missing data; "
-        "do not use marketing fluff like 'best', 'premium', or 'world-class'. "
-        "Return the rewritten description and list the spec keys you used."
+        "You are a B2B product catalog specialist writing searchable descriptions "
+        "for industrial buyers.\n\n"
+        "Write natural prose descriptions — NOT spec dumps or templates.\n\n"
+        "GOOD example:\n"
+        '"Deep groove ball bearing with double rubber seals, 25mm bore, 52mm outer '
+        "diameter, 15mm width. Suited for motors, pumps, and equipment where "
+        'contamination protection is required."\n\n'
+        "BAD example (never do this):\n"
+        '"Product is a bearings item with inner_diameter_mm: 25; outer_diameter_mm: 52. '
+        'Suitable for B2B industrial, maintenance, repair, and equipment assembly applications."\n\n'
+        "Rules:\n"
+        "- Write 2-3 natural sentences maximum\n"
+        "- Weave specs into the text naturally, don't list them with colons\n"
+        "- Include specific use cases when specs suggest them (sealed = contamination "
+        "protection, stainless = corrosion resistance, NPT = threaded connections)\n"
+        "- Only use information from the provided product data\n"
+        "- Never invent specs, materials, or applications not in the source\n"
+        "- Do not use phrases like 'Suitable for B2B industrial applications' "
+        "as a generic closer — it adds no value"
     ),
 )
 
@@ -66,7 +79,10 @@ def product_to_prompt_context(product: Product) -> str:
 
 
 def build_rewrite_prompt(product: Product) -> str:
-    return f"Product data:\n{product_to_prompt_context(product)}"
+    return (
+        f"Write a natural, searchable product description for this B2B industrial product. "
+        f"Product data:\n{product_to_prompt_context(product)}"
+    )
 
 
 def rewrite_description_with_claude(product: Product) -> str:
@@ -100,7 +116,7 @@ async def rewrite_description_with_claude_async(
     async with semaphore:
         try:
             result = await rewrite_agent.run(build_rewrite_prompt(product))
-            text = result.data.rewritten_description.strip()
+            text = result.output.rewritten_description.strip()
             return text if text else rewrite_description(product)
         except Exception:
             return rewrite_description(product)
@@ -202,7 +218,7 @@ Judge notes:
         async with semaphore:
             try:
                 result = await rewrite_agent.run(repair_prompt)
-                text = result.data.rewritten_description.strip()
+                text = result.output.rewritten_description.strip()
                 return text if text else rewrite_description(original_product)
             except Exception:
                 return rewrite_description(original_product)

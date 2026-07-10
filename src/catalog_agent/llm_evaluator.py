@@ -202,7 +202,7 @@ async def evaluate_rewritten_description_async(
                     rewritten_description=rewritten_description,
                 )
             )
-            j = result.data
+            j = result.output
             return {
                 "score": j.score,
                 "hallucination_risk": j.hallucination_risk,

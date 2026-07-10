@@ -58,7 +58,7 @@ async def _explain_one(
         f"Existing graph note: {original_reason}"
     )
     result = await explanation_agent.run(prompt)
-    return result.data.explanation.strip()
+    return result.output.explanation.strip()
 
 
 async def get_cross_sell_with_explanation(cart_sku: str) -> dict:

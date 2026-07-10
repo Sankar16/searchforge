@@ -554,7 +554,7 @@ async def search_gap_analysis(body: GapAnalysisRequest):
 
     try:
         run = await gap_agent.run(prompt)
-        result = run.data
+        result = run.output
         analytics["gap_analyses"].append({
             "query": query,
             "hidden_match_count": len(result.hidden_matches),
