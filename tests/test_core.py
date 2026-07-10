@@ -6,13 +6,30 @@ Comprehensive unit tests for SearchForge core modules:
   - src/crosssell_agent/knowledge_graph.py
 """
 
+import json
+import sys
+from pathlib import Path
+
 import pytest
+import networkx as nx
 
 from src.schemas import Product
 from src.catalog_agent.uom import inch_to_mm, normalize_product_uom, normalize_catalog_uom
 from src.catalog_agent.dedup import find_duplicate_candidates
 from src.catalog_agent.spec_checker import check_missing_specs
 from src.crosssell_agent.knowledge_graph import build_compatibility_graph, get_graph_recommendations
+from src.crosssell_agent.graph_generator import (
+    find_candidate_pairs,
+    build_graph_from_edges,
+    COMPATIBLE_CATEGORY_PAIRS,
+)
+from src.search.semantic_retriever import build_semantic_index, semantic_search
+from src.search.retriever import search_catalog
+from src.crosssell_agent.recommender import recommend_cross_sell
+
+# Import calculate_completeness_score directly from api/main.py
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api"))
+from main import calculate_completeness_score
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -395,6 +412,331 @@ def test_spec_checker_extra_specs_beyond_required_still_passes():
     )
     issues = check_missing_specs([bearing])
     assert issues == []
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 1: Graph Generator tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def small_catalog():
+    return [
+        {
+            "sku": "BRG-TEST-001",
+            "name": "Test Bearing",
+            "category": "Bearings",
+            "description": "Test bearing",
+            "specs": {"inner_diameter_mm": 25, "outer_diameter_mm": 52},
+        },
+        {
+            "sku": "HSG-TEST-001",
+            "name": "Test Housing",
+            "category": "Housings",
+            "description": "Test housing",
+            "specs": {"bore_diameter_mm": 25},
+        },
+        {
+            "sku": "SHAFT-TEST-001",
+            "name": "Test Shaft",
+            "category": "Mounts",
+            "description": "Test shaft",
+            "specs": {"diameter_mm": 25},
+        },
+        {
+            "sku": "BOLT-TEST-001",
+            "name": "Test Bolt",
+            "category": "Fasteners",
+            "description": "Test bolt",
+            "specs": {"diameter_mm": 8},
+        },
+        {
+            "sku": "VALVE-TEST-001",
+            "name": "Test Valve",
+            "category": "Valves",
+            "description": "Test valve",
+            "specs": {"size_inch": 0.5},
+        },
+    ]
+
+
+def test_find_candidate_pairs_returns_list(small_catalog):
+    result = find_candidate_pairs(small_catalog)
+    assert isinstance(result, list)
+
+
+def test_find_candidate_pairs_not_empty(small_catalog):
+    result = find_candidate_pairs(small_catalog)
+    assert len(result) > 0
+
+
+def test_find_candidate_pairs_no_self_pairs(small_catalog):
+    candidates = find_candidate_pairs(small_catalog)
+    assert all(a["sku"] != b["sku"] for a, b in candidates)
+
+
+def test_find_candidate_pairs_no_duplicate_pairs(small_catalog):
+    candidates = find_candidate_pairs(small_catalog)
+    normalized = {(min(a["sku"], b["sku"]), max(a["sku"], b["sku"])) for a, b in candidates}
+    assert len(candidates) == len(normalized)
+
+
+def test_find_candidate_pairs_empty_catalog():
+    assert find_candidate_pairs([]) == []
+
+
+def test_find_candidate_pairs_single_product(small_catalog):
+    assert find_candidate_pairs([small_catalog[0]]) == []
+
+
+def test_build_graph_from_edges_returns_digraph():
+    G = build_graph_from_edges([])
+    assert isinstance(G, nx.DiGraph)
+
+
+def test_build_graph_from_edges_with_data():
+    edges = [
+        {
+            "source": "A",
+            "target": "B",
+            "relationship": "fits_housing",
+            "confidence": 0.9,
+            "reason": "test reason",
+            "source_name": "Product A",
+            "target_name": "Product B",
+        }
+    ]
+    G = build_graph_from_edges(edges)
+    assert G.has_edge("A", "B")
+    assert G["A"]["B"]["relationship"] == "fits_housing"
+    assert G["A"]["B"]["confidence"] == 0.9
+
+
+def test_compatible_category_pairs_has_electronics():
+    assert ("laptops", "chargers") in COMPATIBLE_CATEGORY_PAIRS
+    assert ("monitors", "cables") in COMPATIBLE_CATEGORY_PAIRS
+
+
+def test_find_candidate_pairs_respects_limit():
+    large_catalog = [
+        {
+            "sku": f"LAP-{i:03d}",
+            "name": f"Laptop {i}",
+            "category": "Laptops",
+            "description": "A laptop",
+            "specs": {},
+        }
+        for i in range(20)
+    ]
+    candidates = find_candidate_pairs(large_catalog)
+    assert len(candidates) <= 60
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 2: Semantic Retriever tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def search_catalog_data():
+    return [
+        {
+            "sku": "SRCH-001",
+            "name": "Ball Bearing 25mm",
+            "description": "Deep groove ball bearing for motors",
+            "category": "Bearings",
+            "specs": {"inner_diameter_mm": 25},
+        },
+        {
+            "sku": "SRCH-002",
+            "name": "Brass Ball Valve",
+            "description": "Half inch brass ball valve for water",
+            "category": "Valves",
+            "specs": {"size_inch": 0.5},
+        },
+        {
+            "sku": "SRCH-003",
+            "name": "Hex Bolt M8",
+            "description": "M8 zinc hex bolt for fastening",
+            "category": "Fasteners",
+            "specs": {"diameter_mm": 8},
+        },
+    ]
+
+
+@pytest.fixture
+def catalog_with_duplicate():
+    return [
+        {
+            "sku": "DUP-001",
+            "name": "Product A",
+            "description": "First occurrence",
+            "category": "Test",
+            "specs": {},
+        },
+        {
+            "sku": "DUP-001",
+            "name": "Product A Duplicate",
+            "description": "Second occurrence",
+            "category": "Test",
+            "specs": {},
+        },
+        {
+            "sku": "DUP-002",
+            "name": "Product B",
+            "description": "Unique product",
+            "category": "Test",
+            "specs": {},
+        },
+    ]
+
+
+@pytest.mark.slow
+def test_build_semantic_index_returns_collection(search_catalog_data):
+    collection = build_semantic_index(search_catalog_data, "test_search_001")
+    assert collection is not None
+    assert collection.count() == 3
+
+
+@pytest.mark.slow
+def test_build_semantic_index_deduplicates_duplicate_skus(catalog_with_duplicate):
+    collection = build_semantic_index(catalog_with_duplicate, "test_dedup_001")
+    assert collection.count() == 2
+
+
+@pytest.mark.slow
+def test_semantic_search_returns_results(search_catalog_data):
+    collection = build_semantic_index(search_catalog_data, "test_search_002")
+    results = semantic_search(collection, "bearing motor", top_k=3)
+    assert len(results) > 0
+    assert results[0]["sku"] is not None
+
+
+@pytest.mark.slow
+def test_semantic_search_score_in_range(search_catalog_data):
+    collection = build_semantic_index(search_catalog_data, "test_search_003")
+    results = semantic_search(collection, "bearing", top_k=3)
+    assert all(0 <= r["score"] <= 100 for r in results)
+
+
+@pytest.mark.slow
+def test_semantic_search_has_match_label(search_catalog_data):
+    collection = build_semantic_index(search_catalog_data, "test_search_004")
+    results = semantic_search(collection, "bearing", top_k=3)
+    valid_labels = {"Strong match", "Good match", "Related", "Partial match", "Weak match"}
+    assert all("match_label" in r for r in results)
+    assert all(r["match_label"] in valid_labels for r in results)
+
+
+@pytest.mark.slow
+def test_semantic_search_filters_low_scores(search_catalog_data):
+    collection = build_semantic_index(search_catalog_data, "test_search_005")
+    high_threshold = semantic_search(collection, "xyz123abc", top_k=5, min_score=90)
+    low_threshold = semantic_search(collection, "xyz123abc", top_k=5, min_score=10)
+    assert len(high_threshold) <= len(low_threshold)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 3: Completeness Score tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _pipeline_result(weak_before=0, weak_after=0, spec_before=0, spec_after=0, dupes=0):
+    return {
+        "weak_descriptions_before": weak_before,
+        "weak_descriptions_after": weak_after,
+        "spec_issues_before": spec_before,
+        "spec_issues_after": spec_after,
+        "duplicate_pairs": dupes,
+    }
+
+
+def test_completeness_score_before_less_than_after():
+    catalog = [{}] * 10
+    result = calculate_completeness_score(catalog, _pipeline_result(weak_before=8, weak_after=2))
+    assert result["after"] > result["before"]
+
+
+def test_completeness_score_in_range():
+    catalog = [{}] * 10
+    result = calculate_completeness_score(catalog, _pipeline_result(weak_before=5, spec_before=3, dupes=1))
+    assert 0 <= result["before"] <= 100
+    assert 0 <= result["after"] <= 100
+
+
+def test_completeness_score_with_no_issues():
+    catalog = [{}] * 10
+    result = calculate_completeness_score(catalog, _pipeline_result())
+    assert result["before"] == 100
+    assert result["after"] == 100
+
+
+def test_completeness_score_with_all_issues():
+    catalog = [{}] * 10
+    result = calculate_completeness_score(
+        catalog, _pipeline_result(weak_before=10, spec_before=10, dupes=5)
+    )
+    assert result["before"] < 50
+
+
+def test_completeness_score_empty_catalog():
+    result = calculate_completeness_score([], _pipeline_result())
+    assert result["before"] == 0
+    assert result["after"] == 0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section 4: MCP Server tool tests (via underlying functions)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_CATALOG_PATH = Path(__file__).resolve().parent.parent / "data" / "catalog_clean.json"
+
+
+def _load_clean_catalog():
+    with open(_CATALOG_PATH) as f:
+        return json.load(f)
+
+
+def test_catalog_server_search_returns_results():
+    catalog = _load_clean_catalog()
+    # Use a word from the first product's name so the query works regardless of catalog contents
+    first_word = catalog[0]["name"].split()[0] if catalog else "product"
+    results = search_catalog(catalog, first_word, top_k=5)
+    assert isinstance(results, list)
+    assert len(results) > 0
+    assert all("sku" in r and "name" in r and "category" in r and "description" in r for r in results)
+
+
+def test_catalog_server_search_empty_query():
+    catalog = _load_clean_catalog()
+    results = search_catalog(catalog, "xyznotexist123", top_k=5)
+    assert isinstance(results, list)
+
+
+def test_catalog_server_get_product_known_sku():
+    catalog = _load_clean_catalog()
+    target_sku = catalog[0]["sku"]
+    match = next((p for p in catalog if p["sku"] == target_sku), None)
+    assert match is not None
+    assert match["sku"] == target_sku
+
+
+def test_catalog_server_get_product_unknown_sku():
+    catalog = _load_clean_catalog()
+    match = next((p for p in catalog if p["sku"] == "NOTEXIST-999"), None)
+    assert match is None
+
+
+def test_catalog_server_get_health_returns_metrics():
+    catalog = _load_clean_catalog()
+    categories = sorted({p.get("category", "") for p in catalog if p.get("category")})
+    prices = [p["price"] for p in catalog if p.get("price") is not None]
+    avg_price = round(sum(prices) / len(prices), 2) if prices else 0.0
+    health = {
+        "total_products": len(catalog),
+        "categories": categories,
+        "avg_price": avg_price,
+    }
+    assert "total_products" in health
+    assert isinstance(health["total_products"], int)
+    assert health["total_products"] > 0
 
 
 def test_spec_checker_accepts_alias_for_required_spec():
