@@ -63,6 +63,7 @@ function getRelationshipBadge(relationship) {
     "requires_washer":     { label: "Required Component",  classes: "bg-red-100 text-red-700 border border-red-200" },
     "requires_housing":    { label: "Required Component",  classes: "bg-red-100 text-red-700 border border-red-200" },
     "compatible_shaft":    { label: "Works With",          classes: "bg-blue-100 text-blue-700 border border-blue-200" },
+    "fits_into":           { label: "Fits This Component", classes: "bg-blue-100 text-blue-700 border border-blue-200" },
   }
   return map[relationship] || { label: "Compatible", classes: "bg-gray-100 text-gray-600 border border-gray-200" }
 }

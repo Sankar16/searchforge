@@ -130,7 +130,20 @@ async def _validate_pair_with_llm(
     prompt = (
         f"Product A:\n{json.dumps({'sku': prod_a.get('sku'), 'name': prod_a.get('name'), 'category': prod_a.get('category'), 'specs': prod_a.get('specs', {})}, indent=2)}\n\n"
         f"Product B:\n{json.dumps({'sku': prod_b.get('sku'), 'name': prod_b.get('name'), 'category': prod_b.get('category'), 'specs': prod_b.get('specs', {})}, indent=2)}\n\n"
-        "Are these two products technically compatible? Can one be used together with the other?"
+        "Are these two products technically compatible? Can one be used together with the other?\n\n"
+        "Use SPECIFIC relationship types — never use generic terms:\n"
+        "- fits_housing: bearing or component fits into a housing or pillow block\n"
+        "- fits_shaft: bearing or bushing mounts directly onto a shaft\n"
+        "- requires_shaft: component requires a shaft to function\n"
+        "- requires_hardware: component needs bolts, nuts, or fasteners to install\n"
+        "- pairs_with: commonly purchased and used together (e.g. bolt + nut)\n"
+        "- requires_sealant: threaded connection requires thread sealant or tape\n"
+        "- compatible_charger: device is compatible with this charger\n"
+        "- compatible_cable: device uses this cable type\n"
+        "- pairs_with_peripheral: computer/device pairs with this peripheral\n"
+        "- requires_adapter: device needs this adapter for connectivity\n\n"
+        "DO NOT use 'fits_into' or other generic terms.\n"
+        "Pick the most specific type that describes the actual relationship."
     )
     async with semaphore:
         try:
