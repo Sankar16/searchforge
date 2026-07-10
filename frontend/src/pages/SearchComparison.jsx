@@ -1,16 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-const PILLS = [
-  'sealed bearing for motor shaft',
-  'automated valve for fluid control',
-  'anti-corrosion pipe fitting',
-  'fastener for concrete',
-  'shaft mounting component',
-]
 
 const MODES = [
   { value: 'clean', label: 'Optimized Catalog' },
@@ -33,9 +25,88 @@ function MatchBadge({ label }) {
   )
 }
 
+// ── Synonym Rules Section ──────────────────────────────────────────────────
+
+function SynonymSection({ synonymsLoading, synonymRules, skippedIndices, approvedSynonyms, onApprove, onSkip, onExport }) {
+  if (!synonymsLoading && synonymRules.length === 0) return null
+  return (
+    <div style={{ marginTop: 24, borderTop: '1px solid #E5E7EB', paddingTop: 20 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+        Suggested Synonym Rules
+      </div>
+      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+        Add these to your search platform to help customers find these products
+      </div>
+      {synonymsLoading && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: '#6B7280', fontSize: 13 }}>
+          <style>{`@keyframes syn-spin { to { transform: rotate(360deg) } } .syn-spin { animation: syn-spin 0.8s linear infinite; }`}</style>
+          <div className="syn-spin" style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #E5E7EB', borderTopColor: '#00C2E0', flexShrink: 0 }} />
+          Generating synonym rules…
+        </div>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {synonymRules.map((rule, i) => {
+          if (skippedIndices.has(i)) return null
+          const isApproved = approvedSynonyms.some(r => r.trigger === rule.trigger)
+          return (
+            <div key={i} style={{ background: '#FAFAFA', border: `1px solid ${isApproved ? 'rgba(0,194,224,0.3)' : '#E5E7EB'}`, borderRadius: 8, padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+                  {rule.trigger}
+                </span>
+                <span style={{ color: '#9CA3AF', fontSize: 13 }}>→</span>
+                {rule.synonyms.map((s, j) => (
+                  <span key={j} style={{ fontSize: 12, fontWeight: 500, padding: '3px 10px', borderRadius: 999, background: 'rgba(0,194,224,0.08)', color: '#007A8F', border: '1px solid rgba(0,194,224,0.25)' }}>
+                    {s}
+                  </span>
+                ))}
+              </div>
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{rule.rationale}</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => onApprove(rule, i)}
+                  style={{
+                    fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 6, cursor: 'pointer',
+                    border: `1.5px solid ${isApproved ? '#00C2E0' : '#00C2E0'}`,
+                    background: isApproved ? '#00C2E0' : '#fff',
+                    color: isApproved ? '#fff' : '#00C2E0',
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  {isApproved ? '✓ Approved' : '✓ Approve Rule'}
+                </button>
+                {!isApproved && (
+                  <button
+                    onClick={() => onSkip(i)}
+                    style={{ fontSize: 12, padding: '4px 12px', borderRadius: 6, cursor: 'pointer', border: '1px solid #E5E7EB', background: '#fff', color: '#9CA3AF', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    ✗ Skip
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {approvedSynonyms.length > 0 && (
+        <button
+          onClick={onExport}
+          style={{
+            marginTop: 12, fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 8,
+            border: '1.5px solid #0A1628', background: '#fff', color: '#0A1628',
+            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          Export Synonym Rules ({approvedSynonyms.length})
+        </button>
+      )}
+    </div>
+  )
+}
+
 // ── Gap Analysis Card ──────────────────────────────────────────────────────
 
-function GapAnalysisCard({ gap, query }) {
+function GapAnalysisCard({ gap, query, synonymProps }) {
   return (
     <div style={{
       background: '#fff',
@@ -144,7 +215,7 @@ function GapAnalysisCard({ gap, query }) {
 
       {/* Description suggestion */}
       {gap.description_suggestion && (
-        <div>
+        <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
             Example description improvement
           </div>
@@ -165,6 +236,19 @@ function GapAnalysisCard({ gap, query }) {
             {gap.description_suggestion}
           </div>
         </div>
+      )}
+
+      {/* Synonym rules */}
+      {synonymProps && (
+        <SynonymSection
+          synonymsLoading={synonymProps.loading}
+          synonymRules={synonymProps.rules}
+          skippedIndices={synonymProps.skipped}
+          approvedSynonyms={synonymProps.approved}
+          onApprove={synonymProps.onApprove}
+          onSkip={synonymProps.onSkip}
+          onExport={synonymProps.onExport}
+        />
       )}
     </div>
   )
@@ -199,6 +283,18 @@ function GapLoadingState() {
 
 // ── Main component ─────────────────────────────────────────────────────────
 
+function exportSynonymRules(rules) {
+  const header = 'trigger,synonyms,rationale\n'
+  const rows = rules.map(r => `"${r.trigger}","${r.synonyms.join('|')}","${r.rationale}"`).join('\n')
+  const blob = new Blob([header + rows], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'synonym_rules.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function SearchComparison() {
   const navigate = useNavigate()
   const { analysisRan, changesApplied } = useCatalog()
@@ -215,11 +311,29 @@ export default function SearchComparison() {
   const [gapAnalysis, setGapAnalysis] = useState(null)
   const [gapLoading, setGapLoading] = useState(false)
 
+  const [suggestions, setSuggestions] = useState([])
+
+  const [synonymRules, setSynonymRules] = useState([])
+  const [synonymsLoading, setSynonymsLoading] = useState(false)
+  const [approvedSynonyms, setApprovedSynonyms] = useState([])
+  const [skippedSynonymIndices, setSkippedSynonymIndices] = useState(new Set())
+
   const activeResults = mode === 'clean' ? cleanResults : messyResults
+
+  useEffect(() => {
+    fetch(`${API}/api/search/suggestions?mode=clean`)
+      .then(r => r.json())
+      .then(data => setSuggestions(data.suggestions || []))
+      .catch(() => {})
+  }, [])
 
   async function runGapAnalysis(term) {
     setGapLoading(true)
     setGapAnalysis(null)
+    setSynonymRules([])
+    setSynonymsLoading(false)
+    setApprovedSynonyms([])
+    setSkippedSynonymIndices(new Set())
     try {
       const res = await fetch(`${API}/api/search/gap-analysis`, {
         method: 'POST',
@@ -228,6 +342,17 @@ export default function SearchComparison() {
       })
       const data = await res.json()
       setGapAnalysis(data)
+      // Fetch synonyms after gap analysis succeeds
+      setSynonymsLoading(true)
+      fetch(`${API}/api/search/synonyms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: term, suggested_keywords: data.suggested_keywords || [] }),
+      })
+        .then(r => r.json())
+        .then(syn => setSynonymRules(syn.synonyms || []))
+        .catch(() => {})
+        .finally(() => setSynonymsLoading(false))
     } catch (e) {
       // Gap analysis failure is non-fatal — silently swallow
       setGapAnalysis(null)
@@ -395,24 +520,26 @@ export default function SearchComparison() {
         </div>
       )}
 
-      {/* Pill suggestions */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-        {PILLS.map(p => (
-          <button
-            key={p}
-            onClick={() => { setQuery(p); handleSearch(p) }}
-            style={{
-              padding: '6px 14px', borderRadius: 999, border: '1.5px solid #E5E7EB',
-              background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif', transition: 'border-color 0.15s, color 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#00C2E0'; e.currentTarget.style.color = '#00C2E0' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
+      {/* Pill suggestions — dynamic from catalog */}
+      {suggestions.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+          {suggestions.map(p => (
+            <button
+              key={p}
+              onClick={() => { setQuery(p); handleSearch(p) }}
+              style={{
+                padding: '6px 14px', borderRadius: 999, border: '1.5px solid #E5E7EB',
+                background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif', transition: 'border-color 0.15s, color 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#00C2E0'; e.currentTarget.style.color = '#00C2E0' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
 
       {error && (
         <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', padding: '12px 16px', borderRadius: 8, fontSize: 13, marginBottom: 16 }}>
@@ -425,7 +552,23 @@ export default function SearchComparison() {
         <>
           {gapLoading && <GapLoadingState />}
           {!gapLoading && gapAnalysis && (
-            <GapAnalysisCard gap={gapAnalysis} query={cleanResults.query} />
+            <GapAnalysisCard
+              gap={gapAnalysis}
+              query={cleanResults.query}
+              synonymProps={{
+                loading: synonymsLoading,
+                rules: synonymRules,
+                skipped: skippedSynonymIndices,
+                approved: approvedSynonyms,
+                onApprove: (rule) => {
+                  setApprovedSynonyms(prev =>
+                    prev.some(r => r.trigger === rule.trigger) ? prev : [...prev, rule]
+                  )
+                },
+                onSkip: (idx) => setSkippedSynonymIndices(prev => new Set([...prev, idx])),
+                onExport: () => exportSynonymRules(approvedSynonyms),
+              }}
+            />
           )}
           {!gapLoading && !gapAnalysis && (
             <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '40px', textAlign: 'center' }}>

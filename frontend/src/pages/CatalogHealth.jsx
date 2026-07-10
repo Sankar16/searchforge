@@ -506,6 +506,91 @@ export default function CatalogHealth() {
             </div>
           )}
 
+          {/* Completeness Score */}
+          {analysisResult.completeness_score && (() => {
+            const score = analysisResult.completeness_score
+            const scoreBefore = score.before || 0
+            const scoreAfter = score.after || 0
+            const improvement = scoreAfter - scoreBefore
+            return (
+              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: '#0A1628' }}>Catalog Completeness Score</div>
+                    <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 4 }}>Based on description quality, spec coverage, and duplicate detection</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 800, color: '#EF4444' }}>{scoreBefore}</div>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Before</div>
+                    </div>
+                    <div style={{ fontSize: 20, color: '#D1D5DB' }}>→</div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 800, color: '#10B981' }}>{scoreAfter}</div>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>After</div>
+                    </div>
+                    {improvement > 0 && (
+                      <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '8px 14px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: '#15803D' }}>+{improvement}</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF' }}>improvement</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>
+                    <span>0</span><span>100</span>
+                  </div>
+                  <div style={{ position: 'relative', height: 10, background: '#F3F4F6', borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: '#FCA5A5', borderRadius: 999, width: `${scoreBefore}%`, transition: 'width 0.5s ease' }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: '#34D399', borderRadius: 999, width: `${scoreAfter}%`, transition: 'width 0.7s ease' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FCA5A5' }} />
+                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>Before optimization</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34D399' }} />
+                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>After optimization</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Breakdown */}
+                {score.breakdown && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 16 }}>
+                    <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 14px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Vague Descriptions</div>
+                      <div style={{ fontSize: 13 }}>
+                        <span style={{ color: '#EF4444', fontWeight: 600 }}>{score.breakdown.vague_descriptions?.before || 0} issues</span>
+                        <span style={{ color: '#9CA3AF', margin: '0 6px' }}>→</span>
+                        <span style={{ color: '#10B981', fontWeight: 600 }}>{score.breakdown.vague_descriptions?.after || 0} remaining</span>
+                      </div>
+                    </div>
+                    <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 14px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Missing Specs</div>
+                      <div style={{ fontSize: 13 }}>
+                        <span style={{ color: '#EF4444', fontWeight: 600 }}>{score.breakdown.missing_specs?.before || 0} issues</span>
+                        <span style={{ color: '#9CA3AF', margin: '0 6px' }}>→</span>
+                        <span style={{ color: '#10B981', fontWeight: 600 }}>{score.breakdown.missing_specs?.after || 0} remaining</span>
+                      </div>
+                    </div>
+                    <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 14px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Duplicate Listings</div>
+                      <div style={{ fontSize: 13 }}>
+                        <span style={{ color: score.breakdown.duplicate_listings?.count > 0 ? '#F59E0B' : '#10B981', fontWeight: 600 }}>
+                          {score.breakdown.duplicate_listings?.count || 0} pairs
+                        </span>
+                        <span style={{ color: '#9CA3AF', fontSize: 11, marginLeft: 4 }}>found</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
           {/* Metric cards */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
             <StatCard label="Total Products" value={analysisResult.total_products} />

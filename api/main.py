@@ -190,12 +190,47 @@ async def upload_catalog(file: UploadFile = File(...)):
     }
 
 
+def calculate_completeness_score(catalog_before: list, pipeline_result: dict) -> dict:
+    total_products = len(catalog_before)
+    if total_products == 0:
+        return {"before": 0, "after": 0, "breakdown": {}}
+
+    weak_before = pipeline_result.get("weak_descriptions_before", 0)
+    weak_after = pipeline_result.get("weak_descriptions_after", 0)
+    spec_issues_before = pipeline_result.get("spec_issues_before", 0)
+    spec_issues_after = pipeline_result.get("spec_issues_after", 0)
+    duplicate_pairs = pipeline_result.get("duplicate_pairs", 0)
+
+    desc_deduction_before = min(30, int((weak_before / total_products) * 30))
+    spec_deduction_before = min(25, int((spec_issues_before / total_products) * 25))
+    dup_deduction = min(15, duplicate_pairs * 3)
+
+    score_before = max(0, 100 - desc_deduction_before - spec_deduction_before - dup_deduction)
+
+    desc_deduction_after = min(30, int((weak_after / total_products) * 30))
+    spec_deduction_after = min(25, int((spec_issues_after / total_products) * 25))
+    score_after = max(0, 100 - desc_deduction_after - spec_deduction_after - dup_deduction)
+
+    return {
+        "before": score_before,
+        "after": score_after,
+        "breakdown": {
+            "vague_descriptions": {"before": weak_before, "after": weak_after, "max_deduction": 30},
+            "missing_specs": {"before": spec_issues_before, "after": spec_issues_after, "max_deduction": 25},
+            "duplicate_listings": {"count": duplicate_pairs, "max_deduction": 15},
+        },
+    }
+
+
 def run_catalog_pipeline(source: str) -> dict:
     uploaded_path = PROJECT_ROOT / "data" / "catalog_uploaded.json"
     if source == "uploaded" and uploaded_path.exists():
         input_path = str(uploaded_path)
     else:
         input_path = str(PROJECT_ROOT / "data" / "catalog_messy.json")
+
+    with open(input_path) as f:
+        catalog_before = json.load(f)
 
     graph = build_catalog_intelligence_graph()
     initial_state = {
@@ -232,7 +267,7 @@ def run_catalog_pipeline(source: str) -> dict:
     scores = [e["judge_score"] for e in evals if "judge_score" in e]
     avg_score = round(sum(scores) / len(scores), 2) if scores else 0.0
 
-    return {
+    result = {
         "total_products": report.get("total_products", 0),
         "spec_issues_before": report.get("messy_spec_issues", 0),
         "spec_issues_after": report.get("normalized_spec_issues", 0),
@@ -264,6 +299,8 @@ def run_catalog_pipeline(source: str) -> dict:
             for d in dupes
         ],
     }
+    result["completeness_score"] = calculate_completeness_score(catalog_before, result)
+    return result
 
 
 def run_pipeline_in_background(job_id: str, source: str):
@@ -572,6 +609,140 @@ async def crosssell(sku: str):
     if not result.get("cart_product"):
         raise HTTPException(status_code=404, detail=f"Product not found: {sku}")
     return result
+
+
+@app.get("/api/search/suggestions")
+async def get_search_suggestions(mode: str = "clean"):
+    """Returns 5 suggested search queries based on the current catalog."""
+    data_dir = PROJECT_ROOT / "data"
+    if mode == "clean" and (data_dir / "catalog_clean.json").exists():
+        catalog_path = data_dir / "catalog_clean.json"
+    elif (data_dir / "catalog_uploaded.json").exists():
+        catalog_path = data_dir / "catalog_uploaded.json"
+    else:
+        catalog_path = data_dir / "catalog_messy.json"
+
+    with open(catalog_path) as f:
+        catalog = json.load(f)
+
+    if not catalog:
+        return {"suggestions": []}
+
+    def score_product(p):
+        return len(p.get("description", "")) + (50 if p.get("specs") else 0)
+
+    sorted_products = sorted(catalog, key=score_product, reverse=True)
+    seen_categories: set = set()
+    suggestions = []
+    key_specs = ["inner_diameter_mm", "bore", "size_inch", "diameter_mm", "voltage", "port_size_inch"]
+    for product in sorted_products:
+        category = product.get("category", "").lower()
+        if category not in seen_categories and len(suggestions) < 5:
+            seen_categories.add(category)
+            name = product.get("name", "")
+            specs = product.get("specs", {})
+            if specs:
+                for sk in key_specs:
+                    if sk in specs:
+                        unit = "mm" if "_mm" in sk else ""
+                        suggestions.append(f"{name.lower()} {specs[sk]}{unit}")
+                        break
+                else:
+                    suggestions.append(name.lower())
+            else:
+                suggestions.append(name.lower())
+
+    categories = list({p.get("category", "") for p in catalog})
+    for cat in categories:
+        if len(suggestions) >= 5:
+            break
+        q = f"{cat.lower()} products"
+        if q not in suggestions:
+            suggestions.append(q)
+
+    return {"suggestions": suggestions[:5]}
+
+
+@app.get("/api/catalog/sample-skus")
+async def get_sample_skus():
+    """Returns 5 representative SKUs from the current catalog."""
+    data_dir = PROJECT_ROOT / "data"
+    if (data_dir / "catalog_clean.json").exists():
+        with open(data_dir / "catalog_clean.json") as f:
+            catalog = json.load(f)
+    else:
+        with open(data_dir / "catalog_messy.json") as f:
+            catalog = json.load(f)
+
+    if not catalog:
+        return {"skus": []}
+
+    try:
+        from src.crosssell_agent.knowledge_graph import build_compatibility_graph
+        G = build_compatibility_graph()
+        graph_skus = list(G.nodes())
+        catalog_skus = {p["sku"] for p in catalog}
+        valid = [s for s in graph_skus if s in catalog_skus]
+        if len(valid) >= 5:
+            result = []
+            for sku in valid[:5]:
+                product = next((p for p in catalog if p["sku"] == sku), None)
+                if product:
+                    result.append({"sku": sku, "name": product.get("name", sku)})
+            return {"skus": result}
+    except Exception:
+        pass
+
+    return {"skus": [{"sku": p["sku"], "name": p.get("name", p["sku"])} for p in catalog[:5]]}
+
+
+class SynonymRequest(BaseModel):
+    query: str
+    suggested_keywords: list[str] = []
+
+
+@app.post("/api/search/synonyms")
+async def generate_synonyms(body: SynonymRequest):
+    """Given a zero-result query, generate synonym rules using Claude Haiku."""
+    from pydantic import BaseModel as PydanticBase
+    from pydantic_ai import Agent as PydAgent
+
+    class SynonymRule(PydanticBase):
+        trigger: str
+        synonyms: list[str]
+        rationale: str
+
+    class SynonymResponse(PydanticBase):
+        rules: list[SynonymRule]
+
+    synonym_agent = PydAgent(
+        "anthropic:claude-haiku-4-5-20251001",
+        output_type=SynonymResponse,
+        system_prompt=(
+            "You are a B2B eCommerce search specialist. "
+            "Generate synonym rules for a search platform. "
+            "When a customer searches for X, they should also find results for Y. "
+            "Focus on B2B industrial product terminology."
+        ),
+    )
+
+    try:
+        result = await synonym_agent.run(
+            f'The customer searched for: "{body.query}"\n\n'
+            f"The catalog uses these related keywords: {body.suggested_keywords}\n\n"
+            "Generate 2-3 synonym rules. Each rule maps a customer search term "
+            "to catalog terminology that would find matching products.\n\n"
+            "Keep synonyms specific to B2B industrial terminology."
+        )
+        return {
+            "query": body.query,
+            "synonyms": [
+                {"trigger": r.trigger, "synonyms": r.synonyms, "rationale": r.rationale}
+                for r in result.output.rules
+            ],
+        }
+    except Exception as e:
+        return {"query": body.query, "synonyms": [], "error": str(e)}
 
 
 @app.get("/api/analytics")

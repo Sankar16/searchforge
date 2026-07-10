@@ -1,9 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCatalog } from '../context/CatalogContext.jsx'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-const DEMO_SKUS = ['BRG-6205-2RS', 'BRG-6206-2RS', 'SEAL-V-55', 'BELT-AX42', 'CPL-JAW-28']
 
 // Bug 1: relationship badge map keyed by actual API relationship field values
 const REL_BADGE_MAP = {
@@ -96,6 +94,14 @@ export default function CrossSell() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)  // Bug 6: already existed, adding UI
   const [error, setError] = useState(null)
+  const [skuSuggestions, setSkuSuggestions] = useState([])
+
+  useEffect(() => {
+    fetch(`${API}/api/catalog/sample-skus`)
+      .then(r => r.json())
+      .then(d => setSkuSuggestions(d.skus || []))
+      .catch(() => {})
+  }, [])
 
   async function lookup(s) {
     const term = (s ?? sku).trim().toUpperCase()
@@ -211,23 +217,29 @@ export default function CrossSell() {
             {loading ? 'Loading…' : 'Get Recommendations'}
           </button>
         </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-          {DEMO_SKUS.map(s => (
-            <button
-              key={s}
-              onClick={() => { setSku(s); lookup(s) }}
-              style={{
-                padding: '5px 12px', borderRadius: 999, border: '1.5px solid #E5E7EB',
-                background: '#fff', color: '#374151', fontSize: 12, cursor: 'pointer',
-                fontFamily: 'monospace', transition: 'border-color 0.15s, color 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#00C2E0'; e.currentTarget.style.color = '#00C2E0' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        {skuSuggestions.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+            {skuSuggestions.map(item => {
+              const label = `${item.sku} — ${item.name.length > 20 ? item.name.slice(0, 20) + '…' : item.name}`
+              return (
+                <button
+                  key={item.sku}
+                  onClick={() => { setSku(item.sku); lookup(item.sku) }}
+                  title={item.name}
+                  style={{
+                    padding: '5px 12px', borderRadius: 999, border: '1.5px solid #E5E7EB',
+                    background: '#fff', color: '#374151', fontSize: 12, cursor: 'pointer',
+                    fontFamily: 'monospace', transition: 'border-color 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#00C2E0'; e.currentTarget.style.color = '#00C2E0' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Error */}

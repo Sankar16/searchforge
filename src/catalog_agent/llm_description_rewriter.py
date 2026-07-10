@@ -21,7 +21,8 @@ class RewriteResult(BaseModel):
     key_specs_used: list[str]
 
 
-_rewrite_model = f"anthropic:{os.getenv('ANTHROPIC_REWRITE_MODEL', 'claude-sonnet-4-5')}"
+# Haiku for speed/cost, Sonnet reserved for judge (quality gate)
+_rewrite_model = f"anthropic:{os.getenv('ANTHROPIC_REWRITE_MODEL', 'claude-haiku-4-5-20251001')}"
 
 rewrite_agent = Agent(
     _rewrite_model,
@@ -148,7 +149,7 @@ async def rewrite_weak_descriptions_with_llm_async(
     weak_skus: set[str],
 ) -> List[Product]:
     """Async parallel version with bounded concurrency. Preserves original product order."""
-    semaphore = asyncio.Semaphore(get_llm_concurrency())
+    semaphore = asyncio.Semaphore(8)
 
     tasks = []
     for product in products:
@@ -176,7 +177,7 @@ async def repair_failed_rewrites_with_llm_async(
     Repairs only descriptions that failed or were flagged by the LLM judge.
     Products that passed remain unchanged.
     """
-    semaphore = asyncio.Semaphore(get_llm_concurrency())
+    semaphore = asyncio.Semaphore(8)
 
     failed_skus = {item["sku"] for item in failed_evaluations}
     failed_notes_by_sku = {
