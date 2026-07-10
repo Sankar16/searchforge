@@ -1,56 +1,38 @@
 [
   {
-    "source": "BRG-6205-2RS",
-    "target": "HSG-P205",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "P205 Pillow Block Housing",
-    "relationship": "fits_into",
+    "source": "SHO-RUN-BLK-10",
+    "target": "SOC-ANK-WHT-3PK",
+    "source_name": "Black Running Shoes Size 10",
+    "target_name": "White Ankle Socks 3 Pack",
+    "relationship": "pairs_with",
     "confidence": 0.95,
-    "reason": "The 6205-2RS bearing with 25mm inner diameter fits into the P205 pillow block housing designed for 6205 series bearings with matching 25mm shaft diameter."
+    "reason": "Running shoes and ankle socks are commonly worn together as complementary apparel items."
   },
   {
-    "source": "BRG-6205-2RS",
-    "target": "HSG-P205-CAST",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "Cast Iron Pillow Block P205",
-    "relationship": "fits_into",
-    "confidence": 0.95,
-    "reason": "The 6205-2RS bearing with 25mm inner diameter matches the P205 pillow block's 25mm shaft size and compatible bearing specification."
-  },
-  {
-    "source": "BRG-6205-2RS",
-    "target": "MNT-SHAFT-25MM",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "25mm Steel Shaft",
-    "relationship": "fits_into",
-    "confidence": 0.95,
-    "reason": "The bearing's inner diameter (25mm) matches the shaft's diameter (25mm), allowing the bearing to fit onto the shaft."
-  },
-  {
-    "source": "BRG-6205-2RS",
-    "target": "MNT-SHAFT-1IN",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "1 in Steel Shaft",
-    "relationship": "fits_into",
-    "confidence": 0.95,
-    "reason": "The bearing's inner diameter of 25mm matches the shaft's 25.4mm (1 inch) diameter within standard bearing tolerance, allowing the bearing to mount on the shaft."
-  },
-  {
-    "source": "BRG-6004-ZZ",
-    "target": "HSG-UCP204",
-    "source_name": "6004-ZZ Shielded Ball Bearing",
-    "target_name": "UCP204 Pillow Block Bearing Unit",
-    "relationship": "fits_into",
+    "source": "SWT-CARDI-BGE-S",
+    "target": "TOP-SILK-PNK-S",
+    "source_name": "Beige Knit Cardigan Small",
+    "target_name": "Pink Silk Camisole Small",
+    "relationship": "pairs_with",
     "confidence": 0.85,
-    "reason": "The 6004-ZZ bearing has a 20mm inner diameter that matches the UCP204 housing's 20mm shaft diameter specification, allowing the bearing to fit into the pillow block unit."
+    "reason": "Both are clothing items in small sizes that can be layered or worn together as complementary pieces in an outfit."
   },
   {
-    "source": "BRG-6004-ZZ",
-    "target": "HSG-P204",
-    "source_name": "6004-ZZ Shielded Ball Bearing",
-    "target_name": "P204 Pillow Block Housing",
-    "relationship": "fits_into",
-    "confidence": 0.75,
-    "reason": "The bearing's 20mm inner diameter matches the housing's 20mm shaft diameter specification, allowing the bearing to be mounted on the shaft within the pillow block."
+    "source": "TSH-BASIC-BLACK-M",
+    "target": "CAP-DAD-BLU-OS",
+    "source_name": "Black Cotton Crew Neck Tee M",
+    "target_name": "Blue Cotton Dad Cap One Size",
+    "relationship": "pairs_with",
+    "confidence": 0.9,
+    "reason": "A black t-shirt and blue dad cap are commonly purchased and worn together as complementary apparel items."
+  },
+  {
+    "source": "LGS-BLK-HIGH-S",
+    "target": "SHO-RUN-BLK-10",
+    "source_name": "Women's Black High-Rise Leggings Small",
+    "target_name": "Black Running Shoes Size 10",
+    "relationship": "pairs_with",
+    "confidence": 0.85,
+    "reason": "Black leggings and black running shoes are commonly worn together as part of an athletic outfit and complement each other functionally for exercise."
   }
 ]
