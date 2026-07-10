@@ -1,948 +1,1476 @@
 [
   {
-    "sku": "LAP-DELL-5420-I5",
-    "name": "Dell Latitude 5420 Laptop i5 8GB 256GB",
-    "category": "Laptop",
-    "description": "Dell Latitude 5420 business laptop equipped with Intel Core i5 processor, 8GB RAM, and 256GB solid-state storage. Designed for office productivity, remote work, and enterprise deployments requiring dependable performance for document editing, web applications, video conferencing, and multitasking. The Latitude series offers professional-grade durability and manageability features suited for IT fleets and business users.",
-    "brand": "Dell",
-    "specs": {},
+    "sku": "BRG-6205-2RS",
+    "name": "6205-2RS Sealed Ball Bearing",
+    "category": "Bearings",
+    "description": "Deep groove ball bearing made from chrome steel with double rubber seals (2RS), featuring 25mm inner diameter, 52mm outer diameter, and 15mm width. Manufactured by SKF.",
+    "brand": "SKF",
+    "specs": {
+      "inner_diameter_mm": 25,
+      "outer_diameter_mm": 52,
+      "width_mm": 15,
+      "seal_type": "2RS",
+      "bearing_type": "deep groove ball bearing",
+      "material": "chrome steel"
+    },
     "uom": "normalized",
-    "price": 649.99,
-    "search_terms": []
+    "price": 8.95,
+    "search_terms": [
+      "6205 bearing",
+      "sealed bearing",
+      "25mm bearing",
+      "motor bearing"
+    ]
   },
   {
-    "sku": "LAP-DELL-LAT5420",
-    "name": "Latitude 5420 Notebook",
-    "category": "Laptops",
-    "description": "Dell business laptop with Intel i5, 8GB memory and 256GB SSD for office use.",
-    "brand": "DELL",
-    "specs": {},
-    "uom": "normalized",
-    "price": 650.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-HP-840G8-I7",
-    "name": "HP EliteBook 840 G8 i7",
-    "category": "Notebooks",
-    "description": "HP EliteBook 840 G8 notebook computer with Intel Core i7 processor. Designed for business computing tasks including office work, professional applications, and mobile productivity.",
-    "brand": "HP",
-    "specs": {},
-    "uom": "normalized",
-    "price": 829.5,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-HP-ELITE-840-G8",
-    "name": "HP Elite Book 840G8",
-    "category": "Laptop Computers",
-    "description": "14 inch HP laptop i7 16gb ram 512 SSD windows.",
-    "brand": "Hewlett Packard",
-    "specs": {},
-    "uom": "normalized",
-    "price": 835.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-LEN-T14-I5",
-    "name": "Lenovo ThinkPad T14 Gen 2",
-    "category": "Laptop",
-    "description": "Lenovo ThinkPad T14 Gen 2 laptop for business and professional computing applications. Designed for office, enterprise, and mobile work environments.",
-    "brand": "Lenovo",
-    "specs": {},
-    "uom": "normalized",
-    "price": 779.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-LEN-T14-G2",
-    "name": "Thinkpad T14 Laptop Gen2",
-    "category": "Laptops",
-    "description": "Lenovo T14 with i5 processor and 14in screen.",
-    "brand": "LENOVO",
-    "specs": {},
-    "uom": "normalized",
-    "price": 775.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-ASUS-ZEN14",
-    "name": "ASUS ZenBook 14 OLED",
-    "category": "Ultrabook",
-    "description": "ASUS ZenBook 14 OLED is a lightweight ultrabook featuring an OLED display. Offers good battery performance for mobile computing needs.",
-    "brand": "Asus",
-    "specs": {},
-    "uom": "normalized",
-    "price": 899.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-APPLE-MBA-M2",
-    "name": "MacBook Air M2 13 inch 8GB 256GB",
-    "category": "Laptop",
-    "description": "Apple MacBook Air with M2 chip.",
-    "brand": "Apple",
-    "specs": {},
-    "uom": "normalized",
-    "price": 999.99,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-APPLE-AIR-M2-13",
-    "name": "Apple MBA 13 M2",
-    "category": "Laptops",
-    "description": "Apple MacBook Air 13-inch laptop with M2 chip. macOS-based portable computer from Apple's MacBook Air product line.",
-    "brand": "APPLE",
-    "specs": {},
-    "uom": "normalized",
-    "price": 1005.0,
-    "search_terms": []
-  },
-  {
-    "sku": "LAP-ACER-SWIFT3",
-    "name": "Acer Swift 3 14 Laptop",
-    "category": "Laptop",
-    "description": "Acer Swift 3 with Ryzen 5 processor, 8GB RAM and 512GB SSD.",
-    "brand": "Acer",
-    "specs": {},
-    "uom": "normalized",
-    "price": 599.99,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-DELL-U2720Q",
-    "name": "Dell UltraSharp U2720Q 27in 4K Monitor",
-    "category": "Monitor",
-    "description": "27 inch 4K USB-C monitor with 3840 x 2160 resolution.",
-    "brand": "Dell",
-    "specs": {},
-    "uom": "normalized",
-    "price": 479.0,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-DELL-27-4K-USBC",
-    "name": "Dell 27 4K USB C Display",
-    "category": "Displays",
-    "description": "Dell 27-inch 4K display with USB-C connectivity. Suitable for workstations, design environments, and business computing setups requiring high-resolution screens.",
-    "brand": "DELL",
-    "specs": {},
-    "uom": "normalized",
-    "price": 475.0,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-LG-27UL500",
-    "name": "LG 27UL500-W 27 inch 4K Monitor",
-    "category": "Monitors",
-    "description": "4K IPS monitor for work and design.",
-    "brand": "LG",
-    "specs": {},
-    "uom": "normalized",
-    "price": 296.99,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-LG-27-4K",
-    "name": "LG 27in UHD Monitor",
-    "category": "Screen",
-    "description": "27-inch LG UHD monitor with 3840x2160 resolution. Provides screen real estate and visual clarity for workstations and productivity tasks.",
-    "brand": "L.G.",
-    "specs": {},
-    "uom": "normalized",
-    "price": 299.0,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-SAM-CURVED-32",
-    "name": "Samsung 32 Curved Monitor",
-    "category": "Monitor",
-    "description": "Samsung 32-inch curved monitor with a curved screen design for desktop computing and display applications.",
-    "brand": "Samsung",
-    "specs": {},
-    "uom": "normalized",
-    "price": 249.99,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-SAM-LC32F391",
-    "name": "Samsung LC32F391 Curved 32in",
-    "category": "Monitors",
-    "description": "Samsung LC32F391 is a 32-inch curved monitor for desktop computing and office use. The curved display design offers an alternative to flat-screen monitors for workstations and general business environments.",
-    "brand": "SAMSUNG",
-    "specs": {},
-    "uom": "normalized",
-    "price": 245.0,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-ASUS-24-FHD",
-    "name": "ASUS 24 inch Full HD Monitor",
-    "category": "Display",
-    "description": "ASUS 24in 1080p monitor HDMI VGA.",
-    "brand": "Asus",
-    "specs": {},
-    "uom": "normalized",
-    "price": 129.0,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-ACER-27-QHD",
-    "name": "Acer 27 QHD Monitor",
-    "category": "Monitor",
-    "description": "27-inch QHD monitor from Acer with 2560x1440 resolution. Designed for desktop use where higher resolution and increased screen space are needed.",
-    "brand": "Acer",
-    "specs": {},
-    "uom": "normalized",
-    "price": 199.99,
-    "search_terms": []
-  },
-  {
-    "sku": "KB-LOGI-MXKEYS",
-    "name": "Logitech MX Keys Wireless Keyboard",
-    "category": "Keyboard",
-    "description": "Logitech MX Keys wireless keyboard for desktop computers and workstations. Provides wireless connectivity for cable-free operation.",
-    "brand": "Logitech",
-    "specs": {},
-    "uom": "normalized",
-    "price": 119.99,
-    "search_terms": []
-  },
-  {
-    "sku": "KEY-LOGITECH-MX-KEYS",
-    "name": "Logitech MXKeys Keyboard",
-    "category": "Keyboards",
-    "description": "Logi keyboard bluetooth backlit full size",
-    "brand": "Logi",
-    "specs": {},
-    "uom": "normalized",
-    "price": 117.5,
-    "search_terms": []
-  },
-  {
-    "sku": "KB-HP-WIRED-US",
-    "name": "HP USB Wired Keyboard",
-    "category": "Keyboard",
-    "description": "HP USB keyboard for desktop computers.",
-    "brand": "HP",
-    "specs": {},
-    "uom": "normalized",
-    "price": 18.99,
-    "search_terms": []
-  },
-  {
-    "sku": "KB-DELL-KB216",
-    "name": "Dell KB216 Wired Keyboard",
-    "category": "Accessories",
-    "description": "Dell KB216 wired keyboard for desktop computer use. Provides basic input functionality for office workstations and general computing tasks.",
-    "brand": "Dell",
-    "specs": {},
-    "uom": "normalized",
-    "price": 14.99,
-    "search_terms": []
-  },
-  {
-    "sku": "KB-MECH-RED-SWITCH",
-    "name": "Mechanical Gaming Keyboard Red Switch",
-    "category": "Gaming Accessories",
-    "description": "Mechanical keyboard with red switches and RGB lighting.",
+    "sku": "BRG-6205-RUBBER",
+    "name": "Rubber Sealed 6205 Bearing",
+    "category": "Bearing",
+    "description": "Deep groove ball bearing with rubber seals, featuring a 25mm bore, 52mm outer diameter, and 15mm width. Designed to protect internal components from dust and contaminants in motors, pumps, conveyors, and general machinery. The rubber sealing provides reliable contamination protection for equipment operating in moderately dirty environments.",
     "brand": "Generic",
-    "specs": {},
+    "specs": {
+      "bore": "25 mm",
+      "od": "52 mm",
+      "width": "15 mm",
+      "seal": "rubber"
+    },
     "uom": "normalized",
-    "price": 59.99,
-    "search_terms": []
+    "price": 7.5,
+    "search_terms": [
+      "6205 rubber bearing",
+      "sealed ball bearing"
+    ]
   },
   {
-    "sku": "KB-RAZER-BW-V3",
-    "name": "Razer BlackWidow V3 Mechanical Keyboard",
-    "category": "Keyboard",
-    "description": "Razer BlackWidow V3 mechanical keyboard for desktop computers and workstations. Provides physical key input for data entry, productivity tasks, and general computing use.",
-    "brand": "Razer",
-    "specs": {},
+    "sku": "BRG-6004-ZZ",
+    "name": "6004-ZZ Shielded Ball Bearing",
+    "category": "Bearings",
+    "description": "6004-ZZ deep groove ball bearing with metal shields for electric motors, pumps, and rotating shafts.",
+    "brand": "NSK",
+    "specs": {
+      "inner_diameter_mm": 20,
+      "outer_diameter_mm": 42,
+      "width_mm": 12,
+      "seal_type": "ZZ",
+      "bearing_type": "deep groove ball bearing",
+      "material": "chrome steel"
+    },
     "uom": "normalized",
-    "price": 139.0,
-    "search_terms": []
+    "price": 6.25,
+    "search_terms": [
+      "6004 bearing",
+      "20mm bearing",
+      "shielded bearing"
+    ]
   },
   {
-    "sku": "KB-APPLE-MAGIC",
-    "name": "Apple Magic Keyboard",
-    "category": "Keyboard",
-    "description": "Apple Magic Keyboard wireless model in silver. Designed for use with computers and mobile devices requiring a wireless keyboard input solution.",
-    "brand": "Apple",
-    "specs": {},
+    "sku": "BRG-6004-METAL",
+    "name": "6004 Metal Shield Bearing",
+    "category": "Bearings",
+    "description": "NTN 6004 metal shield bearing with 20mm bore, 42mm outer diameter, and 12mm width. Metal shields provide protection from contaminants in machinery applications.",
+    "brand": "NTN",
+    "specs": {
+      "inner_diameter_mm": 20,
+      "outer_diameter_mm": 42,
+      "width_mm": 12,
+      "seal_type": "metal shield"
+    },
     "uom": "normalized",
-    "price": 99.0,
-    "search_terms": []
+    "price": 6.1,
+    "search_terms": [
+      "6004 bearing",
+      "metal shield bearing"
+    ]
   },
   {
-    "sku": "MOU-LOGI-MXMASTER3",
-    "name": "Logitech MX Master 3 Wireless Mouse",
-    "category": "Mouse",
-    "description": "Wireless ergonomic mouse with Bluetooth and USB receiver.",
-    "brand": "Logitech",
-    "specs": {},
+    "sku": "BRG-6303-OPEN",
+    "name": "6303 Open Ball Bearing",
+    "category": "Bearings",
+    "description": "Open deep groove bearing for light industrial rotating equipment.",
+    "brand": "Timken",
+    "specs": {
+      "inner_diameter_mm": 17,
+      "outer_diameter_mm": 47,
+      "width_mm": 14,
+      "seal_type": "open",
+      "bearing_type": "deep groove ball bearing"
+    },
     "uom": "normalized",
-    "price": 99.99,
-    "search_terms": []
+    "price": 5.75,
+    "search_terms": [
+      "6303 bearing",
+      "open bearing",
+      "17mm bearing"
+    ]
   },
   {
-    "sku": "MOUSE-LOGITECH-MX3",
-    "name": "Logitech MX Master3 Mouse",
-    "category": "Mice",
-    "description": "Logitech MX Master 3 mouse for desktop computers and workstations. Designed for office productivity, data entry, design work, and general computing tasks.",
-    "brand": "LOGITECH",
-    "specs": {},
+    "sku": "BRG-6303-NO-SPEC",
+    "name": "6303 Bearing",
+    "category": "Bearings",
+    "description": "Open-type 6303 bearing without seals. Generic brand.",
+    "brand": "Generic",
+    "specs": {
+      "seal_type": "open"
+    },
+    "uom": "normalized",
+    "price": 4.95,
+    "search_terms": [
+      "6303 bearing"
+    ]
+  },
+  {
+    "sku": "BRG-608-2RS",
+    "name": "608-2RS Miniature Sealed Bearing",
+    "category": "Bearings",
+    "description": "608-2RS sealed miniature bearing with 8mm bore for small wheels, rollers, and compact equipment.",
+    "brand": "SKF",
+    "specs": {
+      "inner_diameter_mm": 8,
+      "outer_diameter_mm": 22,
+      "width_mm": 7,
+      "seal_type": "2RS",
+      "bearing_type": "miniature ball bearing"
+    },
+    "uom": "normalized",
+    "price": 2.2,
+    "search_terms": [
+      "608 bearing",
+      "skate bearing",
+      "8mm bearing"
+    ]
+  },
+  {
+    "sku": "BRG-1IN-PILOT",
+    "name": "1 Inch Pilot Bearing",
+    "category": "Bearings",
+    "description": "Pilot bearing for transmission and shaft support applications.",
+    "brand": "National",
+    "specs": {
+      "inner_diameter_in": 1,
+      "outer_diameter_in": 2.047,
+      "width_in": 0.59,
+      "seal_type": "open",
+      "inner_diameter_mm": 25.4,
+      "outer_diameter_mm": 51.99,
+      "width_mm": 14.99
+    },
+    "uom": "normalized",
+    "price": 12.4,
+    "search_terms": [
+      "1 inch bearing",
+      "pilot bearing"
+    ]
+  },
+  {
+    "sku": "BRG-TAPER-30205",
+    "name": "30205 Tapered Roller Bearing",
+    "category": "Bearings",
+    "description": "30205 tapered roller bearing for radial and axial load support in hubs and gearboxes.",
+    "brand": "Timken",
+    "specs": {
+      "inner_diameter_mm": 25,
+      "outer_diameter_mm": 52,
+      "width_mm": 16.25,
+      "bearing_type": "tapered roller bearing",
+      "material": "chrome steel"
+    },
+    "uom": "normalized",
+    "price": 14.8,
+    "search_terms": [
+      "30205 bearing",
+      "taper roller bearing",
+      "25mm tapered bearing"
+    ]
+  },
+  {
+    "sku": "BRG-UC205",
+    "name": "UC205 Insert Bearing",
+    "category": "Bearings",
+    "description": "Insert bearing with set screws for mounted bearing units and pillow block assemblies.",
+    "brand": "FYH",
+    "specs": {
+      "inner_diameter_mm": 25,
+      "outer_diameter_mm": 52,
+      "width_mm": 34.1,
+      "seal_type": "contact seal",
+      "bearing_type": "insert bearing",
+      "compatible_housing_series": "P205"
+    },
+    "uom": "normalized",
+    "price": 11.9,
+    "search_terms": [
+      "UC205 bearing",
+      "insert bearing",
+      "pillow block bearing"
+    ]
+  },
+  {
+    "sku": "HSG-P205",
+    "name": "P205 Pillow Block Housing",
+    "category": "Housings",
+    "description": "P205 cast iron pillow block housing compatible with UC205 and 6205-series bearing inserts for 25mm shaft support.",
+    "brand": "FYH",
+    "specs": {
+      "compatible_bearing_series": [
+        "UC205",
+        "6205"
+      ],
+      "shaft_diameter_mm": 25,
+      "mount_type": "pillow block",
+      "material": "cast iron",
+      "bolt_hole_spacing_mm": 105
+    },
+    "uom": "normalized",
+    "price": 18.5,
+    "search_terms": [
+      "P205 housing",
+      "pillow block",
+      "6205 housing",
+      "25mm shaft mount"
+    ]
+  },
+  {
+    "sku": "HSG-P205-CAST",
+    "name": "Cast Iron Pillow Block P205",
+    "category": "Mounts",
+    "description": "Cast iron pillow block mount compatible with 6205 or UC205 bearings and 25 mm shafts. Designed to house and support rotating shaft assemblies where the bearing requires mounting on a horizontal surface.",
+    "brand": "Generic",
+    "specs": {
+      "compatible_bearing": "6205 / UC205",
+      "shaft_size": "25 mm",
+      "mount": "pillow block"
+    },
+    "uom": "normalized",
+    "price": 16.95,
+    "search_terms": [
+      "P205 pillow block",
+      "25mm bearing housing"
+    ]
+  },
+  {
+    "sku": "HSG-FL205",
+    "name": "FL205 Two-Bolt Flange Housing",
+    "category": "Housings",
+    "description": "FL205 two-bolt flange housing for UC205 insert bearings and 25mm shafts.",
+    "brand": "FYH",
+    "specs": {
+      "compatible_bearing_series": [
+        "UC205"
+      ],
+      "shaft_diameter_mm": 25,
+      "mount_type": "two-bolt flange",
+      "material": "cast iron",
+      "bolt_hole_spacing_mm": 99
+    },
+    "uom": "normalized",
+    "price": 20.75,
+    "search_terms": [
+      "FL205 housing",
+      "two bolt flange",
+      "UC205 housing"
+    ]
+  },
+  {
+    "sku": "HSG-UCP204",
+    "name": "UCP204 Pillow Block Bearing Unit",
+    "category": "Housings",
+    "description": "Mounted pillow block bearing unit with UC204 insert for 20mm shafts.",
+    "brand": "FYH",
+    "specs": {
+      "compatible_bearing_series": [
+        "UC204"
+      ],
+      "shaft_diameter_mm": 20,
+      "mount_type": "pillow block",
+      "material": "cast iron"
+    },
+    "uom": "normalized",
+    "price": 24.3,
+    "search_terms": [
+      "UCP204",
+      "20mm pillow block bearing"
+    ]
+  },
+  {
+    "sku": "MNT-MOTOR-BASE-56C",
+    "name": "56C Motor Mount Base Plate",
+    "category": "Housings",
+    "description": "Adjustable steel base plate for mounting 56C frame motors.",
+    "brand": "Baldor",
+    "specs": {
+      "mount_type": "motor base plate",
+      "compatible_motor_frame": "56C",
+      "material": "steel",
+      "slot_length_mm": 60
+    },
+    "uom": "normalized",
+    "price": 42.0,
+    "search_terms": [
+      "motor mount",
+      "56C motor base",
+      "base plate"
+    ]
+  },
+  {
+    "sku": "MNT-MOTOR-56C-PLATE",
+    "name": "Motor Base Plate for 56C Frame",
+    "category": "Fasteners",
+    "description": "Steel mounting base plate designed for 56C frame motors. Provides a stable mounting surface for securing motors to equipment frames, machinery bases, or flooring in industrial installations. Used in motor replacement, equipment assembly, and maintenance applications requiring proper motor alignment and support.",
+    "brand": "Generic",
+    "specs": {
+      "compatible_motor_frame": "56C",
+      "material": "steel"
+    },
+    "uom": "normalized",
+    "price": 39.5,
+    "search_terms": [
+      "motor mount plate",
+      "56C base"
+    ]
+  },
+  {
+    "sku": "FST-M8-40-ZN",
+    "name": "M8 x 40mm Zinc Hex Bolt",
+    "category": "Fasteners",
+    "description": "M8 x 40mm zinc-plated hex bolt for machinery, mounting brackets, and motor base assemblies.",
+    "brand": "Hillman",
+    "specs": {
+      "diameter_mm": 8,
+      "length_mm": 40,
+      "thread_pitch_mm": 1.25,
+      "material": "zinc-plated steel",
+      "head_type": "hex"
+    },
+    "uom": "normalized",
+    "price": 0.28,
+    "search_terms": [
+      "M8 bolt",
+      "8mm bolt",
+      "motor mount bolt",
+      "hex bolt"
+    ]
+  },
+  {
+    "sku": "FST-HEX-M8X40",
+    "name": "Hex Bolt M8x40",
+    "category": "Fasteners",
+    "description": "M8 hex bolt with 40mm length, made from zinc steel. Threaded fastener for bolted connections in industrial equipment and machinery.",
+    "brand": "Generic",
+    "specs": {
+      "diameter": "M8",
+      "length": "40 mm",
+      "material": "zinc steel"
+    },
+    "uom": "normalized",
+    "price": 0.25,
+    "search_terms": [
+      "hex bolt",
+      "M8 40mm bolt"
+    ]
+  },
+  {
+    "sku": "FST-M8-40-HEXAGON",
+    "name": "M8 40mm Hexagon Bolt Zinc",
+    "category": "Bolts",
+    "description": "Zinc-plated steel hexagon bolt with M8 diameter and 40mm length. Provides corrosion resistance for outdoor or moisture-exposed assemblies in machinery, equipment mounting, structural connections, and general fastening applications. Compatible with standard hex wrenches and sockets.",
+    "brand": "Generic",
+    "specs": {
+      "diameter_mm": 8,
+      "length_mm": 40,
+      "material": "zinc-plated steel",
+      "head_type": "hexagon"
+    },
+    "uom": "normalized",
+    "price": 0.27,
+    "search_terms": [
+      "M8 hexagon bolt",
+      "M8x40 bolt"
+    ]
+  },
+  {
+    "sku": "FST-M10-60-SS",
+    "name": "M10 x 60mm Stainless Steel Hex Bolt",
+    "category": "Fasteners",
+    "description": "M10 x 60mm stainless steel hex bolt for corrosion-resistant industrial fastening.",
+    "brand": "Hillman",
+    "specs": {
+      "diameter_mm": 10,
+      "length_mm": 60,
+      "thread_pitch_mm": 1.5,
+      "material": "stainless steel",
+      "head_type": "hex"
+    },
+    "uom": "normalized",
+    "price": 0.55,
+    "search_terms": [
+      "M10 bolt",
+      "stainless hex bolt",
+      "10mm bolt"
+    ]
+  },
+  {
+    "sku": "FST-1-2-13X2-HEX",
+    "name": "1/2-13 x 2 in Hex Cap Screw",
+    "category": "Fasteners",
+    "description": "1/2-13 UNC hex cap screw with 2 inch length for heavy-duty fastening.",
+    "brand": "Fastenal",
+    "specs": {
+      "diameter_in": 0.5,
+      "length_in": 2,
+      "thread_type": "UNC",
+      "threads_per_inch": 13,
+      "material": "steel",
+      "head_type": "hex",
+      "diameter_mm": 12.7,
+      "length_mm": 50.8
+    },
+    "uom": "normalized",
+    "price": 0.62,
+    "search_terms": [
+      "half inch bolt",
+      "hex cap screw",
+      "1/2-13 bolt"
+    ]
+  },
+  {
+    "sku": "FST-HALF-IN-BOLT",
+    "name": "Half Inch Hex Bolt 2 Inch",
+    "category": "Fasteners",
+    "description": "Plain steel hex bolt with 1/2 inch diameter and 2 inch length. Threaded fastener for securing components in assemblies and structures.",
+    "brand": "Generic",
+    "specs": {
+      "diameter": "1/2 inch",
+      "length": "2 in",
+      "material": "plain steel"
+    },
+    "uom": "normalized",
+    "price": 0.48,
+    "search_terms": [
+      "half inch bolt",
+      "2 inch bolt"
+    ]
+  },
+  {
+    "sku": "FST-M6-20-SOCKET",
+    "name": "M6 x 20mm Socket Head Cap Screw",
+    "category": "Fasteners",
+    "description": "M6 socket head cap screw for machine assemblies requiring a recessed hex drive.",
+    "brand": "Brighton",
+    "specs": {
+      "diameter_mm": 6,
+      "length_mm": 20,
+      "thread_pitch_mm": 1.0,
+      "material": "alloy steel",
+      "head_type": "socket"
+    },
+    "uom": "normalized",
+    "price": 0.18,
+    "search_terms": [
+      "M6 screw",
+      "socket head screw",
+      "cap screw"
+    ]
+  },
+  {
+    "sku": "FST-WASHER-M8-FLAT",
+    "name": "M8 Flat Washer Zinc",
+    "category": "Fasteners",
+    "description": "M8 zinc-plated flat washer for distributing load under bolts and nuts.",
+    "brand": "Hillman",
+    "specs": {
+      "inner_diameter_mm": 8.4,
+      "outer_diameter_mm": 16,
+      "thickness_mm": 1.6,
+      "material": "zinc-plated steel"
+    },
+    "uom": "normalized",
+    "price": 0.06,
+    "search_terms": [
+      "M8 washer",
+      "flat washer",
+      "bolt washer"
+    ]
+  },
+  {
+    "sku": "FST-NUT-M8-ZN",
+    "name": "M8 Zinc Hex Nut",
+    "category": "Fasteners",
+    "description": "M8 zinc-plated hex nut for use with M8 bolts and threaded rods.",
+    "brand": "Hillman",
+    "specs": {
+      "diameter_mm": 8,
+      "thread_pitch_mm": 1.25,
+      "material": "zinc-plated steel",
+      "nut_type": "hex"
+    },
+    "uom": "normalized",
+    "price": 0.09,
+    "search_terms": [
+      "M8 nut",
+      "hex nut",
+      "zinc nut"
+    ]
+  },
+  {
+    "sku": "FST-ANCHOR-3-8",
+    "name": "3/8 in Wedge Anchor",
+    "category": "Fasteners",
+    "description": "Concrete wedge anchor for mounting equipment to concrete floors.",
+    "brand": "Red Head",
+    "specs": {
+      "diameter_in": 0.375,
+      "length_in": 3.75,
+      "material": "zinc-plated steel",
+      "anchor_type": "wedge",
+      "diameter_mm": 9.52,
+      "length_mm": 95.25
+    },
+    "uom": "normalized",
+    "price": 1.15,
+    "search_terms": [
+      "wedge anchor",
+      "concrete anchor",
+      "3/8 anchor"
+    ]
+  },
+  {
+    "sku": "FST-ANCHOR-NOSIZE",
+    "name": "Concrete Anchor",
+    "category": "Fasteners",
+    "description": "Steel wedge anchor designed for securing fixtures, equipment, and structural components to concrete and masonry surfaces. The wedge design expands within the drilled hole to create a mechanical lock, providing reliable holding strength for mounting brackets, machinery bases, handrails, and heavy-duty installations.",
+    "brand": "Generic",
+    "specs": {
+      "material": "steel",
+      "anchor_type": "wedge"
+    },
+    "uom": "normalized",
+    "price": 0.9,
+    "search_terms": [
+      "concrete anchor"
+    ]
+  },
+  {
+    "sku": "PIP-ELBOW-1-2-NPT-BRASS",
+    "name": "1/2 in NPT Brass 90 Degree Elbow",
+    "category": "Pipe Fittings",
+    "description": "1/2 inch NPT brass 90 degree elbow for changing pipe direction in plumbing and heating systems.",
+    "brand": "Parker",
+    "specs": {
+      "size_inch": 0.5,
+      "thread_type": "NPT",
+      "angle_degree": 90,
+      "material": "brass",
+      "fitting_type": "elbow"
+    },
+    "uom": "normalized",
+    "price": 4.2,
+    "search_terms": [
+      "1/2 NPT elbow",
+      "brass elbow",
+      "pipe elbow"
+    ]
+  },
+  {
+    "sku": "PIP-BRASS-ELBOW-HALF",
+    "name": "Half Inch Brass Elbow",
+    "category": "Pipe Fittings",
+    "description": "Half inch brass elbow fitting with NPT threads for creating 90-degree directional changes in pipe systems. Brass construction provides corrosion resistance and durability in plumbing, compressed air, fuel, and hydraulic line installations. Threaded connections enable secure, tool-tightened joints without welding or soldering.",
+    "brand": "Generic",
+    "specs": {
+      "size": "1/2 inch",
+      "thread": "NPT",
+      "material": "brass"
+    },
+    "uom": "normalized",
+    "price": 3.95,
+    "search_terms": [
+      "half inch elbow",
+      "brass pipe elbow"
+    ]
+  },
+  {
+    "sku": "PIP-TEE-3-4-NPT-GALV",
+    "name": "3/4 in Galvanized Steel Tee Fitting",
+    "category": "Pipe Fittings",
+    "description": "3/4 inch NPT galvanized tee fitting for branching threaded pipe runs.",
+    "brand": "Mueller",
+    "specs": {
+      "size_inch": 0.75,
+      "thread_type": "NPT",
+      "material": "galvanized steel",
+      "fitting_type": "tee"
+    },
+    "uom": "normalized",
+    "price": 5.1,
+    "search_terms": [
+      "3/4 tee",
+      "galvanized tee",
+      "NPT tee"
+    ]
+  },
+  {
+    "sku": "PIP-COUPLING-1-NPT-SS",
+    "name": "1 in Stainless Steel NPT Coupling",
+    "category": "Pipe Fittings",
+    "description": "1 inch stainless steel NPT coupling for joining threaded pipe sections.",
+    "brand": "Parker",
+    "specs": {
+      "size_inch": 1,
+      "thread_type": "NPT",
+      "material": "stainless steel",
+      "fitting_type": "coupling"
+    },
+    "uom": "normalized",
+    "price": 9.8,
+    "search_terms": [
+      "1 inch coupling",
+      "stainless pipe coupling",
+      "NPT coupling"
+    ]
+  },
+  {
+    "sku": "PIP-REDUCER-1X1-2-BRASS",
+    "name": "1 in x 1/2 in Brass Reducer Bushing",
+    "category": "Pipe Fittings",
+    "description": "Brass reducer bushing for adapting 1 inch NPT female ports to 1/2 inch NPT male connections.",
+    "brand": "Parker",
+    "specs": {
+      "size_inch": 1,
+      "reduced_size_inch": 0.5,
+      "thread_type": "NPT",
+      "material": "brass",
+      "fitting_type": "reducer bushing"
+    },
+    "uom": "normalized",
+    "price": 6.45,
+    "search_terms": [
+      "reducer bushing",
+      "1 to 1/2 reducer",
+      "brass reducer"
+    ]
+  },
+  {
+    "sku": "PIP-ADAPTER-25MM",
+    "name": "25mm Compression Adapter",
+    "category": "Pipe Fittings",
+    "description": "25mm compression adapter for metric pipe connections.",
+    "brand": "Uponor",
+    "specs": {
+      "size_mm": 25,
+      "connection_type": "compression",
+      "material": "brass",
+      "fitting_type": "adapter"
+    },
+    "uom": "normalized",
+    "price": 7.3,
+    "search_terms": [
+      "25mm adapter",
+      "compression adapter",
+      "metric pipe fitting"
+    ]
+  },
+  {
+    "sku": "PIP-SEALANT-PTFE",
+    "name": "PTFE Thread Seal Tape",
+    "category": "Pipe Fittings",
+    "description": "PTFE thread seal tape for sealing NPT threaded pipe fittings and preventing leaks.",
+    "brand": "Oatey",
+    "specs": {
+      "width_in": 0.5,
+      "length_ft": 260,
+      "material": "PTFE",
+      "application": "thread sealing",
+      "width_mm": 12.7
+    },
+    "uom": "normalized",
+    "price": 1.95,
+    "search_terms": [
+      "thread tape",
+      "PTFE tape",
+      "pipe sealant",
+      "teflon tape"
+    ]
+  },
+  {
+    "sku": "PIP-SEALANT-PASTE",
+    "name": "Pipe Thread Sealant Paste",
+    "category": "Pipe Fittings",
+    "description": "Non-hardening thread sealant paste for metal pipe fittings.",
+    "brand": "RectorSeal",
+    "specs": {
+      "container_size_oz": 4,
+      "application": "thread sealing",
+      "compatible_materials": [
+        "steel",
+        "brass",
+        "iron"
+      ]
+    },
+    "uom": "normalized",
+    "price": 6.75,
+    "search_terms": [
+      "pipe dope",
+      "thread sealant",
+      "NPT sealant"
+    ]
+  },
+  {
+    "sku": "PIP-MISC-001",
+    "name": "Threaded Pipe Fitting",
+    "category": "Pipe Fittings",
+    "description": "Brass threaded pipe fitting for connecting pipe sections in various systems. Generic brand fitting with threaded connections for mechanical assembly.",
+    "brand": "Generic",
+    "specs": {
+      "material": "brass"
+    },
+    "uom": "normalized",
+    "price": 2.5,
+    "search_terms": [
+      "pipe fitting"
+    ]
+  },
+  {
+    "sku": "VAL-BALL-1-2-BRASS",
+    "name": "1/2 in Brass Ball Valve",
+    "category": "Valves",
+    "description": "1/2 inch brass full-port ball valve with NPT female connections for water and air service.",
+    "brand": "Apollo",
+    "specs": {
+      "size_inch": 0.5,
+      "connection_type": "NPT female",
+      "pressure_rating_psi": 600,
+      "material": "brass",
+      "valve_type": "ball"
+    },
+    "uom": "normalized",
+    "price": 11.4,
+    "search_terms": [
+      "1/2 ball valve",
+      "brass valve",
+      "shutoff valve"
+    ]
+  },
+  {
+    "sku": "VAL-HALF-BRASS-BALL",
+    "name": "Half Inch Brass Shutoff Ball Valve",
+    "category": "Valve",
+    "description": "Half inch brass ball valve with female NPT threaded connections, rated for 600 psi working pressure. Provides reliable on-off flow control in water lines, compressed air systems, and general plumbing installations where corrosion resistance and durability are needed. Brass construction offers long service life in potable water and light industrial applications.",
+    "brand": "Generic",
+    "specs": {
+      "size": "1/2 inch",
+      "connection": "female NPT",
+      "material": "brass",
+      "pressure": "600 psi"
+    },
+    "uom": "normalized",
+    "price": 10.9,
+    "search_terms": [
+      "half inch ball valve",
+      "brass shutoff valve"
+    ]
+  },
+  {
+    "sku": "VAL-BALL-3-4-SS",
+    "name": "3/4 in Stainless Steel Ball Valve",
+    "category": "Valves",
+    "description": "3/4 inch stainless steel ball valve for industrial fluid control and corrosive service.",
+    "brand": "Apollo",
+    "specs": {
+      "size_inch": 0.75,
+      "connection_type": "NPT female",
+      "pressure_rating_psi": 1000,
+      "material": "stainless steel",
+      "valve_type": "ball"
+    },
+    "uom": "normalized",
+    "price": 24.8,
+    "search_terms": [
+      "3/4 ball valve",
+      "stainless valve",
+      "industrial ball valve"
+    ]
+  },
+  {
+    "sku": "VAL-CHECK-1-BRASS",
+    "name": "1 in Brass Swing Check Valve",
+    "category": "Valves",
+    "description": "1 inch brass swing check valve for preventing reverse flow in water lines.",
+    "brand": "Nibco",
+    "specs": {
+      "size_inch": 1,
+      "connection_type": "NPT female",
+      "pressure_rating_psi": 200,
+      "material": "brass",
+      "valve_type": "swing check"
+    },
+    "uom": "normalized",
+    "price": 18.65,
+    "search_terms": [
+      "check valve",
+      "1 inch check valve",
+      "backflow valve"
+    ]
+  },
+  {
+    "sku": "VAL-GATE-2-IRON",
+    "name": "2 in Cast Iron Gate Valve",
+    "category": "Valves",
+    "description": "2 inch cast iron gate valve for on/off control in low-pressure water systems.",
+    "brand": "Milwaukee Valve",
+    "specs": {
+      "size_inch": 2,
+      "connection_type": "flanged",
+      "pressure_rating_psi": 125,
+      "material": "cast iron",
+      "valve_type": "gate"
+    },
     "uom": "normalized",
     "price": 95.0,
-    "search_terms": []
+    "search_terms": [
+      "2 inch gate valve",
+      "cast iron valve",
+      "flanged valve"
+    ]
   },
   {
-    "sku": "MOU-DELL-MS116",
-    "name": "Dell MS116 USB Optical Mouse",
-    "category": "Mouse",
-    "description": "Dell wired optical mouse USB black.",
-    "brand": "Dell",
-    "specs": {},
+    "sku": "VAL-NEEDLE-1-4-SS",
+    "name": "1/4 in Stainless Steel Needle Valve",
+    "category": "Valves",
+    "description": "1/4 inch stainless needle valve for precise flow control in instrumentation lines.",
+    "brand": "Swagelok",
+    "specs": {
+      "size_inch": 0.25,
+      "connection_type": "NPT female",
+      "pressure_rating_psi": 3000,
+      "material": "stainless steel",
+      "valve_type": "needle"
+    },
     "uom": "normalized",
-    "price": 9.99,
-    "search_terms": []
+    "price": 32.9,
+    "search_terms": [
+      "needle valve",
+      "1/4 valve",
+      "instrument valve"
+    ]
   },
   {
-    "sku": "MOU-HP-X500",
-    "name": "HP X500 Wired Mouse",
-    "category": "Accessories",
-    "description": "HP X500 wired mouse for connecting to computers and performing pointing and clicking functions. Standard desktop mouse for general computing use.",
-    "brand": "HP",
-    "specs": {},
+    "sku": "VAL-RELIEF-NOSPEC",
+    "name": "Pressure Relief Valve",
+    "category": "Valves",
+    "description": "Pressure relief valve designed to automatically release excess pressure when system pressure exceeds set limits. Used in fluid systems requiring overpressure protection.",
+    "brand": "Generic",
+    "specs": {
+      "valve_type": "pressure relief"
+    },
     "uom": "normalized",
-    "price": 8.5,
-    "search_terms": []
+    "price": 21.0,
+    "search_terms": [
+      "pressure relief valve",
+      "safety valve"
+    ]
   },
   {
-    "sku": "MOU-APPLE-MAGIC2",
-    "name": "Apple Magic Mouse 2",
-    "category": "Mouse",
-    "description": "Apple Magic Mouse 2 is a rechargeable Bluetooth mouse for Mac computers. The built-in battery eliminates the need for disposable batteries.",
-    "brand": "Apple",
-    "specs": {},
+    "sku": "FST-MOTOR-KIT-M8",
+    "name": "M8 Motor Mount Hardware Kit",
+    "category": "Fasteners",
+    "description": "Hardware kit with M8 bolts, washers, and nuts for mounting small motors to base plates.",
+    "brand": "Brighton",
+    "specs": {
+      "diameter_mm": 8,
+      "length_mm": 40,
+      "material": "zinc-plated steel",
+      "included_items": [
+        "M8 bolts",
+        "M8 washers",
+        "M8 hex nuts"
+      ],
+      "application": "motor mounting"
+    },
     "uom": "normalized",
-    "price": 79.0,
-    "search_terms": []
+    "price": 6.9,
+    "search_terms": [
+      "motor mount hardware",
+      "M8 motor bolt kit",
+      "mounting kit"
+    ]
   },
   {
-    "sku": "MOU-RAZER-DEATHADDER",
-    "name": "Razer DeathAdder Essential Mouse",
-    "category": "Gaming Mouse",
-    "description": "Razer DeathAdder Essential gaming mouse with optical sensor. Designed for gaming applications requiring cursor control and pointer accuracy.",
-    "brand": "Razer",
-    "specs": {},
+    "sku": "FST-MOTOR-BOLT-KIT",
+    "name": "Motor Mount Bolt Kit",
+    "category": "Fasteners",
+    "description": "M8 zinc-plated steel bolt kit designed for securing motors to mounting bases, frames, and equipment housings. Provides corrosion-resistant fastening hardware for electric motor installations in machinery, pumps, conveyors, and industrial equipment.",
+    "brand": "Generic",
+    "specs": {
+      "diameter": "M8",
+      "material": "zinc steel"
+    },
     "uom": "normalized",
-    "price": 29.99,
-    "search_terms": []
+    "price": 5.95,
+    "search_terms": [
+      "motor mount bolt kit",
+      "motor hardware"
+    ]
   },
   {
-    "sku": "SSD-SAM-970EVO-1TB",
-    "name": "Samsung 970 EVO Plus 1TB NVMe SSD",
-    "category": "Storage",
-    "description": "Samsung 970 EVO Plus 1TB NVMe solid state drive in M.2 form factor for internal storage in computers and workstations. Uses NVMe protocol for data access and transfer.",
-    "brand": "Samsung",
-    "specs": {},
+    "sku": "MNT-VIBRATION-PAD-4IN",
+    "name": "4 in Rubber Vibration Isolation Pad",
+    "category": "Housings",
+    "description": "Rubber vibration isolation pad for reducing motor and pump vibration on base plates.",
+    "brand": "Mason",
+    "specs": {
+      "length_in": 4,
+      "width_in": 4,
+      "thickness_in": 0.5,
+      "material": "rubber",
+      "application": "vibration isolation",
+      "width_mm": 101.6,
+      "length_mm": 101.6
+    },
     "uom": "normalized",
-    "price": 89.99,
-    "search_terms": []
+    "price": 7.85,
+    "search_terms": [
+      "vibration pad",
+      "motor pad",
+      "rubber isolation pad"
+    ]
   },
   {
-    "sku": "SSD-SAMSUNG-970-1T",
-    "name": "Samsung 970EVO 1 T SSD",
-    "category": "Hard Drives",
-    "description": "Samsung 970 EVO solid-state drive with 1 terabyte storage capacity for computing systems requiring storage upgrades or replacements.",
-    "brand": "SAMSUNG",
-    "specs": {},
+    "sku": "MNT-SHAFT-25MM",
+    "name": "25mm Steel Shaft",
+    "category": "Housings",
+    "description": "25mm precision steel shaft for use with 6205 bearings and 25mm pillow block assemblies.",
+    "brand": "Misumi",
+    "specs": {
+      "diameter_mm": 25,
+      "length_mm": 500,
+      "material": "carbon steel",
+      "compatible_bearing_bore_mm": 25
+    },
     "uom": "normalized",
-    "price": 91.0,
-    "search_terms": []
+    "price": 28.0,
+    "search_terms": [
+      "25mm shaft",
+      "bearing shaft",
+      "6205 shaft"
+    ]
   },
   {
-    "sku": "SSD-WD-BLUE-500GB",
-    "name": "WD Blue SN570 500GB NVMe SSD",
-    "category": "Storage",
-    "description": "Western Digital Blue 500GB NVMe M.2 SSD.",
-    "brand": "Western Digital",
-    "specs": {},
+    "sku": "MNT-SHAFT-1IN",
+    "name": "1 in Steel Shaft",
+    "category": "Housings",
+    "description": "One inch steel shaft for inch-series bearings and mounted units.",
+    "brand": "Misumi",
+    "specs": {
+      "diameter_in": 1,
+      "length_in": 24,
+      "material": "carbon steel",
+      "diameter_mm": 25.4,
+      "length_mm": 609.6
+    },
     "uom": "normalized",
-    "price": 42.99,
-    "search_terms": []
+    "price": 31.5,
+    "search_terms": [
+      "1 inch shaft",
+      "steel shaft",
+      "bearing shaft"
+    ]
   },
   {
-    "sku": "SSD-WD-SN570-500",
-    "name": "WD SN570 500 GB SSD",
-    "category": "SSD",
-    "description": "WD SN570 solid state drive with 500 GB storage capacity, M.2 form factor, and NVMe interface. Provides high-speed storage for computing systems that support M.2 NVMe drives.",
-    "brand": "WD",
-    "specs": {},
+    "sku": "BRG-UC204",
+    "name": "UC204 Insert Bearing",
+    "category": "Bearings",
+    "description": "UC204 insert bearing with set screws for 20mm mounted bearing applications.",
+    "brand": "FYH",
+    "specs": {
+      "inner_diameter_mm": 20,
+      "outer_diameter_mm": 47,
+      "width_mm": 31,
+      "seal_type": "contact seal",
+      "bearing_type": "insert bearing",
+      "compatible_housing_series": "P204"
+    },
     "uom": "normalized",
-    "price": 43.5,
-    "search_terms": []
+    "price": 10.45,
+    "search_terms": [
+      "UC204 bearing",
+      "20mm insert bearing"
+    ]
   },
   {
-    "sku": "HDD-SEAGATE-2TB",
-    "name": "Seagate BarraCuda 2TB Desktop HDD",
-    "category": "Storage",
-    "description": "2TB Seagate BarraCuda desktop hard drive with 7200 RPM spindle speed and SATA interface. Provides high-capacity internal storage for desktop computers, workstations, and servers requiring reliable bulk data storage for files, applications, and backup operations.",
-    "brand": "Seagate",
-    "specs": {},
+    "sku": "HSG-P204",
+    "name": "P204 Pillow Block Housing",
+    "category": "Housings",
+    "description": "P204 pillow block housing compatible with UC204 insert bearings for 20mm shaft mounting.",
+    "brand": "FYH",
+    "specs": {
+      "compatible_bearing_series": [
+        "UC204"
+      ],
+      "shaft_diameter_mm": 20,
+      "mount_type": "pillow block",
+      "material": "cast iron"
+    },
     "uom": "normalized",
-    "price": 54.99,
-    "search_terms": []
+    "price": 16.9,
+    "search_terms": [
+      "P204 housing",
+      "20mm pillow block",
+      "UC204 housing"
+    ]
   },
   {
-    "sku": "HDD-SEA-2T-BARRA",
-    "name": "Seagate 2 T Barracuda Drive",
-    "category": "Hard Drive",
-    "description": "Seagate Barracuda 2TB internal hard drive for desktop computers and workstations. Provides bulk storage for operating systems, applications, and data files in business computing environments. Suitable for IT departments upgrading or replacing desktop storage capacity.",
-    "brand": "Seagate",
-    "specs": {},
+    "sku": "BRG-6203-2RS",
+    "name": "6203-2RS Sealed Ball Bearing",
+    "category": "Bearings",
+    "description": "6203-2RS sealed deep groove bearing for 17mm shafts, small motors, and pumps.",
+    "brand": "SKF",
+    "specs": {
+      "inner_diameter_mm": 17,
+      "outer_diameter_mm": 40,
+      "width_mm": 12,
+      "seal_type": "2RS",
+      "bearing_type": "deep groove ball bearing"
+    },
     "uom": "normalized",
-    "price": 55.0,
-    "search_terms": []
+    "price": 5.2,
+    "search_terms": [
+      "6203 bearing",
+      "17mm bearing",
+      "sealed bearing"
+    ]
   },
   {
-    "sku": "SSD-CRUCIAL-MX500-1TB",
-    "name": "Crucial MX500 1TB SATA SSD",
-    "category": "SSD",
-    "description": "Crucial SATA 2.5 inch SSD 1TB.",
-    "brand": "Crucial",
-    "specs": {},
+    "sku": "HSG-FL204",
+    "name": "FL204 Two-Bolt Flange Housing",
+    "category": "Housings",
+    "description": "Two-bolt flange housing for UC204 insert bearings.",
+    "brand": "FYH",
+    "specs": {
+      "compatible_bearing_series": [
+        "UC204"
+      ],
+      "shaft_diameter_mm": 20,
+      "mount_type": "two-bolt flange",
+      "material": "cast iron"
+    },
     "uom": "normalized",
-    "price": 64.99,
-    "search_terms": []
+    "price": 18.1,
+    "search_terms": [
+      "FL204 housing",
+      "UC204 flange",
+      "two bolt flange housing"
+    ]
   },
   {
-    "sku": "RAM-KING-16GB-DDR4",
-    "name": "Kingston 16GB DDR4 3200MHz RAM",
-    "category": "Memory",
-    "description": "16GB DDR4 memory module 3200 MHz.",
-    "brand": "Kingston",
-    "specs": {},
+    "sku": "PIP-NIPPLE-1-2-BRASS",
+    "name": "1/2 in Brass Pipe Nipple",
+    "category": "Pipe Fittings",
+    "description": "1/2 inch brass close nipple with male NPT threads for connecting valves and fittings.",
+    "brand": "Mueller",
+    "specs": {
+      "size_inch": 0.5,
+      "thread_type": "NPT",
+      "material": "brass",
+      "fitting_type": "nipple"
+    },
     "uom": "normalized",
-    "price": 39.99,
-    "search_terms": []
+    "price": 2.25,
+    "search_terms": [
+      "1/2 nipple",
+      "brass pipe nipple",
+      "NPT nipple"
+    ]
   },
   {
-    "sku": "MEM-KINGSTON-16-DDR4",
-    "name": "Kingston DDR4 16 GB 3200",
-    "category": "RAM",
-    "description": "Kingston 16GB DDR4 memory module operating at 3200 MHz for desktop computers, workstations, and servers. Provides high-speed system memory for data processing, multitasking, and running memory-intensive business applications in IT infrastructure and professional computing environments.",
-    "brand": "KINGSTON",
-    "specs": {},
+    "sku": "PIP-UNION-1-2-BRASS",
+    "name": "1/2 in Brass Pipe Union",
+    "category": "Pipe Fittings",
+    "description": "1/2 inch brass union fitting for detachable threaded pipe connections.",
+    "brand": "Mueller",
+    "specs": {
+      "size_inch": 0.5,
+      "thread_type": "NPT",
+      "material": "brass",
+      "fitting_type": "union"
+    },
     "uom": "normalized",
-    "price": 40.0,
-    "search_terms": []
+    "price": 7.9,
+    "search_terms": [
+      "1/2 union",
+      "brass union",
+      "pipe union"
+    ]
   },
   {
-    "sku": "RAM-CORSAIR-32-DDR4",
-    "name": "Corsair Vengeance LPX 32GB DDR4 Kit",
-    "category": "Memory",
-    "description": "Corsair Vengeance LPX 32GB DDR4 memory kit consisting of two 16GB modules running at 3200MHz. Suitable for desktop computers and workstations requiring additional memory capacity.",
-    "brand": "Corsair",
-    "specs": {},
+    "sku": "PIP-CLAMP-1IN",
+    "name": "1 in Pipe Support Clamp",
+    "category": "Pipe Fittings",
+    "description": "Steel pipe support clamp for securing 1 inch pipe to walls or structural supports.",
+    "brand": "Unistrut",
+    "specs": {
+      "size_inch": 1,
+      "material": "zinc-plated steel",
+      "mount_type": "pipe clamp"
+    },
     "uom": "normalized",
-    "price": 72.99,
-    "search_terms": []
+    "price": 3.75,
+    "search_terms": [
+      "pipe clamp",
+      "1 inch clamp",
+      "pipe support"
+    ]
   },
   {
-    "sku": "RAM-CRUCIAL-8-DDR4",
-    "name": "Crucial 8GB DDR4 Laptop RAM",
-    "category": "Laptop Memory",
-    "description": "8GB DDR4 SO-DIMM memory module from Crucial for upgrading or replacing laptop RAM. Provides additional capacity for multitasking, running business applications, and improving system performance in notebooks and compact workstations that support DDR4 SO-DIMM slots.",
-    "brand": "Crucial",
-    "specs": {},
+    "sku": "VAL-SOLENOID-1-2-24V",
+    "name": "1/2 in 24V Brass Solenoid Valve",
+    "category": "Valves",
+    "description": "24V brass solenoid valve with 1/2 inch NPT ports for automated water and air control.",
+    "brand": "ASCO",
+    "specs": {
+      "size_inch": 0.5,
+      "connection_type": "NPT female",
+      "voltage": "24V",
+      "pressure_rating_psi": 150,
+      "material": "brass",
+      "valve_type": "solenoid"
+    },
     "uom": "normalized",
-    "price": 21.99,
-    "search_terms": []
+    "price": 48.6,
+    "search_terms": [
+      "solenoid valve",
+      "24V valve",
+      "1/2 solenoid"
+    ]
   },
   {
-    "sku": "RAM-SAMSUNG-8GB-DDR4",
-    "name": "Samsung 8GB DDR4 SODIMM",
-    "category": "Memory",
-    "description": "8GB DDR4 SODIMM memory module from Samsung for laptops, compact workstations, and small form factor computers. Provides reliable system memory for business computing, mobile workstations, and equipment requiring laptop-style RAM upgrades.",
-    "brand": "Samsung",
-    "specs": {},
+    "sku": "VAL-SOLENOID-24V-HALF",
+    "name": "24 Volt Half Inch Solenoid Valve",
+    "category": "Electrical",
+    "description": "Brass solenoid valve with half-inch port size, operating on 24 volt power. Designed for electrically controlled on-off valve operation.",
+    "brand": "Generic",
+    "specs": {
+      "size": "1/2 inch",
+      "voltage": "24V",
+      "material": "brass"
+    },
     "uom": "normalized",
-    "price": 20.5,
-    "search_terms": []
+    "price": 42.0,
+    "search_terms": [
+      "24v solenoid valve",
+      "half inch automatic valve"
+    ]
   },
   {
-    "sku": "CAB-HDMI-6FT",
-    "name": "HDMI Cable 6 ft",
-    "category": "Cable",
-    "description": "6-foot HDMI cable for connecting video and audio equipment. Generic brand cable transmits digital signals between compatible devices.",
+    "sku": "MNT-COUPLING-25MM",
+    "name": "25mm Flexible Shaft Coupling",
+    "category": "Housings",
+    "description": "Flexible jaw coupling for connecting 25mm motor shafts to driven equipment.",
+    "brand": "Lovejoy",
+    "specs": {
+      "bore_diameter_mm": 25,
+      "coupling_type": "jaw",
+      "material": "steel",
+      "application": "shaft coupling"
+    },
+    "uom": "normalized",
+    "price": 34.8,
+    "search_terms": [
+      "25mm coupling",
+      "shaft coupling",
+      "motor coupling"
+    ]
+  },
+  {
+    "sku": "MNT-COUPLING-20MM",
+    "name": "20mm Flexible Shaft Coupling",
+    "category": "Housings",
+    "description": "Flexible jaw coupling for 20mm shafts in motor and pump assemblies.",
+    "brand": "Lovejoy",
+    "specs": {
+      "bore_diameter_mm": 20,
+      "coupling_type": "jaw",
+      "material": "steel",
+      "application": "shaft coupling"
+    },
+    "uom": "normalized",
+    "price": 29.4,
+    "search_terms": [
+      "20mm coupling",
+      "shaft coupling",
+      "pump coupling"
+    ]
+  },
+  {
+    "sku": "MNT-KEY-8X7X40",
+    "name": "8mm x 7mm x 40mm Shaft Key",
+    "category": "Fasteners",
+    "description": "Parallel shaft key for locking pulleys, sprockets, and couplings to metric shafts.",
+    "brand": "Misumi",
+    "specs": {
+      "width_mm": 8,
+      "height_mm": 7,
+      "length_mm": 40,
+      "material": "carbon steel"
+    },
+    "uom": "normalized",
+    "price": 1.2,
+    "search_terms": [
+      "shaft key",
+      "8mm key",
+      "coupling key"
+    ]
+  },
+  {
+    "sku": "MNT-KEY-NOSPEC",
+    "name": "Shaft Key",
+    "category": "Fasteners",
+    "description": "Steel shaft key for securing components to shafts in mechanical assemblies. Used as a fastening element to prevent relative rotation between shaft and mounted part.",
+    "brand": "Generic",
+    "specs": {
+      "material": "steel"
+    },
+    "uom": "normalized",
+    "price": 0.95,
+    "search_terms": [
+      "shaft key"
+    ]
+  },
+  {
+    "sku": "BRG-MISC-001",
+    "name": "Industrial Bearing",
+    "category": "Bearings",
+    "description": "Industrial bearing from Generic for rotational support applications in machinery. No technical specifications available.",
     "brand": "Generic",
     "specs": {},
     "uom": "normalized",
-    "price": 7.99,
-    "search_terms": []
+    "price": 9.0,
+    "search_terms": [
+      "industrial bearing"
+    ]
   },
   {
-    "sku": "CBL-HDMI-2M",
-    "name": "HDMI Cable 2 Meter",
-    "category": "Cables",
-    "description": "HDMI 2m cable supports 4k maybe.",
+    "sku": "FST-MISC-002",
+    "name": "Machine Screw",
+    "category": "Fasteners",
+    "description": "Steel machine screw designed for fastening metal parts and components with threaded holes or nuts. Commonly used in machinery assembly, equipment fabrication, and maintenance applications where uniform threading and secure mechanical connections are required.",
     "brand": "Generic",
-    "specs": {},
+    "specs": {
+      "material": "steel"
+    },
     "uom": "normalized",
-    "price": 8.25,
-    "search_terms": []
+    "price": 0.12,
+    "search_terms": [
+      "machine screw"
+    ]
   },
   {
-    "sku": "CAB-USBC-100W-1M",
-    "name": "USB-C 100W Charging Cable 1m",
-    "category": "Cable",
-    "description": "USB C cable 100w 1 meter.",
-    "brand": "Anker",
-    "specs": {},
+    "sku": "VAL-MISC-003",
+    "name": "Industrial Valve",
+    "category": "Valves",
+    "description": "Brass industrial valve for controlling flow in piping systems. Generic brand construction with brass material.",
+    "brand": "Generic",
+    "specs": {
+      "material": "brass"
+    },
     "uom": "normalized",
-    "price": 12.99,
-    "search_terms": []
+    "price": 15.0,
+    "search_terms": [
+      "industrial valve"
+    ]
   },
   {
-    "sku": "CAB-ANKER-USBC-3FT",
-    "name": "Anker USB-C Cable 3ft 100 Watt",
-    "category": "Cables",
-    "description": "3-foot USB-C cable rated for 100 watts, designed for fast charging laptops, tablets, and mobile devices. Supports high-power delivery for compatible USB-C equipment in office, field service, and technical environments where reliable power and data connectivity is essential.",
-    "brand": "ANKER",
-    "specs": {},
+    "sku": "HSG-MISC-004",
+    "name": "Bearing Mount",
+    "category": "Housings",
+    "description": "Cast iron bearing mount designed to secure bearings in equipment and machinery. Provides mounting support for bearing assemblies.",
+    "brand": "Generic",
+    "specs": {
+      "material": "cast iron"
+    },
     "uom": "normalized",
     "price": 13.5,
-    "search_terms": []
+    "search_terms": [
+      "bearing mount"
+    ]
   },
   {
-    "sku": "CAB-DP-6FT",
-    "name": "DisplayPort Cable 6ft",
-    "category": "Cables",
-    "description": "Cable Matters 6-foot DisplayPort 1.4 cable for connecting computers to monitors and displays.",
-    "brand": "Cable Matters",
-    "specs": {},
+    "sku": "PIP-ELBOW-3-4-PVC",
+    "name": "3/4 in PVC 90 Degree Elbow",
+    "category": "Pipe Fittings",
+    "description": "3/4 inch PVC elbow for non-metallic water pipe direction changes.",
+    "brand": "Charlotte Pipe",
+    "specs": {
+      "size_inch": 0.75,
+      "connection_type": "slip",
+      "angle_degree": 90,
+      "material": "PVC",
+      "fitting_type": "elbow"
+    },
     "uom": "normalized",
-    "price": 10.99,
-    "search_terms": []
+    "price": 0.95,
+    "search_terms": [
+      "PVC elbow",
+      "3/4 elbow",
+      "plastic pipe elbow"
+    ]
   },
   {
-    "sku": "CAB-ETH-CAT6-10FT",
-    "name": "Cat6 Ethernet Cable 10ft",
-    "category": "Networking",
-    "description": "CAT 6 LAN cable 10 ft blue.",
+    "sku": "PIP-VALVE-ADAPTER-1-2",
+    "name": "1/2 in Brass Valve Adapter",
+    "category": "Pipe Fittings",
+    "description": "Adapter fitting for connecting 1/2 inch brass valves to threaded pipe.",
+    "brand": "Mueller",
+    "specs": {
+      "size_inch": 0.5,
+      "thread_type": "NPT",
+      "material": "brass",
+      "fitting_type": "adapter"
+    },
+    "uom": "normalized",
+    "price": 4.6,
+    "search_terms": [
+      "valve adapter",
+      "1/2 adapter",
+      "brass adapter"
+    ]
+  },
+  {
+    "sku": "PIP-HOSE-BARB-1-2",
+    "name": "1/2 in Brass Hose Barb Adapter",
+    "category": "Pipe Fittings",
+    "description": "Brass hose barb adapter with 1/2 inch NPT male thread for hose connections.",
+    "brand": "Parker",
+    "specs": {
+      "size_inch": 0.5,
+      "thread_type": "NPT",
+      "barb_size_inch": 0.5,
+      "material": "brass",
+      "fitting_type": "hose barb adapter"
+    },
+    "uom": "normalized",
+    "price": 3.85,
+    "search_terms": [
+      "hose barb",
+      "1/2 hose adapter",
+      "brass barb"
+    ]
+  },
+  {
+    "sku": "VAL-BUTTERFLY-4IN",
+    "name": "4 in Lug Style Butterfly Valve",
+    "category": "Valves",
+    "description": "4 inch lug style butterfly valve for throttling and isolation in larger pipe systems.",
+    "brand": "Bray",
+    "specs": {
+      "size_inch": 4,
+      "connection_type": "lug",
+      "pressure_rating_psi": 150,
+      "material": "ductile iron",
+      "valve_type": "butterfly"
+    },
+    "uom": "normalized",
+    "price": 138.0,
+    "search_terms": [
+      "butterfly valve",
+      "4 inch valve",
+      "lug valve"
+    ]
+  },
+  {
+    "sku": "VAL-BUTTERFLY-LUG",
+    "name": "Lug Butterfly Valve 4 Inch",
+    "category": "Valves",
+    "description": "Four-inch butterfly valve with lug-style connection, rated for 150 psi pressure. The lug connection type allows bolted flange mounting.",
     "brand": "Generic",
-    "specs": {},
+    "specs": {
+      "size": "4 inch",
+      "connection": "lug",
+      "pressure": "150 psi"
+    },
     "uom": "normalized",
-    "price": 6.99,
-    "search_terms": []
+    "price": 121.0,
+    "search_terms": [
+      "4 inch butterfly valve",
+      "lug butterfly valve"
+    ]
   },
   {
-    "sku": "CAB-LIGHTNING-APPLE",
-    "name": "Apple Lightning to USB Cable",
-    "category": "Cable",
-    "description": "Apple Lightning to USB cable for charging and syncing iPhones, iPads, and iPods. Connects Apple devices with Lightning ports to USB power adapters, computer USB ports, or charging stations. Commonly used in offices, hospitality, retail environments, and fleet device management for maintaining Apple mobile device connectivity.",
-    "brand": "Apple",
-    "specs": {},
+    "sku": "ACC-GREASE-NLGI2",
+    "name": "NLGI 2 Bearing Grease Cartridge",
+    "category": "Bearings",
+    "description": "Lithium complex NLGI 2 grease cartridge for lubricating ball bearings and mounted units.",
+    "brand": "Mobil",
+    "specs": {
+      "grease_type": "lithium complex",
+      "nlgi_grade": 2,
+      "container_size_oz": 14,
+      "application": "bearing lubrication"
+    },
     "uom": "normalized",
-    "price": 19.0,
-    "search_terms": []
+    "price": 6.95,
+    "search_terms": [
+      "bearing grease",
+      "NLGI 2 grease",
+      "lubricant"
+    ]
   },
   {
-    "sku": "ADP-USBC-HDMI",
-    "name": "USB-C to HDMI Adapter",
-    "category": "Adapter",
-    "description": "USB-C HDMI adapter for laptop display output.",
-    "brand": "Anker",
-    "specs": {},
+    "sku": "ACC-GREASE-FITTING-M6",
+    "name": "M6 Grease Zerk Fitting",
+    "category": "Fasteners",
+    "description": "M6 grease zerk fitting for relubricating bearings, housings, and machinery joints.",
+    "brand": "Lincoln",
+    "specs": {
+      "thread_size": "M6",
+      "fitting_type": "grease zerk",
+      "material": "zinc-plated steel"
+    },
     "uom": "normalized",
-    "price": 18.99,
-    "search_terms": []
+    "price": 0.75,
+    "search_terms": [
+      "grease fitting",
+      "zerk fitting",
+      "M6 zerk"
+    ]
   },
   {
-    "sku": "ADPT-C-HDMI",
-    "name": "Type C HDMI Dongle",
-    "category": "Adapters",
-    "description": "USB Type-C to HDMI adapter dongle for connecting laptops, tablets, and mobile devices with USB-C ports to HDMI displays, monitors, and projectors. Enables video output for presentations, digital signage, and workstation monitor setups where legacy HDMI connectivity is required.",
-    "brand": "Generic",
-    "specs": {},
+    "sku": "ACC-THREADLOCKER-BLUE",
+    "name": "Blue Threadlocker Medium Strength",
+    "category": "Fasteners",
+    "description": "Medium strength blue threadlocker for securing bolts and screws against vibration loosening.",
+    "brand": "Loctite",
+    "specs": {
+      "strength": "medium",
+      "color": "blue",
+      "container_size_ml": 10,
+      "application": "thread locking"
+    },
     "uom": "normalized",
-    "price": 17.99,
-    "search_terms": []
+    "price": 8.4,
+    "search_terms": [
+      "threadlocker",
+      "blue loctite",
+      "bolt adhesive"
+    ]
   },
   {
-    "sku": "ADP-DELL-65W-USBC",
-    "name": "Dell 65W USB-C Laptop Charger",
-    "category": "Power Adapter",
-    "description": "Dell 65 watt USB-C AC adapter.",
-    "brand": "Dell",
-    "specs": {},
+    "sku": "ACC-PIPE-WRENCH-10",
+    "name": "10 in Pipe Wrench",
+    "category": "Pipe Fittings",
+    "description": "10 inch pipe wrench for installing and removing threaded pipe fittings.",
+    "brand": "Ridgid",
+    "specs": {
+      "length_in": 10,
+      "tool_type": "pipe wrench",
+      "material": "cast iron",
+      "length_mm": 254.0
+    },
     "uom": "normalized",
-    "price": 49.99,
-    "search_terms": []
-  },
-  {
-    "sku": "CHG-DELL-TYPEC-65W",
-    "name": "Dell Type C 65 Watt Charger",
-    "category": "Chargers",
-    "description": "65-watt USB Type-C charger designed for Dell laptops and mobile devices. Provides fast charging for compatible Dell notebooks, Chromebooks, and tablets requiring USB-C power delivery. Suitable for office deployments, IT equipment replacement, and maintaining backup power supplies for business computing environments.",
-    "brand": "DELL",
-    "specs": {},
-    "uom": "normalized",
-    "price": 48.5,
-    "search_terms": []
-  },
-  {
-    "sku": "ADP-LEN-65W-USB-C",
-    "name": "Lenovo 65W USB-C AC Adapter",
-    "category": "Power",
-    "description": "Lenovo USB C laptop charger 65W.",
-    "brand": "Lenovo",
-    "specs": {},
-    "uom": "normalized",
-    "price": 44.99,
-    "search_terms": []
-  },
-  {
-    "sku": "ADP-APPLE-30W-USBC",
-    "name": "Apple 30W USB-C Power Adapter",
-    "category": "Charger",
-    "description": "Apple 30W USB-C power adapter for charging USB-C equipped devices. Compact design suitable for powering compatible laptops, tablets, and mobile devices.",
-    "brand": "Apple",
-    "specs": {},
-    "uom": "normalized",
-    "price": 39.0,
-    "search_terms": []
-  },
-  {
-    "sku": "HUB-USBC-7IN1",
-    "name": "USB-C 7-in-1 Hub",
-    "category": "Docking",
-    "description": "USB-C hub with HDMI, USB, SD card and charging pass-through.",
-    "brand": "Generic",
-    "specs": {},
-    "uom": "normalized",
-    "price": 34.99,
-    "search_terms": []
-  },
-  {
-    "sku": "DOCK-DELL-WD19S",
-    "name": "Dell WD19S USB-C Docking Station",
-    "category": "Dock",
-    "description": "Dell WD19S USB-C docking station for expanding laptop connectivity. Provides a single-cable connection solution for workstations and desktops.",
-    "brand": "Dell",
-    "specs": {},
-    "uom": "normalized",
-    "price": 179.0,
-    "search_terms": []
-  },
-  {
-    "sku": "NET-TPARCH-AX1800",
-    "name": "TP-Link Archer AX1800 WiFi 6 Router",
-    "category": "Networking",
-    "description": "TP-Link Archer AX1800 is a WiFi 6 dual-band router for wireless network connectivity. Provides AX1800 wireless throughput for connecting multiple devices to a network.",
-    "brand": "TP-Link",
-    "specs": {},
-    "uom": "normalized",
-    "price": 89.99,
-    "search_terms": []
-  },
-  {
-    "sku": "RTR-TPLINK-AX1800",
-    "name": "TP Link AX1800 Wireless Router",
-    "category": "Router",
-    "description": "TP Link AX1800 wireless router for network connectivity. Provides wireless access for computers, mobile devices, and networked equipment.",
-    "brand": "TP Link",
-    "specs": {},
-    "uom": "normalized",
-    "price": 87.99,
-    "search_terms": []
-  },
-  {
-    "sku": "NET-NETGEAR-GS108",
-    "name": "Netgear GS108 8-Port Gigabit Switch",
-    "category": "Networking",
-    "description": "8 port gigabit unmanaged switch metal case.",
-    "brand": "Netgear",
-    "specs": {},
-    "uom": "normalized",
-    "price": 29.99,
-    "search_terms": []
-  },
-  {
-    "sku": "SW-NETGEAR-8PORT-GIG",
-    "name": "NetGear 8 Port Gig Switch",
-    "category": "Switches",
-    "description": "NETGEAR 8-port Gigabit Ethernet switch for connecting multiple network devices. Designed for workgroup and office network expansion.",
-    "brand": "NETGEAR",
-    "specs": {},
-    "uom": "normalized",
-    "price": 31.0,
-    "search_terms": []
-  },
-  {
-    "sku": "NET-UBI-U6-LITE",
-    "name": "Ubiquiti UniFi U6 Lite Access Point",
-    "category": "Wireless",
-    "description": "Ubiquiti UniFi U6 Lite wireless access point for network connectivity. Provides Wi-Fi coverage for business and commercial environments.",
-    "brand": "Ubiquiti",
-    "specs": {},
-    "uom": "normalized",
-    "price": 99.0,
-    "search_terms": []
-  },
-  {
-    "sku": "NET-CAT6-PATCH-25",
-    "name": "Cat6 Patch Cable 25 ft",
-    "category": "Networking",
-    "description": "25-foot Cat6 ethernet patch cable for network connectivity applications. Generic brand networking cable supplied in 25-foot length.",
-    "brand": "Generic",
-    "specs": {},
-    "uom": "normalized",
-    "price": 11.99,
-    "search_terms": []
-  },
-  {
-    "sku": "CAM-LOGI-C920",
-    "name": "Logitech C920 HD Webcam",
-    "category": "Camera",
-    "description": "Logitech C920 webcam with 1080p resolution and USB connection for desktop and laptop computers.",
-    "brand": "Logitech",
-    "specs": {},
-    "uom": "normalized",
-    "price": 69.99,
-    "search_terms": []
-  },
-  {
-    "sku": "WEB-LOGITECH-C920",
-    "name": "Logi C920 Webcam",
-    "category": "Webcams",
-    "description": "Logi C920 webcam for video meetings and business communication. Suitable for connecting to computers and workstations where video calling capability is needed.",
-    "brand": "Logi",
-    "specs": {},
-    "uom": "normalized",
-    "price": 66.99,
-    "search_terms": []
-  },
-  {
-    "sku": "HEAD-JABRA-EVOLVE40",
-    "name": "Jabra Evolve 40 USB Headset",
-    "category": "Headset",
-    "description": "Jabra Evolve 40 USB headset with microphone for computer audio and voice communication applications.",
-    "brand": "Jabra",
-    "specs": {},
-    "uom": "normalized",
-    "price": 79.99,
-    "search_terms": []
-  },
-  {
-    "sku": "HEAD-LOGI-H390",
-    "name": "Logitech H390 USB Headset",
-    "category": "Audio",
-    "description": "Logitech H390 USB headset for computer audio and communication tasks. Connects via USB to desktop computers and workstations.",
-    "brand": "Logitech",
-    "specs": {},
-    "uom": "normalized",
-    "price": 24.99,
-    "search_terms": []
-  },
-  {
-    "sku": "SPK-LOGI-Z313",
-    "name": "Logitech Z313 Speaker System",
-    "category": "Speakers",
-    "description": "Logitech Z313 2.1 speaker system with subwoofer for audio playback. Provides speaker output with dedicated low-frequency driver for enhanced bass.",
-    "brand": "Logitech",
-    "specs": {},
-    "uom": "normalized",
-    "price": 59.99,
-    "search_terms": []
-  },
-  {
-    "sku": "MIC-BLUE-YETI",
-    "name": "Blue Yeti USB Microphone",
-    "category": "Microphone",
-    "description": "USB mic for recording and streaming.",
-    "brand": "Blue",
-    "specs": {},
-    "uom": "normalized",
-    "price": 109.99,
-    "search_terms": []
-  },
-  {
-    "sku": "BAT-APC-BE600M1",
-    "name": "APC Back-UPS 600VA UPS",
-    "category": "Power",
-    "description": "600VA backup power unit with outlets.",
-    "brand": "APC",
-    "specs": {},
-    "uom": "normalized",
-    "price": 74.99,
-    "search_terms": []
-  },
-  {
-    "sku": "UPS-APC-600VA",
-    "name": "APC 600 VA Battery Backup",
-    "category": "UPS",
-    "description": "APC 600 VA uninterruptible power supply providing battery backup power during outages. UPS unit designed to maintain power continuity for connected equipment.",
-    "brand": "APC",
-    "specs": {},
-    "uom": "normalized",
-    "price": 73.99,
-    "search_terms": []
-  },
-  {
-    "sku": "PWR-STRIP-6OUTLET",
-    "name": "6 Outlet Surge Protector",
-    "category": "Power Strip",
-    "description": "Belkin 6-outlet surge protector power strip for distributing power to multiple devices. Provides surge protection to connected equipment.",
-    "brand": "Belkin",
-    "specs": {},
-    "uom": "normalized",
-    "price": 14.99,
-    "search_terms": []
-  },
-  {
-    "sku": "PWR-BELKIN-6-SURGE",
-    "name": "Belkin 6 Outlet Surge Strip",
-    "category": "Power",
-    "description": "Belkin six-outlet surge protection strip for connecting multiple electronic devices to a single power source. Protects connected equipment from voltage spikes and power surges.",
-    "brand": "Belkin",
-    "specs": {},
-    "uom": "normalized",
-    "price": 16.5,
-    "search_terms": []
-  },
-  {
-    "sku": "PRN-HP-LJ-M404DN",
-    "name": "HP LaserJet Pro M404dn Printer",
-    "category": "Printer",
-    "description": "HP black and white laser printer with duplex printing.",
-    "brand": "HP",
-    "specs": {},
-    "uom": "normalized",
-    "price": 249.99,
-    "search_terms": []
-  },
-  {
-    "sku": "PRN-BROTHER-HL-L2350DW",
-    "name": "Brother HL-L2350DW Laser Printer",
-    "category": "Printers",
-    "description": "Brother HL-L2350DW wireless laser printer for document output in office and business environments. Wireless capability allows network connection for printing from multiple devices.",
-    "brand": "Brother",
-    "specs": {},
-    "uom": "normalized",
-    "price": 179.99,
-    "search_terms": []
-  },
-  {
-    "sku": "TABLET-IPAD-10TH-64",
-    "name": "Apple iPad 10th Gen 64GB WiFi",
-    "category": "Tablet",
-    "description": "iPad 10th generation with 64GB storage.",
-    "brand": "Apple",
-    "specs": {},
-    "uom": "normalized",
-    "price": 349.0,
-    "search_terms": []
-  },
-  {
-    "sku": "TAB-SAMSUNG-A9",
-    "name": "Samsung Galaxy Tab A9 64GB",
-    "category": "Tablet",
-    "description": "Samsung Galaxy Tab A9 Android tablet with 64GB storage capacity. This tablet provides touchscreen computing and mobile connectivity for workplace or business use.",
-    "brand": "Samsung",
-    "specs": {},
-    "uom": "normalized",
-    "price": 219.99,
-    "search_terms": []
-  },
-  {
-    "sku": "PHONE-IPHONE-13-128",
-    "name": "Apple iPhone 13 128GB Unlocked",
-    "category": "Phone",
-    "description": "Apple iPhone 13 with 128GB storage capacity, unlocked for use across carriers. Suitable for business users and organizations requiring mobile communication devices without carrier lock-in.",
-    "brand": "Apple",
-    "specs": {},
-    "uom": "normalized",
-    "price": 599.0,
-    "search_terms": []
-  },
-  {
-    "sku": "PHONE-SAM-S23-128",
-    "name": "Samsung Galaxy S23 128 GB",
-    "category": "Smartphones",
-    "description": "Samsung Galaxy S23 smartphone with 128 GB of storage. Provides mobile communication and connectivity for users requiring a smartphone device.",
-    "brand": "Samsung",
-    "specs": {},
-    "uom": "normalized",
-    "price": 649.0,
-    "search_terms": []
-  },
-  {
-    "sku": "ACC-LAPTOP-SLEEVE-14",
-    "name": "14 inch Laptop Sleeve",
-    "category": "Accessories",
-    "description": "protective laptop sleeve for 14in notebooks.",
-    "brand": "Generic",
-    "specs": {},
-    "uom": "normalized",
-    "price": 15.99,
-    "search_terms": []
-  },
-  {
-    "sku": "ACC-WIRELESS-PRESENTER",
-    "name": "Wireless Presentation Remote",
-    "category": "Accessories",
-    "description": "Wireless presentation remote with USB receiver for controlling presentations. Designed for use in meetings, training sessions, and conference environments where remote slide control is needed.",
-    "brand": null,
-    "specs": {},
-    "uom": "normalized",
-    "price": 19.99,
-    "search_terms": []
-  },
-  {
-    "sku": "ACC-USB-DRIVE-64",
-    "name": "SanDisk 64 GB USB Drive",
-    "category": "Storage Devices",
-    "description": "SanDisk 64 GB USB drive for portable data storage and file transfer.",
-    "brand": "Sandisk",
-    "specs": {},
-    "uom": "normalized",
-    "price": null,
-    "search_terms": []
-  },
-  {
-    "sku": "SSD-SAM-970EVO-1TB",
-    "name": "Samsung 970 EVO Plus 1TB SSD Duplicate",
-    "category": "Storage",
-    "description": "Samsung 970 EVO Plus solid state drive with 1TB storage capacity. This SSD is designed for use in computers and data storage systems.",
-    "brand": "Samsung",
-    "specs": {},
-    "uom": "normalized",
-    "price": 88.99,
-    "search_terms": []
-  },
-  {
-    "sku": "MON-UNKNOWN-27",
-    "name": "27 inch Monitor",
-    "category": "Electronics",
-    "description": "27-inch monitor for connecting to computers and workstations.",
-    "brand": "Unknown",
-    "specs": {},
-    "uom": "normalized",
-    "price": null,
-    "search_terms": []
-  },
-  {
-    "sku": "CHG-USB-C-65W-GEN",
-    "name": "USB C Charger 65w",
-    "category": "",
-    "description": "65-watt USB-C charger from Generic brand for powering devices with USB-C charging ports. Delivers 65 watts of power output through a USB-C connection.",
-    "brand": "Generic",
-    "specs": {},
-    "uom": "normalized",
-    "price": 25.0,
-    "search_terms": []
+    "price": 19.95,
+    "search_terms": [
+      "pipe wrench",
+      "threaded pipe tool",
+      "plumbing wrench"
+    ]
   }
 ]

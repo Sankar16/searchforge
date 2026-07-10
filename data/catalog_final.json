@@ -3,7 +3,7 @@
     "sku": "BRG-6205-2RS",
     "name": "6205-2RS Sealed Ball Bearing",
     "category": "Bearings",
-    "description": "SKF chrome steel deep groove ball bearing with double rubber seals (2RS), featuring a 25mm bore, 52mm outer diameter, and 15mm width. The sealed design provides contamination protection, making it well-suited for motors, pumps, conveyors, and other equipment operating in dusty or wet environments.",
+    "description": "Deep groove ball bearing made from chrome steel with double rubber seals (2RS), featuring 25mm inner diameter, 52mm outer diameter, and 15mm width. Manufactured by SKF.",
     "brand": "SKF",
     "specs": {
       "inner_diameter_mm": 25,
@@ -26,7 +26,7 @@
     "sku": "BRG-6205-RUBBER",
     "name": "Rubber Sealed 6205 Bearing",
     "category": "Bearing",
-    "description": "Deep groove ball bearing with rubber seals, featuring a 25mm bore, 52mm outer diameter, and 15mm width. The rubber sealing provides protection against dust and moisture ingress, making it suitable for motors, pumps, conveyors, and general machinery operating in environments where contamination is a concern.",
+    "description": "Deep groove ball bearing with rubber seals, featuring a 25mm bore, 52mm outer diameter, and 15mm width. Designed to protect internal components from dust and contaminants in motors, pumps, conveyors, and general machinery. The rubber sealing provides reliable contamination protection for equipment operating in moderately dirty environments.",
     "brand": "Generic",
     "specs": {
       "bore": "25 mm",
@@ -67,7 +67,7 @@
     "sku": "BRG-6004-METAL",
     "name": "6004 Metal Shield Bearing",
     "category": "Bearings",
-    "description": "NTN 6004 bearing with metal shield, 20mm inner diameter, 42mm outer diameter, and 12mm width.",
+    "description": "NTN 6004 metal shield bearing with 20mm bore, 42mm outer diameter, and 12mm width. Metal shields provide protection from contaminants in machinery applications.",
     "brand": "NTN",
     "specs": {
       "inner_diameter_mm": 20,
@@ -107,7 +107,7 @@
     "sku": "BRG-6303-NO-SPEC",
     "name": "6303 Bearing",
     "category": "Bearings",
-    "description": "Open-style 6303 bearing without seals or shields, allowing for external lubrication and cooling in controlled environments. The open design provides lower friction and heat generation compared to sealed versions, making it ideal for applications where contamination is not a concern and regular maintenance access is available.",
+    "description": "Open-type 6303 bearing without seals. Generic brand.",
     "brand": "Generic",
     "specs": {
       "seal_type": "open"
@@ -233,7 +233,7 @@
     "sku": "HSG-P205-CAST",
     "name": "Cast Iron Pillow Block P205",
     "category": "Mounts",
-    "description": "Cast iron pillow block bearing housing designed for 25mm shafts, compatible with 6205 and UC205 bearings. This mount provides a durable support structure for shafts in conveyor systems, agricultural equipment, and general machinery requiring secure bearing retention.",
+    "description": "Cast iron pillow block mount compatible with 6205 or UC205 bearings and 25 mm shafts. Designed to house and support rotating shaft assemblies where the bearing requires mounting on a horizontal surface.",
     "brand": "Generic",
     "specs": {
       "compatible_bearing": "6205 / UC205",
@@ -315,7 +315,7 @@
     "sku": "MNT-MOTOR-56C-PLATE",
     "name": "Motor Base Plate for 56C Frame",
     "category": "Fasteners",
-    "description": "Steel motor base plate compatible with 56C frame motors. Provides a mounting surface for motor installation.",
+    "description": "Steel mounting base plate designed for 56C frame motors. Provides a stable mounting surface for securing motors to equipment frames, machinery bases, or flooring in industrial installations. Used in motor replacement, equipment assembly, and maintenance applications requiring proper motor alignment and support.",
     "brand": "Generic",
     "specs": {
       "compatible_motor_frame": "56C",
@@ -354,7 +354,7 @@
     "sku": "FST-HEX-M8X40",
     "name": "Hex Bolt M8x40",
     "category": "Fasteners",
-    "description": "Zinc-plated steel hex bolt with M8 thread diameter and 40mm length, providing corrosion resistance for general fastening applications. The hexagonal head design allows for high-torque tightening with standard wrenches or sockets. Commonly used in machinery assembly, structural connections, and equipment mounting where moderate strength and weather protection are needed.",
+    "description": "M8 hex bolt with 40mm length, made from zinc steel. Threaded fastener for bolted connections in industrial equipment and machinery.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -372,7 +372,7 @@
     "sku": "FST-M8-40-HEXAGON",
     "name": "M8 40mm Hexagon Bolt Zinc",
     "category": "Bolts",
-    "description": "Zinc-plated steel hexagon bolt with M8 thread diameter and 40mm length. The hexagonal head allows for wrench or socket installation, while the zinc plating provides moderate corrosion resistance for general assembly and fastening applications.",
+    "description": "Zinc-plated steel hexagon bolt with M8 diameter and 40mm length. Provides corrosion resistance for outdoor or moisture-exposed assemblies in machinery, equipment mounting, structural connections, and general fastening applications. Compatible with standard hex wrenches and sockets.",
     "brand": "Generic",
     "specs": {
       "diameter_mm": 8,
@@ -436,7 +436,7 @@
     "sku": "FST-HALF-IN-BOLT",
     "name": "Half Inch Hex Bolt 2 Inch",
     "category": "Fasteners",
-    "description": "Plain steel hex bolt with 1/2 inch diameter and 2 inch length. Ideal for general-purpose structural fastening, equipment assembly, and maintenance applications where corrosion resistance is not a primary concern.",
+    "description": "Plain steel hex bolt with 1/2 inch diameter and 2 inch length. Threaded fastener for securing components in assemblies and structures.",
     "brand": "Generic",
     "specs": {
       "diameter": "1/2 inch",
@@ -537,7 +537,7 @@
     "sku": "FST-ANCHOR-NOSIZE",
     "name": "Concrete Anchor",
     "category": "Fasteners",
-    "description": "Steel wedge anchor designed for secure fastening into concrete and masonry. The wedge design expands when tightened to create a reliable hold in solid base materials. Ideal for mounting heavy equipment, structural brackets, and machinery to concrete floors or walls.",
+    "description": "Steel wedge anchor designed for securing fixtures, equipment, and structural components to concrete and masonry surfaces. The wedge design expands within the drilled hole to create a mechanical lock, providing reliable holding strength for mounting brackets, machinery bases, handrails, and heavy-duty installations.",
     "brand": "Generic",
     "specs": {
       "material": "steel",
@@ -574,7 +574,7 @@
     "sku": "PIP-BRASS-ELBOW-HALF",
     "name": "Half Inch Brass Elbow",
     "category": "Pipe Fittings",
-    "description": "Brass elbow fitting with 1/2 inch NPT threads for creating 90-degree directional changes in threaded pipe systems. The brass construction provides corrosion resistance and durability in water, air, and gas distribution applications.",
+    "description": "Half inch brass elbow fitting with NPT threads for creating 90-degree directional changes in pipe systems. Brass construction provides corrosion resistance and durability in plumbing, compressed air, fuel, and hydraulic line installations. Threaded connections enable secure, tool-tightened joints without welding or soldering.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -718,7 +718,7 @@
     "sku": "PIP-MISC-001",
     "name": "Threaded Pipe Fitting",
     "category": "Pipe Fittings",
-    "description": "Brass threaded pipe fitting designed for connecting pipes in plumbing and fluid handling systems. The brass construction provides durability and corrosion resistance for both water and air lines.",
+    "description": "Brass threaded pipe fitting for connecting pipe sections in various systems. Generic brand fitting with threaded connections for mechanical assembly.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -754,7 +754,7 @@
     "sku": "VAL-HALF-BRASS-BALL",
     "name": "Half Inch Brass Shutoff Ball Valve",
     "category": "Valve",
-    "description": "Brass ball valve with half inch female NPT threaded connections, rated for 600 psi working pressure. Provides reliable shutoff control in plumbing systems, water distribution lines, and general fluid handling applications where corrosion resistance and durability are needed.",
+    "description": "Half inch brass ball valve with female NPT threaded connections, rated for 600 psi working pressure. Provides reliable on-off flow control in water lines, compressed air systems, and general plumbing installations where corrosion resistance and durability are needed. Brass construction offers long service life in potable water and light industrial applications.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -857,7 +857,7 @@
     "sku": "VAL-RELIEF-NOSPEC",
     "name": "Pressure Relief Valve",
     "category": "Valves",
-    "description": "Pressure relief valve designed to protect systems from overpressure conditions by automatically opening when pressure exceeds safe operating limits. Used in hydraulic systems, compressed air lines, and process equipment to prevent damage and ensure safe operation.",
+    "description": "Pressure relief valve designed to automatically release excess pressure when system pressure exceeds set limits. Used in fluid systems requiring overpressure protection.",
     "brand": "Generic",
     "specs": {
       "valve_type": "pressure relief"
@@ -898,7 +898,7 @@
     "sku": "FST-MOTOR-BOLT-KIT",
     "name": "Motor Mount Bolt Kit",
     "category": "Fasteners",
-    "description": "Motor mount bolt kit featuring M8 zinc-coated steel fasteners designed for secure motor installation. The zinc plating provides corrosion resistance for mounting applications in industrial environments. This kit supplies the necessary hardware for attaching motors to frames, bases, or mounting plates.",
+    "description": "M8 zinc-plated steel bolt kit designed for securing motors to mounting bases, frames, and equipment housings. Provides corrosion-resistant fastening hardware for electric motor installations in machinery, pumps, conveyors, and industrial equipment.",
     "brand": "Generic",
     "specs": {
       "diameter": "M8",
@@ -1146,7 +1146,7 @@
     "sku": "VAL-SOLENOID-24V-HALF",
     "name": "24 Volt Half Inch Solenoid Valve",
     "category": "Electrical",
-    "description": "Brass solenoid valve with half inch port size, operating on 24 volt power for automated flow control. The brass construction offers durability and corrosion resistance in water, air, and fluid handling systems. Commonly used in HVAC equipment, irrigation controls, and process automation where electrically actuated on-off valve operation is needed.",
+    "description": "Brass solenoid valve with half-inch port size, operating on 24 volt power. Designed for electrically controlled on-off valve operation.",
     "brand": "Generic",
     "specs": {
       "size": "1/2 inch",
@@ -1224,7 +1224,7 @@
     "sku": "MNT-KEY-NOSPEC",
     "name": "Shaft Key",
     "category": "Fasteners",
-    "description": "Steel shaft key for securing components to shafts. This fastener is made of steel and serves as a key for shaft applications.",
+    "description": "Steel shaft key for securing components to shafts in mechanical assemblies. Used as a fastening element to prevent relative rotation between shaft and mounted part.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1239,7 +1239,7 @@
     "sku": "BRG-MISC-001",
     "name": "Industrial Bearing",
     "category": "Bearings",
-    "description": "Industrial bearing from Generic brand. No additional specifications are available for this product.",
+    "description": "Industrial bearing from Generic for rotational support applications in machinery. No technical specifications available.",
     "brand": "Generic",
     "specs": {},
     "uom": "normalized",
@@ -1252,7 +1252,7 @@
     "sku": "FST-MISC-002",
     "name": "Machine Screw",
     "category": "Fasteners",
-    "description": "Steel machine screw designed for threaded fastening in metal assemblies and equipment. Provides reliable mechanical connection in machinery, control panels, and structural components where precision threading is required.",
+    "description": "Steel machine screw designed for fastening metal parts and components with threaded holes or nuts. Commonly used in machinery assembly, equipment fabrication, and maintenance applications where uniform threading and secure mechanical connections are required.",
     "brand": "Generic",
     "specs": {
       "material": "steel"
@@ -1267,7 +1267,7 @@
     "sku": "VAL-MISC-003",
     "name": "Industrial Valve",
     "category": "Valves",
-    "description": "Brass industrial valve designed for fluid control in piping systems. The brass construction provides good corrosion resistance and durability for water, air, and other compatible media applications. Suitable for general-purpose flow regulation in mechanical systems and process equipment.",
+    "description": "Brass industrial valve for controlling flow in piping systems. Generic brand construction with brass material.",
     "brand": "Generic",
     "specs": {
       "material": "brass"
@@ -1282,7 +1282,7 @@
     "sku": "HSG-MISC-004",
     "name": "Bearing Mount",
     "category": "Housings",
-    "description": "Cast iron bearing mount designed to securely support and position bearings in machinery assemblies. The robust construction provides stable mounting in rotating equipment, conveyors, and drive systems where reliable bearing support is essential.",
+    "description": "Cast iron bearing mount designed to secure bearings in equipment and machinery. Provides mounting support for bearing assemblies.",
     "brand": "Generic",
     "specs": {
       "material": "cast iron"
@@ -1380,7 +1380,7 @@
     "sku": "VAL-BUTTERFLY-LUG",
     "name": "Lug Butterfly Valve 4 Inch",
     "category": "Valves",
-    "description": "Lug-style butterfly valve with a 4 inch port size, rated for pressures up to 150 psi. The lug connection design allows installation between flanges without through-bolts, making it ideal for dead-end service or systems requiring easy valve removal without shutting down the entire line.",
+    "description": "Four-inch butterfly valve with lug-style connection, rated for 150 psi pressure. The lug connection type allows bolted flange mounting.",
     "brand": "Generic",
     "specs": {
       "size": "4 inch",
