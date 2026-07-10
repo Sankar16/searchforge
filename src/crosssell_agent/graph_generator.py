@@ -61,20 +61,27 @@ MATCHING_SPEC_PAIRS = [
     ("diameter_mm", "diameter_mm"),
 ]
 
-compatibility_agent = Agent(
-    "anthropic:claude-haiku-4-5-20251001",
-    output_type=CompatibilityResult,
-    system_prompt=(
-        "You are a B2B industrial product expert. Given two industrial products, "
-        "determine if they are technically compatible (e.g., a bearing fits a housing, "
-        "a bolt fits a mount, a valve connects to a fitting). "
-        "Only say are_compatible=True if there is a clear technical reason based on the specs. "
-        "relationship_type should be one of: 'fits_into', 'mounts_on', 'connects_to', 'pairs_with', "
-        "'compatible_charger', 'compatible_cable', 'pairs_with_peripheral', 'requires_adapter', 'compatible_accessory'. "
-        "confidence should reflect how certain you are (0.0-1.0). "
-        "Keep reason to one short sentence."
-    ),
-)
+_compatibility_agent = None
+
+
+def _get_compatibility_agent() -> Agent:
+    global _compatibility_agent
+    if _compatibility_agent is None:
+        _compatibility_agent = Agent(
+            "anthropic:claude-haiku-4-5-20251001",
+            output_type=CompatibilityResult,
+            system_prompt=(
+                "You are a B2B industrial product expert. Given two industrial products, "
+                "determine if they are technically compatible (e.g., a bearing fits a housing, "
+                "a bolt fits a mount, a valve connects to a fitting). "
+                "Only say are_compatible=True if there is a clear technical reason based on the specs. "
+                "relationship_type should be one of: 'fits_into', 'mounts_on', 'connects_to', 'pairs_with', "
+                "'compatible_charger', 'compatible_cable', 'pairs_with_peripheral', 'requires_adapter', 'compatible_accessory'. "
+                "confidence should reflect how certain you are (0.0-1.0). "
+                "Keep reason to one short sentence."
+            ),
+        )
+    return _compatibility_agent
 
 
 def find_candidate_pairs(catalog: list[dict]) -> list[tuple[dict, dict]]:
@@ -127,7 +134,7 @@ async def _validate_pair_with_llm(
     )
     async with semaphore:
         try:
-            result = await compatibility_agent.run(prompt)
+            result = await _get_compatibility_agent().run(prompt)
             r = result.output
             if not r.are_compatible or r.confidence < 0.6:
                 return None

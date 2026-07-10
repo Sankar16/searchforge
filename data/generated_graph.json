@@ -1,56 +1,263 @@
 [
   {
-    "source": "BRG-6205-2RS",
-    "target": "HSG-P205",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "P205 Pillow Block Housing",
-    "relationship": "fits_into",
+    "source": "LAP-DELL-LAT5420",
+    "target": "KEY-LOGITECH-MX-KEYS",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "Logitech MXKeys Keyboard",
+    "relationship": "pairs_with_peripheral",
     "confidence": 0.95,
-    "reason": "The 6205-2RS bearing has a 25mm inner diameter that matches the P205 housing's 25mm shaft diameter, and the housing explicitly lists 6205 as a compatible bearing series."
+    "reason": "Dell Latitude 5420 laptop is compatible with Logitech MX Keys wireless keyboard via Bluetooth or USB receiver connection."
   },
   {
-    "source": "BRG-6205-2RS",
-    "target": "HSG-P205-CAST",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "Cast Iron Pillow Block P205",
-    "relationship": "fits_into",
+    "source": "LAP-DELL-LAT5420",
+    "target": "MOUSE-LOGITECH-MX3",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "Logitech MX Master3 Mouse",
+    "relationship": "pairs_with_peripheral",
     "confidence": 0.95,
-    "reason": "The 6205-2RS bearing with 25mm inner diameter matches the P205 pillow block's 25mm shaft size and compatible bearing designation."
+    "reason": "Dell Latitude 5420 notebook can pair with Logitech MX Master 3 mouse via USB receiver or Bluetooth connectivity as a standard input peripheral."
   },
   {
-    "source": "BRG-6205-2RS",
-    "target": "MNT-SHAFT-25MM",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "25mm Steel Shaft",
-    "relationship": "fits_into",
-    "confidence": 0.95,
-    "reason": "The bearing's inner diameter (25mm) matches the shaft's diameter (25mm), allowing the bearing to fit onto the shaft."
-  },
-  {
-    "source": "BRG-6205-2RS",
-    "target": "MNT-SHAFT-1IN",
-    "source_name": "6205-2RS Sealed Ball Bearing",
-    "target_name": "1 in Steel Shaft",
-    "relationship": "fits_into",
-    "confidence": 0.95,
-    "reason": "The bearing's inner diameter (25mm) matches the shaft diameter (25.4mm within typical manufacturing tolerances), allowing the bearing to mount onto the shaft."
-  },
-  {
-    "source": "BRG-6004-ZZ",
-    "target": "HSG-UCP204",
-    "source_name": "6004-ZZ Shielded Ball Bearing",
-    "target_name": "UCP204 Pillow Block Bearing Unit",
-    "relationship": "fits_into",
+    "source": "LAP-DELL-LAT5420",
+    "target": "CBL-HDMI-2M",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "HDMI Cable 2 Meter",
+    "relationship": "compatible_cable",
     "confidence": 0.85,
-    "reason": "The bearing's 20mm inner diameter matches the pillow block's 20mm shaft diameter specification, allowing the bearing to fit into the housing."
+    "reason": "Dell Latitude 5420 notebooks typically feature HDMI output ports for connecting external displays via HDMI cables."
   },
   {
-    "source": "BRG-6004-ZZ",
-    "target": "HSG-P204",
-    "source_name": "6004-ZZ Shielded Ball Bearing",
-    "target_name": "P204 Pillow Block Housing",
-    "relationship": "fits_into",
+    "source": "LAP-DELL-LAT5420",
+    "target": "CAB-ANKER-USBC-3FT",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "Anker USB-C Cable 3ft 100 Watt",
+    "relationship": "compatible_cable",
     "confidence": 0.85,
-    "reason": "The bearing's 20mm inner diameter matches the housing's 20mm shaft diameter, allowing the bearing to fit onto the shaft and into the pillow block housing."
+    "reason": "Dell Latitude 5420 notebooks feature USB-C ports and can be charged/data-synced with USB-C cables like this Anker 100W cable, though confirmation of exact connector type and power specifications would be ideal."
+  },
+  {
+    "source": "LAP-DELL-LAT5420",
+    "target": "CAB-DP-6FT",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "DisplayPort Cable 6ft",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "Dell Latitude 5420 notebooks include DisplayPort video output ports, making a DisplayPort cable a compatible accessory for video display connectivity."
+  },
+  {
+    "source": "LAP-DELL-LAT5420",
+    "target": "ADPT-C-HDMI",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "Dell Latitude 5420 notebooks typically feature USB Type-C ports that support video output, making them compatible with Type-C to HDMI dongles for display connectivity."
+  },
+  {
+    "source": "LAP-DELL-LAT5420",
+    "target": "CHG-DELL-TYPEC-65W",
+    "source_name": "Latitude 5420 Notebook",
+    "target_name": "Dell Type C 65 Watt Charger",
+    "relationship": "compatible_charger",
+    "confidence": 0.85,
+    "reason": "Dell Latitude 5420 supports USB Type-C charging and the 65W Dell Type-C charger is compatible with this model."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "KEY-LOGITECH-MX-KEYS",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "Logitech MXKeys Keyboard",
+    "relationship": "pairs_with_peripheral",
+    "confidence": 0.95,
+    "reason": "Logitech MX Keys is a wireless keyboard compatible with most laptops including ThinkPad via Bluetooth or USB receiver."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "MOUSE-LOGITECH-MX3",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "Logitech MX Master3 Mouse",
+    "relationship": "pairs_with_peripheral",
+    "confidence": 0.95,
+    "reason": "Logitech MX Master3 is a wireless mouse compatible with ThinkPad T14 Gen2 via Bluetooth or USB receiver."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "CBL-HDMI-2M",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "HDMI Cable 2 Meter",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "ThinkPad T14 Gen2 laptops typically feature HDMI output ports, making a standard HDMI cable compatible for video display connectivity."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "CAB-ANKER-USBC-3FT",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "Anker USB-C Cable 3ft 100 Watt",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "ThinkPad T14 Gen2 has USB-C ports and the Anker USB-C 100W cable is compatible for charging and data transfer."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "CAB-DP-6FT",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "DisplayPort Cable 6ft",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "ThinkPad T14 Gen2 laptops typically feature DisplayPort output via USB-C or dedicated ports, making them compatible with standard DisplayPort cables."
+  },
+  {
+    "source": "LAP-LEN-T14-G2",
+    "target": "ADPT-C-HDMI",
+    "source_name": "Thinkpad T14 Laptop Gen2",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "compatible_accessory",
+    "confidence": 0.85,
+    "reason": "ThinkPad T14 Gen2 has USB Type-C ports that support display output, compatible with the Type-C HDMI dongle for external display connectivity."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "KEY-LOGITECH-MX-KEYS",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "Logitech MXKeys Keyboard",
+    "relationship": "pairs_with_peripheral",
+    "confidence": 0.95,
+    "reason": "Logitech MX Keys is a Bluetooth/wireless keyboard that is compatible with Apple MacBook Air M2 via standard wireless connectivity."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "MOUSE-LOGITECH-MX3",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "Logitech MX Master3 Mouse",
+    "relationship": "pairs_with_peripheral",
+    "confidence": 0.95,
+    "reason": "Logitech MX Master 3 is a wireless/Bluetooth mouse that is universally compatible with macOS devices including the Apple MacBook Air M2."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "CBL-HDMI-2M",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "HDMI Cable 2 Meter",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "Apple MacBook Air M2 13\" has HDMI output capabilities and can connect to HDMI cables for external display connections."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "CAB-ANKER-USBC-3FT",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "Anker USB-C Cable 3ft 100 Watt",
+    "relationship": "compatible_cable",
+    "confidence": 0.95,
+    "reason": "Apple MacBook Air M2 13\" has USB-C ports and the Anker USB-C cable is compatible for charging and data transfer."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "CAB-DP-6FT",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "DisplayPort Cable 6ft",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "Apple MacBook Air M2 13\" supports Thunderbolt 3/4 which is compatible with DisplayPort cables for video output."
+  },
+  {
+    "source": "LAP-APPLE-AIR-M2-13",
+    "target": "ADPT-C-HDMI",
+    "source_name": "Apple MBA 13 M2",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "compatible_cable",
+    "confidence": 0.95,
+    "reason": "Apple MacBook Air M2 includes USB-C ports that are compatible with Type C HDMI dongles for video output."
+  },
+  {
+    "source": "MON-LG-27UL500",
+    "target": "CBL-HDMI-2M",
+    "source_name": "LG 27UL500-W 27 inch 4K Monitor",
+    "target_name": "HDMI Cable 2 Meter",
+    "relationship": "compatible_cable",
+    "confidence": 0.95,
+    "reason": "LG 27UL500-W 27 inch 4K monitors typically feature HDMI inputs and can be connected with standard HDMI cables for video transmission."
+  },
+  {
+    "source": "MON-LG-27UL500",
+    "target": "CAB-ANKER-USBC-3FT",
+    "source_name": "LG 27UL500-W 27 inch 4K Monitor",
+    "target_name": "Anker USB-C Cable 3ft 100 Watt",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "The LG 27UL500-W monitor supports USB-C connectivity for both video and power delivery, making the Anker USB-C cable compatible for data and charging applications."
+  },
+  {
+    "source": "MON-LG-27UL500",
+    "target": "CAB-DP-6FT",
+    "source_name": "LG 27UL500-W 27 inch 4K Monitor",
+    "target_name": "DisplayPort Cable 6ft",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "The LG 27UL500-W 4K monitor typically supports DisplayPort connectivity, making a 6ft DisplayPort cable a compatible audio/video cable option."
+  },
+  {
+    "source": "MON-LG-27UL500",
+    "target": "ADPT-C-HDMI",
+    "source_name": "LG 27UL500-W 27 inch 4K Monitor",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "compatible_accessory",
+    "confidence": 0.7,
+    "reason": "A Type C to HDMI dongle can connect to devices with USB-C ports to output video to the monitor's HDMI input, though the monitor specs are not detailed enough to confirm full compatibility."
+  },
+  {
+    "source": "MON-SAM-LC32F391",
+    "target": "CBL-HDMI-2M",
+    "source_name": "Samsung LC32F391 Curved 32in",
+    "target_name": "HDMI Cable 2 Meter",
+    "relationship": "compatible_cable",
+    "confidence": 0.95,
+    "reason": "Samsung LC32F391 32-inch curved monitor has HDMI inputs and a 2-meter HDMI cable is a standard compatible connection for video signal transmission."
+  },
+  {
+    "source": "MON-SAM-LC32F391",
+    "target": "CAB-DP-6FT",
+    "source_name": "Samsung LC32F391 Curved 32in",
+    "target_name": "DisplayPort Cable 6ft",
+    "relationship": "compatible_cable",
+    "confidence": 0.75,
+    "reason": "Samsung LC32F391 monitors typically feature DisplayPort connectivity, allowing the DisplayPort cable to connect the monitor to a compatible source device."
+  },
+  {
+    "source": "MON-SAM-LC32F391",
+    "target": "ADPT-C-HDMI",
+    "source_name": "Samsung LC32F391 Curved 32in",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "requires_adapter",
+    "confidence": 0.75,
+    "reason": "The Samsung LC32F391 monitor accepts HDMI input and the USB-C to HDMI dongle enables connection from USB-C devices, making them compatible for video display."
+  },
+  {
+    "source": "KEY-LOGITECH-MX-KEYS",
+    "target": "MOUSE-LOGITECH-MX3",
+    "source_name": "Logitech MXKeys Keyboard",
+    "target_name": "Logitech MX Master3 Mouse",
+    "relationship": "pairs_with_peripheral",
+    "confidence": 0.85,
+    "reason": "Both Logitech MX products use the same 2.4GHz wireless protocol and can pair with a single Unifying receiver or connect via Bluetooth to the same computer."
+  },
+  {
+    "source": "CBL-HDMI-2M",
+    "target": "ADPT-C-HDMI",
+    "source_name": "HDMI Cable 2 Meter",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "connects_to",
+    "confidence": 0.7,
+    "reason": "An HDMI cable can connect to a Type C HDMI dongle's output port to transmit video/audio signals."
+  },
+  {
+    "source": "CAB-ANKER-USBC-3FT",
+    "target": "ADPT-C-HDMI",
+    "source_name": "Anker USB-C Cable 3ft 100 Watt",
+    "target_name": "Type C HDMI Dongle",
+    "relationship": "compatible_cable",
+    "confidence": 0.85,
+    "reason": "USB-C cable can physically connect to Type C HDMI dongle to enable video output from USB-C devices."
   }
 ]

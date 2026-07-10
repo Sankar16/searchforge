@@ -27,7 +27,13 @@ def build_semantic_index(catalog: list[dict], collection_name: str):
 
     ids, embeddings, metadatas, documents = [], [], [], []
 
+    # Deduplicate by SKU keeping last occurrence so ChromaDB never sees duplicate IDs
+    seen_skus: dict = {}
     for product in catalog:
+        seen_skus[product["sku"]] = product
+    deduped_catalog = list(seen_skus.values())
+
+    for product in deduped_catalog:
         text_parts = [
             product.get("name", ""),
             product.get("description", ""),
