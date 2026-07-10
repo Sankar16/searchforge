@@ -364,7 +364,28 @@ export default function CatalogHealth() {
                 <>
                   <div style={{ fontWeight: 600, fontSize: 15, color: '#0A1628', marginBottom: 6 }}>Upload your catalog CSV</div>
                   <div style={{ color: '#9CA3AF', fontSize: 13 }}>Drag & drop or click to browse</div>
-                  <div style={{ color: '#D1D5DB', fontSize: 12, marginTop: 8 }}>Required: SKU, Name, Category, Description</div>
+                  <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '16px 0 12px' }} />
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Expected format:</div>
+                  <div style={{
+                    background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6,
+                    padding: '8px 12px', fontFamily: 'monospace', fontSize: 11,
+                    color: '#374151', textAlign: 'left', whiteSpace: 'pre', lineHeight: 1.6,
+                    marginBottom: 10,
+                  }}>{'sku,name,category,description,price\nBRG-001,Widget A,Bearings,...,12.50'}</div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      const csv = 'sku,name,category,description,price,brand\nBRG-001,Example Bearing,Bearings,Enter description here,12.50,Acme\n'
+                      const blob = new Blob([csv], { type: 'text/csv' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url; a.download = 'catalog_template.csv'; a.click()
+                      URL.revokeObjectURL(url)
+                    }}
+                    style={{ fontSize: 12, color: '#00C2E0', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0, textDecoration: 'underline' }}
+                  >
+                    Download template CSV
+                  </button>
                 </>
               )}
             </div>
@@ -389,7 +410,14 @@ export default function CatalogHealth() {
                 <>
                   <div style={{ fontWeight: 600, fontSize: 15, color: '#0A1628', marginBottom: 6 }}>Use sample catalog</div>
                   <div style={{ color: '#9CA3AF', fontSize: 13 }}>74 industrial B2B products with real issues</div>
-                  <div style={{ color: '#D1D5DB', fontSize: 12, marginTop: 8 }}>Perfect for exploring the platform</div>
+                  <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '16px 0 12px' }} />
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Includes:</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 10 }}>
+                    {['74 products', '6 categories', 'Real issues injected'].map(pill => (
+                      <span key={pill} style={{ fontSize: 12, padding: '3px 10px', borderRadius: 999, background: '#F3F4F6', color: '#374151', fontWeight: 500 }}>{pill}</span>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#00C2E0', fontWeight: 500 }}>Best for exploring all features</div>
                 </>
               )}
             </div>

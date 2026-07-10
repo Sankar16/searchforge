@@ -24,6 +24,34 @@ const REL_BADGE_MAP = {
   frequently_bought_with: { label: 'Often Bought Together', bg: '#D1FAE5', color: '#065F46', border: '#A7F3D0' },
 }
 
+const SPEC_KEY_LABELS = {
+  inner_diameter_mm:  'Bore',
+  bore_diameter_mm:   'Bore',
+  outer_diameter_mm:  'OD',
+  width_mm:           'Width',
+  shaft_diameter_mm:  'Shaft Ø',
+  thread_size:        'Thread',
+  material:           'Material',
+  seal_type:          'Seal',
+  pressure_rating_psi:'Pressure',
+  flow_rate_gpm:      'Flow Rate',
+  tooth_count:        'Teeth',
+  pitch:              'Pitch',
+  length_mm:          'Length',
+}
+
+function formatSpecKey(k) {
+  if (SPEC_KEY_LABELS[k]) return SPEC_KEY_LABELS[k]
+  return k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+function formatSpecValue(k, v) {
+  if (k.endsWith('_mm')) return `${v}mm`
+  if (k.endsWith('_psi')) return `${v} psi`
+  if (k.endsWith('_gpm')) return `${v} gpm`
+  return v
+}
+
 function getRelationshipBadge(relationship) {
   const map = {
     "fits_housing":        { label: "Fits This Housing",   classes: "bg-red-100 text-red-700 border border-red-200" },
@@ -241,7 +269,7 @@ export default function CrossSell() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {Object.entries(cart.specs).map(([k, v]) => (
                   <span key={k} style={{ fontSize: 12, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', padding: '3px 10px', borderRadius: 6, fontWeight: 500 }}>
-                    {k}: {v}
+                    {formatSpecKey(k)}: {formatSpecValue(k, v)}
                   </span>
                 ))}
               </div>
@@ -309,7 +337,7 @@ export default function CrossSell() {
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {Object.entries(r.specs).slice(0, 3).map(([k, v]) => (
                         <span key={k} style={{ fontSize: 11, background: '#F3F4F6', color: '#374151', padding: '2px 8px', borderRadius: 5, fontWeight: 500 }}>
-                          {k}: {v}
+                          {formatSpecKey(k)}: {formatSpecValue(k, v)}
                         </span>
                       ))}
                     </div>

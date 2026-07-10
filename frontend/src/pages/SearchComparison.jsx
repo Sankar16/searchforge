@@ -280,32 +280,6 @@ export default function SearchComparison() {
     setMode(newMode)
   }
 
-  function ComparisonBanner() {
-    if (!searched || !cleanResults || !messyResults) return null
-    const cleanCount = cleanResults.results?.length ?? 0
-    const messyCount = messyResults.results?.length ?? 0
-    const diff = cleanCount - messyCount
-    if (cleanCount === 0) return null
-    if (diff <= 0 && cleanCount === messyCount) {
-      if (mode !== 'clean') return null
-      return (
-        <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628' }}>
-          <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>{' '}
-          Optimized catalog surfaces more relevant products for this query
-        </div>
-      )
-    }
-    if (diff > 0) {
-      return (
-        <div style={{ background: 'rgba(0,194,224,0.08)', border: '1px solid rgba(0,194,224,0.3)', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#0A1628' }}>
-          <span style={{ color: '#00C2E0', fontWeight: 700 }}>✓</span>{' '}
-          Optimized catalog found <strong>{diff} more relevant product{diff !== 1 ? 's' : ''}</strong> for this query
-        </div>
-      )
-    }
-    return null
-  }
-
   const showCleanEmptyState = searched && !loading && mode === 'clean' && (cleanResults?.results?.length ?? 0) === 0
   const showMessyEmptyState = searched && !loading && mode === 'messy' && (messyResults?.results?.length ?? 0) === 0
 
@@ -406,9 +380,6 @@ export default function SearchComparison() {
           </div>
         </div>
       </div>
-
-      {/* Comparison banner */}
-      <ComparisonBanner />
 
       {/* Mode banners (post-search, only when results exist) */}
       {searched && mode === 'clean' && (cleanResults?.results?.length ?? 0) > 0 && (

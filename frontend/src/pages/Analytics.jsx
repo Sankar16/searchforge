@@ -95,21 +95,19 @@ export default function Analytics() {
           label="Avg Top Score"
           value={searches.total ? `${searches.avg_top_score}` : '—'}
           sub="relevance of best match"
-          color="#6366F1"
         />
-        <StatCard label="Gap Analyses" value={gap_analyses.total} sub="zero-result queries analyzed" color="#F59E0B" />
+        <StatCard label="Gap Analyses" value={gap_analyses.total} sub="zero-result queries analyzed" />
       </div>
 
       {/* 2 — Catalog stats */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
-        <StatCard label="Analyses Run" value={catalog.analyses_run} sub="full pipeline runs" color="#0A1628" />
-        <StatCard label="Descriptions Approved" value={catalog.descriptions_approved} color="#10B981" />
-        <StatCard label="Descriptions Rejected" value={catalog.descriptions_rejected} color="#EF4444" />
+        <StatCard label="Analyses Run" value={catalog.analyses_run} sub="full pipeline runs" />
+        <StatCard label="Descriptions Approved" value={catalog.descriptions_approved} />
+        <StatCard label="Descriptions Rejected" value={catalog.descriptions_rejected} color={catalog.descriptions_rejected > 0 ? '#EF4444' : '#00C2E0'} />
         <StatCard
           label="Approval Rate"
           value={catalog.analyses_run ? `${catalog.approval_rate}%` : '—'}
           sub="of reviewed rewrites"
-          color={catalog.approval_rate >= 70 ? '#10B981' : '#F59E0B'}
         />
       </div>
 
@@ -123,7 +121,7 @@ export default function Analytics() {
               <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
                 <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Query</th>
                 <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Count</th>
-                <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}>Bar</th>
+                <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6B7280', fontWeight: 600 }}></th>
               </tr>
             </thead>
             <tbody>
@@ -169,9 +167,9 @@ export default function Analytics() {
                   <td style={{ padding: '8px 8px' }}>
                     <span style={{
                       fontSize: 11, padding: '2px 8px', borderRadius: 999, fontWeight: 600,
-                      background: s.mode === 'clean' ? '#D1FAE5' : '#FEF3C7',
-                      color: s.mode === 'clean' ? '#065F46' : '#92400E',
-                    }}>{s.mode}</span>
+                      background: s.mode === 'clean' ? 'rgba(0,194,224,0.12)' : '#F3F4F6',
+                      color: s.mode === 'clean' ? '#007A8F' : '#4B5563',
+                    }}>{s.mode === 'clean' ? 'Optimized' : 'Original'}</span>
                   </td>
                   <td style={{ padding: '8px 8px', textAlign: 'right', color: s.result_count === 0 ? '#EF4444' : '#374151' }}>
                     {s.result_count === 0 ? '0 ⚠' : s.result_count}
