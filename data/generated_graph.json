@@ -1,0 +1,56 @@
+[
+  {
+    "source": "BRG-6205-2RS",
+    "target": "HSG-P205",
+    "source_name": "6205-2RS Sealed Ball Bearing",
+    "target_name": "P205 Pillow Block Housing",
+    "relationship": "fits_into",
+    "confidence": 0.95,
+    "reason": "The 6205-2RS bearing has a 25mm inner diameter that matches the P205 housing's 25mm shaft diameter, and the housing explicitly lists 6205 as a compatible bearing series."
+  },
+  {
+    "source": "BRG-6205-2RS",
+    "target": "HSG-P205-CAST",
+    "source_name": "6205-2RS Sealed Ball Bearing",
+    "target_name": "Cast Iron Pillow Block P205",
+    "relationship": "fits_into",
+    "confidence": 0.95,
+    "reason": "The 6205-2RS bearing with 25mm inner diameter matches the P205 pillow block's 25mm shaft size and compatible bearing designation."
+  },
+  {
+    "source": "BRG-6205-2RS",
+    "target": "MNT-SHAFT-25MM",
+    "source_name": "6205-2RS Sealed Ball Bearing",
+    "target_name": "25mm Steel Shaft",
+    "relationship": "fits_into",
+    "confidence": 0.95,
+    "reason": "The bearing's inner diameter (25mm) matches the shaft's diameter (25mm), allowing the bearing to fit onto the shaft."
+  },
+  {
+    "source": "BRG-6205-2RS",
+    "target": "MNT-SHAFT-1IN",
+    "source_name": "6205-2RS Sealed Ball Bearing",
+    "target_name": "1 in Steel Shaft",
+    "relationship": "fits_into",
+    "confidence": 0.95,
+    "reason": "The bearing's inner diameter (25mm) matches the shaft diameter (25.4mm within typical manufacturing tolerances), allowing the bearing to mount onto the shaft."
+  },
+  {
+    "source": "BRG-6004-ZZ",
+    "target": "HSG-UCP204",
+    "source_name": "6004-ZZ Shielded Ball Bearing",
+    "target_name": "UCP204 Pillow Block Bearing Unit",
+    "relationship": "fits_into",
+    "confidence": 0.85,
+    "reason": "The bearing's 20mm inner diameter matches the pillow block's 20mm shaft diameter specification, allowing the bearing to fit into the housing."
+  },
+  {
+    "source": "BRG-6004-ZZ",
+    "target": "HSG-P204",
+    "source_name": "6004-ZZ Shielded Ball Bearing",
+    "target_name": "P204 Pillow Block Housing",
+    "relationship": "fits_into",
+    "confidence": 0.85,
+    "reason": "The bearing's 20mm inner diameter matches the housing's 20mm shaft diameter, allowing the bearing to fit onto the shaft and into the pillow block housing."
+  }
+]

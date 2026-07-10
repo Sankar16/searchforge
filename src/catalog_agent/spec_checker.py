@@ -215,14 +215,9 @@ def check_missing_specs(products: List[Product]) -> List[CatalogIssue]:
         required_specs = PRODUCT_TYPE_REQUIRED_SPECS.get(product_type, [])
 
         if product_type == "unknown":
-            issues.append(
-                CatalogIssue(
-                    sku=product.sku,
-                    issue_type="unknown_product_type",
-                    message=f"Could not infer product type for category: {product.category}",
-                    severity="medium"
-                )
-            )
+            # Unknown product types skip spec checking
+            # Spec requirements are domain-specific and must be configured
+            # per industry (industrial B2B, electronics, etc.)
             continue
 
         for spec in required_specs:

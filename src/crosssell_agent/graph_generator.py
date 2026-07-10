@@ -24,6 +24,7 @@ class GraphGenerationResult(BaseModel):
 
 
 COMPATIBLE_CATEGORY_PAIRS = [
+    # Industrial
     ("bearings", "housings"),
     ("bearings", "mounts"),
     ("bearings", "fasteners"),
@@ -32,6 +33,24 @@ COMPATIBLE_CATEGORY_PAIRS = [
     ("fasteners", "fasteners"),
     ("mounts", "fasteners"),
     ("electrical", "mounts"),
+    ("electrical", "cables"),
+    ("electrical", "adapters"),
+    # Electronics
+    ("laptops", "chargers"),
+    ("laptops", "adapters"),
+    ("laptops", "cables"),
+    ("laptops", "docking stations"),
+    ("laptops", "mice"),
+    ("laptops", "keyboards"),
+    ("monitors", "cables"),
+    ("monitors", "adapters"),
+    ("monitors", "stands"),
+    ("keyboards", "mice"),
+    ("networking", "networking"),
+    ("networking", "cables"),
+    ("storage", "cables"),
+    ("adapters", "cables"),
+    ("headsets", "adapters"),
 ]
 
 MATCHING_SPEC_PAIRS = [
@@ -50,7 +69,8 @@ compatibility_agent = Agent(
         "determine if they are technically compatible (e.g., a bearing fits a housing, "
         "a bolt fits a mount, a valve connects to a fitting). "
         "Only say are_compatible=True if there is a clear technical reason based on the specs. "
-        "relationship_type should be one of: 'fits_into', 'mounts_on', 'connects_to', 'pairs_with'. "
+        "relationship_type should be one of: 'fits_into', 'mounts_on', 'connects_to', 'pairs_with', "
+        "'compatible_charger', 'compatible_cable', 'pairs_with_peripheral', 'requires_adapter', 'compatible_accessory'. "
         "confidence should reflect how certain you are (0.0-1.0). "
         "Keep reason to one short sentence."
     ),

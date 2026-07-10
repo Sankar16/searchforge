@@ -618,7 +618,7 @@ export default function CatalogHealth() {
             <StatCard label="Total Products" value={analysisResult.total_products} />
             <StatCard label="Issues Remaining" value={analysisResult.total_issues} accent={analysisResult.total_issues > 0 ? '#EF4444' : '#10B981'} />
             <StatCard label="Spec Issues Fixed" value={analysisResult.spec_issues_before - analysisResult.spec_issues_after} sub={`was ${analysisResult.spec_issues_before}`} accent="#00C2E0" />
-            <StatCard label="Descriptions Optimized" value={analysisResult.descriptions_passing_judge} sub={`avg score ${analysisResult.avg_judge_score}`} accent="#00C2E0" />
+            <StatCard label="Descriptions Optimized" value={analysisResult.descriptions_passing_judge} sub={`avg score ${analysisResult.avg_judge_score != null ? Math.round(analysisResult.avg_judge_score * 10) + '/100' : '—'}`} accent="#00C2E0" />
             <StatCard label="Descriptions Repaired" value={repairedCount} sub="Failed first quality check, automatically fixed" accent={repairedCount > 0 ? '#D97706' : '#10B981'} />
             <StatCard label="Duplicate Pairs" value={analysisResult.duplicate_pairs} accent={analysisResult.duplicate_pairs > 0 ? '#F59E0B' : '#10B981'} />
           </div>
@@ -740,7 +740,9 @@ export default function CatalogHealth() {
                 </div>
                 {analysisResult.description_evaluations.map((e, i) => {
                   const scoreColor = (s) => s >= 8 ? '#10B981' : s >= 6 ? '#F59E0B' : '#EF4444'
+                  const scoreColor100 = (s) => s >= 80 ? '#10B981' : s >= 70 ? '#00C2E0' : '#EF4444'
                   const composite = e.judge_score ?? e.accuracy
+                  const compositeScore = e.composite_score ?? (composite != null ? Math.round(composite * 10) : 0)
                   return (
                     <div key={e.sku} style={{ display: 'grid', gridTemplateColumns: '130px 60px 60px 60px 60px 70px 110px 60px 1fr', borderBottom: i < analysisResult.description_evaluations.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
                       <div style={{ padding: '10px 10px', fontSize: 12, color: '#374151', fontWeight: 500 }}>{e.sku}</div>
@@ -754,7 +756,7 @@ export default function CatalogHealth() {
                       ) : (
                         <div style={{ padding: '10px 10px', fontSize: 12, color: '#9CA3AF', gridColumn: 'span 4' }}>—</div>
                       )}
-                      <div style={{ padding: '10px 10px', fontSize: 14, fontWeight: 800, color: scoreColor(composite) }}>{composite}</div>
+                      <div style={{ padding: '10px 10px', fontSize: 14, fontWeight: 800, color: scoreColor100(compositeScore) }}>{compositeScore}</div>
                       <div style={{ padding: '10px 10px' }}>
                         <span style={{
                           fontSize: 11, padding: '2px 7px', borderRadius: 999, fontWeight: 600,

@@ -38,6 +38,20 @@ rewrite_agent = Agent(
         "BAD example (never do this):\n"
         '"Product is a bearings item with inner_diameter_mm: 25; outer_diameter_mm: 52. '
         'Suitable for B2B industrial, maintenance, repair, and equipment assembly applications."\n\n'
+        "When a product has minimal or no specs, use the product name and category to write "
+        "what the product IS and what it DOES.\n\n"
+        "GOOD example for low-spec product:\n"
+        'Product: Cat6 Patch Cable 25 ft, Category: Networking\n'
+        'Description: "25-foot Cat6 ethernet patch cable for connecting devices to network '
+        "switches, routers, and patch panels. Suitable for office, data center, and structured "
+        'cabling installations requiring reliable Gigabit network connections."\n\n'
+        "GOOD example for low-spec product:\n"
+        'Product: USB Wired Keyboard, Category: Peripherals\n'
+        'Description: "USB wired keyboard for desktop computers and workstations. Standard '
+        'layout with full-size keys for data entry, office productivity, and general computing use."\n\n'
+        "The key rule: NEVER write '[Product Name] is a [category] product for B2B industrial, "
+        "maintenance, repair, and equipment assembly applications.' This is always wrong and adds no value.\n\n"
+        "Always describe what the product does and who uses it, even if you must infer from the name alone.\n\n"
         "Rules:\n"
         "- Write 2-3 natural sentences maximum\n"
         "- Weave specs into the text naturally, don't list them with colons\n"
@@ -81,7 +95,8 @@ def product_to_prompt_context(product: Product) -> str:
 
 def build_rewrite_prompt(product: Product) -> str:
     return (
-        f"Write a natural, searchable product description for this B2B industrial product. "
+        f"Write a natural, searchable product description for this B2B product. "
+        f"If this product has no specs, infer its use from the name and category and write a natural description of what it does. "
         f"Product data:\n{product_to_prompt_context(product)}"
     )
 
