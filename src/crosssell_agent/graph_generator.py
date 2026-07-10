@@ -84,7 +84,8 @@ def _get_compatibility_agent() -> Agent:
     return _compatibility_agent
 
 
-def find_candidate_pairs(catalog: list[dict]) -> list[tuple[dict, dict]]:
+def _find_candidates_by_rules(catalog: list[dict]) -> list[tuple[dict, dict]]:
+    """Rule-based candidate generation: spec matching + known category pairs."""
     candidates: list[tuple[dict, dict]] = []
     seen: set[tuple[str, str]] = set()
 
@@ -121,7 +122,72 @@ def find_candidate_pairs(catalog: list[dict]) -> list[tuple[dict, dict]]:
                     seen.add(key)
                     break
 
-    return candidates[:60]
+    return candidates
+
+
+def find_candidate_pairs_by_embedding(
+    catalog: list[dict],
+    max_candidates: int = 40,
+) -> list[tuple[dict, dict]]:
+    """Find cross-sell candidates via semantic similarity across different categories.
+
+    Products that are semantically similar but in DIFFERENT categories are good
+    cross-sell candidates. Reuses the sentence-transformers model already loaded
+    by semantic_retriever so we don't load it twice.
+    """
+    if len(catalog) < 2:
+        return []
+
+    try:
+        import numpy as np
+        from src.search.semantic_retriever import encoder  # reuse loaded model
+    except Exception:
+        return []
+
+    texts = [
+        f"{p.get('name', '')} {p.get('category', '')} {p.get('description', '')}".strip()
+        for p in catalog
+    ]
+    embeddings = encoder.encode(texts, show_progress_bar=False)
+
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    embeddings = embeddings / (norms + 1e-8)
+    sim_matrix = np.dot(embeddings, embeddings.T)
+
+    candidates: set[tuple[int, int]] = set()
+    for i, prod_a in enumerate(catalog):
+        cat_a = prod_a.get("category", "").lower()
+        sims = sim_matrix[i].copy()
+
+        # Zero out self and same-category entries
+        for j, prod_b in enumerate(catalog):
+            if i == j or prod_b.get("category", "").lower() == cat_a:
+                sims[j] = -1.0
+
+        top_indices = np.argsort(sims)[-3:][::-1]
+        for j in top_indices:
+            if sims[j] > 0.3:
+                candidates.add((min(i, j), max(i, j)))
+
+    pairs = [(catalog[i], catalog[j]) for i, j in candidates]
+    return pairs[:max_candidates]
+
+
+def find_candidate_pairs(catalog: list[dict]) -> list[tuple[dict, dict]]:
+    """Combine rule-based and embedding-based candidate generation."""
+    rule_candidates = _find_candidates_by_rules(catalog)
+    embedding_candidates = find_candidate_pairs_by_embedding(catalog, max_candidates=30)
+
+    seen: set[tuple[str, str]] = set()
+    combined: list[tuple[dict, dict]] = []
+
+    for a, b in rule_candidates + embedding_candidates:
+        key = (min(a["sku"], b["sku"]), max(a["sku"], b["sku"]))
+        if key not in seen:
+            seen.add(key)
+            combined.append((a, b))
+
+    return combined[:60]
 
 
 async def _validate_pair_with_llm(

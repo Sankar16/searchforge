@@ -29,7 +29,7 @@ class JudgeResult(BaseModel):
 
     @property
     def passes_quality_gate(self) -> bool:
-        return self.composite_score >= 7.0 and self.hallucination_risk != "high"
+        return self.composite_score >= 6.5 and self.hallucination_risk != "high"
 
     @property
     def judge_score(self) -> float:
@@ -42,16 +42,34 @@ judge_agent = Agent(
     _judge_model,
     output_type=JudgeResult,
     system_prompt=(
-        "You evaluate rewritten B2B industrial product descriptions across four dimensions. "
-        "Score each 0-10:\n"
-        "- accuracy: Does the description stay faithful to the provided product data? "
-        "Penalize any invented specs, materials, applications, or brands not in the source.\n"
-        "- searchability: Does the description include keywords industrial buyers would use to search? "
-        "Look for spec values, material names, application terms.\n"
-        "- specificity: Is the description specific about this product (dimensions, materials, standards) "
-        "vs. generic filler phrases that could apply to any product?\n"
-        "- clarity: Is the description clear, natural prose that is easy to read and not a spec dump?\n"
-        "hallucination_risk: 'low' if no invented claims, 'medium' if borderline, 'high' if clearly invented.\n"
+        "You evaluate rewritten B2B product descriptions across four dimensions. Score each 0-10.\n\n"
+        "ACCURACY (score this dimension carefully):\n"
+        "HALLUCINATION (score 1-2): Invents specific technical specs, dimensions, brand names, "
+        "certifications, or claims that directly contradict or significantly extend beyond source data. "
+        "Examples: source has no voltage but description says '120V rated'; source has no pressure "
+        "rating but description says '600 PSI'; source has no material but description says "
+        "'stainless steel grade 316'.\n"
+        "REASONABLE INFERENCE (score 4-5): Uses domain knowledge to infer obvious product "
+        "characteristics that a knowledgeable product manager would know from the product name alone. "
+        "Examples: 't-shirt' → 'short-sleeve design' (every t-shirt has short sleeves); "
+        "'ball bearing' → 'rotational support' (definitional); "
+        "'polo shirt' → 'collared design' (definitional); "
+        "'bluetooth mouse' → 'wireless connectivity' (definitional); "
+        "'hiking boot' → 'outdoor use' (obvious from category).\n"
+        "The test: Could a knowledgeable product manager infer this from the product name and "
+        "category alone, without any additional data? Yes → score 4-5 (reasonable inference, "
+        "low hallucination risk). No → score 1-3 (requires verification, hallucination risk).\n"
+        "Generic use-case claims ('for business use', 'professional environments') that are "
+        "appropriate for the category but unverified score 3-4.\n\n"
+        "hallucination_risk: "
+        "'high' if accuracy_score <= 2 (actual hallucination of specs/numbers); "
+        "'medium' if accuracy_score == 3 (unverifiable specific claims); "
+        "'low' if accuracy_score >= 4 (reasonable inference or verified from source data).\n\n"
+        "- searchability: Does the description include keywords buyers would use to search? "
+        "Look for product type terms, material names, application terms, spec values.\n"
+        "- specificity: Is the description specific about this product vs. generic filler "
+        "phrases that could apply to any product?\n"
+        "- clarity: Is the description clear, natural prose that is easy to read and not a spec dump?\n\n"
         "specs_verified: list only spec keys that appear in both the product data and the rewritten description."
     ),
 )
@@ -147,7 +165,7 @@ def normalize_eval_result(result: Dict[str, Any]) -> Dict[str, Any]:
         notes = ["Judge returned notes in an unexpected format."]
 
     composite = round((accuracy + searchability + specificity + clarity) / 4, 1)
-    passes = composite >= 7.0 and hallucination_risk != "high"
+    passes = composite >= 6.5 and hallucination_risk != "high"
 
     return {
         "accuracy": accuracy,

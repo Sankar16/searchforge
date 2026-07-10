@@ -767,6 +767,13 @@ async def generate_synonyms(body: SynonymRequest):
         return {"query": body.query, "synonyms": [], "error": str(e)}
 
 
+@app.get("/api/catalog/spec-requirements")
+async def get_spec_requirements(category: str = Query(...), name: str = Query("")):
+    """Infer required specs for a product category using Claude Haiku."""
+    from src.catalog_agent.spec_checker import infer_required_specs_for_category
+    return await infer_required_specs_for_category(category=category, product_name=name)
+
+
 @app.get("/api/analytics")
 def get_analytics():
     searches = analytics["searches"]

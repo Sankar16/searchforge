@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict, Any
 from src.schemas import Product, CatalogIssue
 
@@ -231,4 +232,83 @@ def check_missing_specs(products: List[Product]) -> List[CatalogIssue]:
                     )
                 )
 
+    return issues
+
+
+# ─── LLM-based spec inference ─────────────────────────────────────────────────
+
+_spec_inference_agent = None
+
+
+def _get_spec_inference_agent():
+    global _spec_inference_agent
+    if _spec_inference_agent is None:
+        from pydantic import BaseModel as _BaseModel
+        from pydantic_ai import Agent as _Agent
+
+        class _SpecInference(_BaseModel):
+            required_specs: list[str]
+            optional_specs: list[str]
+            domain: str
+
+        _spec_inference_agent = _Agent(
+            f"anthropic:{os.getenv('ANTHROPIC_REWRITE_MODEL', 'claude-haiku-4-5-20251001')}",
+            output_type=_SpecInference,
+            system_prompt=(
+                "You determine what product specifications a B2B buyer would expect to see "
+                "in a product listing. Return simple lowercase field names (e.g. size, color, "
+                "material, voltage, connectivity). Never include price, brand, or name."
+            ),
+        )
+    return _spec_inference_agent
+
+
+async def infer_required_specs_for_category(
+    category: str,
+    product_name: str,
+) -> dict:
+    """Use Claude Haiku to determine what specs a product SHOULD have.
+
+    Returns a dict with required_specs, optional_specs, and domain.
+    """
+    agent = _get_spec_inference_agent()
+    prompt = (
+        f"Product category: {category}\n"
+        f"Product name: {product_name}\n\n"
+        "What are the 2-4 most important specifications a B2B buyer would expect in a "
+        "product listing for this type of product?\n\n"
+        "Use simple, lowercase field names that would appear in a CSV:\n"
+        "Examples: size, color, material, voltage, capacity, diameter_mm, "
+        "thread_type, pressure_rating, connectivity, storage_gb\n\n"
+        "Only include specs that are commonly present in product data.\n"
+        "Do not include price, brand, or name — those are separate fields."
+    )
+    try:
+        result = await agent.run(prompt)
+        r = result.output
+        return {
+            "required_specs": r.required_specs,
+            "optional_specs": r.optional_specs,
+            "domain": r.domain,
+        }
+    except Exception as e:
+        return {"required_specs": [], "optional_specs": [], "domain": "unknown", "error": str(e)}
+
+
+def check_specs_with_inferred_requirements(
+    product: Product,
+    inferred_specs: list[str],
+) -> List[CatalogIssue]:
+    """Check if product has the inferred required specs."""
+    issues = []
+    for spec_name in inferred_specs:
+        if spec_name not in product.specs or not product.specs[spec_name]:
+            issues.append(
+                CatalogIssue(
+                    sku=product.sku,
+                    issue_type="missing_spec",
+                    severity="medium",
+                    message=f"Missing expected spec: {spec_name}",
+                )
+            )
     return issues
