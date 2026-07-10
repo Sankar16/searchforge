@@ -283,6 +283,10 @@ def run_catalog_pipeline(source: str) -> dict:
         "description_evaluations": [
             {
                 "sku": e.get("sku"),
+                "accuracy": e.get("accuracy"),
+                "searchability": e.get("searchability"),
+                "specificity": e.get("specificity"),
+                "clarity": e.get("clarity"),
                 "judge_score": e.get("judge_score"),
                 "hallucination_risk": e.get("hallucination_risk"),
                 "passes_quality_gate": e.get("passes_quality_gate"),
@@ -300,6 +304,24 @@ def run_catalog_pipeline(source: str) -> dict:
         ],
     }
     result["completeness_score"] = calculate_completeness_score(catalog_before, result)
+
+    catalog_after_path = PROJECT_ROOT / "data" / "catalog_clean.json"
+    try:
+        from src.crosssell_agent.graph_generator import generate_knowledge_graph
+        with open(catalog_after_path) as f:
+            catalog_after = json.load(f)
+        graph_result = asyncio.run(generate_knowledge_graph(catalog_after))
+        if graph_result.total_edges > 0:
+            with open(PROJECT_ROOT / "data" / "generated_graph.json", "w") as f:
+                json.dump(graph_result.edges, f, indent=2)
+        result["knowledge_graph"] = {
+            "total_edges": graph_result.total_edges,
+            "total_candidates": graph_result.total_candidates,
+        }
+    except Exception as e:
+        print(f"Graph generation failed (non-fatal): {e}")
+        result["knowledge_graph"] = {"total_edges": 0, "total_candidates": 0}
+
     return result
 
 

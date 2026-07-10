@@ -1,9 +1,7 @@
 import json
 from typing import Dict, Any, List
-from src.crosssell_agent.knowledge_graph import (
-    build_compatibility_graph,
-    get_graph_recommendations,
-)
+from src.crosssell_agent.knowledge_graph import get_graph_recommendations
+from src.crosssell_agent.graph_generator import get_compatibility_graph
 
 
 def load_catalog(path: str = "data/catalog_clean.json") -> Dict[str, Dict[str, Any]]:
@@ -44,7 +42,7 @@ def recommend_cross_sell(
     catalog_path: str = "data/catalog_clean.json",
 ) -> List[Dict[str, Any]]:
     catalog_by_sku = load_catalog(catalog_path)
-    graph = build_compatibility_graph()
+    graph = get_compatibility_graph()
 
     raw_recommendations = get_graph_recommendations(graph, cart_sku)
 

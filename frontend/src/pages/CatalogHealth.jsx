@@ -591,6 +591,28 @@ export default function CatalogHealth() {
             )
           })()}
 
+          {/* Knowledge Graph stats */}
+          {analysisResult.knowledge_graph?.total_edges > 0 && (
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0A1628' }}>🔗 Compatibility Graph Generated</div>
+                  <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 4 }}>AI discovered product compatibility relationships in your catalog</div>
+                </div>
+                <div style={{ display: 'flex', gap: 20 }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#00C2E0' }}>{analysisResult.knowledge_graph.total_edges}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>relationships found</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#6B7280' }}>{analysisResult.knowledge_graph.total_candidates}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>pairs evaluated</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Metric cards */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
             <StatCard label="Total Products" value={analysisResult.total_products} />
@@ -711,30 +733,44 @@ export default function CatalogHealth() {
             <div style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0A1628', marginBottom: 12 }}>Quality Gate Results</h2>
               <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '140px 80px 130px 80px 1fr', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                  {['SKU', 'Score', 'Hallucination Risk', 'Passed', 'Notes'].map(h => (
-                    <div key={h} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '130px 60px 60px 60px 60px 70px 110px 60px 1fr', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                  {['SKU', 'Acc', 'Search', 'Spec', 'Clarity', 'Score', 'Risk', 'Pass', 'Notes'].map(h => (
+                    <div key={h} style={{ padding: '10px 10px', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</div>
                   ))}
                 </div>
-                {analysisResult.description_evaluations.map((e, i) => (
-                  <div key={e.sku} style={{ display: 'grid', gridTemplateColumns: '140px 80px 130px 80px 1fr', borderBottom: i < analysisResult.description_evaluations.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
-                    <div style={{ padding: '12px 16px', fontSize: 13, color: '#374151', fontWeight: 500 }}>{e.sku}</div>
-                    <div style={{ padding: '12px 16px', fontSize: 13, fontWeight: 700, color: e.judge_score >= 8 ? '#10B981' : e.judge_score >= 6 ? '#F59E0B' : '#EF4444' }}>{e.judge_score}</div>
-                    <div style={{ padding: '12px 16px' }}>
-                      <span style={{
-                        fontSize: 12, padding: '2px 8px', borderRadius: 999, fontWeight: 600,
-                        background: e.hallucination_risk === 'low' ? '#D1FAE5' : e.hallucination_risk === 'medium' ? '#FEF3C7' : '#FEE2E2',
-                        color: e.hallucination_risk === 'low' ? '#065F46' : e.hallucination_risk === 'medium' ? '#92400E' : '#991B1B',
-                      }}>{e.hallucination_risk}</span>
+                {analysisResult.description_evaluations.map((e, i) => {
+                  const scoreColor = (s) => s >= 8 ? '#10B981' : s >= 6 ? '#F59E0B' : '#EF4444'
+                  const composite = e.judge_score ?? e.accuracy
+                  return (
+                    <div key={e.sku} style={{ display: 'grid', gridTemplateColumns: '130px 60px 60px 60px 60px 70px 110px 60px 1fr', borderBottom: i < analysisResult.description_evaluations.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+                      <div style={{ padding: '10px 10px', fontSize: 12, color: '#374151', fontWeight: 500 }}>{e.sku}</div>
+                      {e.accuracy != null ? (
+                        <>
+                          <div style={{ padding: '10px 10px', fontSize: 13, fontWeight: 700, color: scoreColor(e.accuracy) }}>{e.accuracy}</div>
+                          <div style={{ padding: '10px 10px', fontSize: 13, fontWeight: 700, color: scoreColor(e.searchability) }}>{e.searchability}</div>
+                          <div style={{ padding: '10px 10px', fontSize: 13, fontWeight: 700, color: scoreColor(e.specificity) }}>{e.specificity}</div>
+                          <div style={{ padding: '10px 10px', fontSize: 13, fontWeight: 700, color: scoreColor(e.clarity) }}>{e.clarity}</div>
+                        </>
+                      ) : (
+                        <div style={{ padding: '10px 10px', fontSize: 12, color: '#9CA3AF', gridColumn: 'span 4' }}>—</div>
+                      )}
+                      <div style={{ padding: '10px 10px', fontSize: 14, fontWeight: 800, color: scoreColor(composite) }}>{composite}</div>
+                      <div style={{ padding: '10px 10px' }}>
+                        <span style={{
+                          fontSize: 11, padding: '2px 7px', borderRadius: 999, fontWeight: 600,
+                          background: e.hallucination_risk === 'low' ? '#D1FAE5' : e.hallucination_risk === 'medium' ? '#FEF3C7' : '#FEE2E2',
+                          color: e.hallucination_risk === 'low' ? '#065F46' : e.hallucination_risk === 'medium' ? '#92400E' : '#991B1B',
+                        }}>{e.hallucination_risk}</span>
+                      </div>
+                      <div style={{ padding: '10px 10px' }}>
+                        <span style={{ fontSize: 12, color: e.passes_quality_gate ? '#10B981' : '#EF4444', fontWeight: 700 }}>
+                          {e.passes_quality_gate ? '✓' : '✕'}
+                        </span>
+                      </div>
+                      <div style={{ padding: '10px 10px', fontSize: 12, color: '#6B7280' }}>{Array.isArray(e.notes) ? e.notes.join(' · ') : e.notes}</div>
                     </div>
-                    <div style={{ padding: '12px 16px' }}>
-                      <span style={{ fontSize: 12, color: e.passes_quality_gate ? '#10B981' : '#EF4444', fontWeight: 700 }}>
-                        {e.passes_quality_gate ? '✓ Yes' : '✕ No'}
-                      </span>
-                    </div>
-                    <div style={{ padding: '12px 16px', fontSize: 13, color: '#6B7280' }}>{e.notes}</div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

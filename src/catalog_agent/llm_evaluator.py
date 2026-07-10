@@ -15,23 +15,44 @@ load_dotenv()
 
 
 class JudgeResult(BaseModel):
-    score: int = Field(ge=0, le=10)
+    accuracy: int = Field(ge=0, le=10)
+    searchability: int = Field(ge=0, le=10)
+    specificity: int = Field(ge=0, le=10)
+    clarity: int = Field(ge=0, le=10)
     hallucination_risk: Literal["low", "medium", "high"]
-    passes: bool
     notes: list[str]
     specs_verified: list[str]
 
+    @property
+    def composite_score(self) -> float:
+        return round((self.accuracy + self.searchability + self.specificity + self.clarity) / 4, 1)
 
-_judge_model = f"anthropic:{os.getenv('ANTHROPIC_JUDGE_MODEL', 'claude-haiku-4-5-20251001')}"
+    @property
+    def passes_quality_gate(self) -> bool:
+        return self.composite_score >= 7.0 and self.hallucination_risk != "high"
+
+    @property
+    def judge_score(self) -> float:
+        return self.composite_score
+
+
+_judge_model = f"anthropic:{os.getenv('ANTHROPIC_JUDGE_MODEL', 'claude-sonnet-4-6')}"
 
 judge_agent = Agent(
     _judge_model,
     output_type=JudgeResult,
     system_prompt=(
-        "You evaluate rewritten B2B industrial product descriptions. "
-        "Penalize invented specs, materials, applications, or brands not present in the product data. "
-        "Score 0-10; mark hallucination_risk low/medium/high; set passes=true if score >= 7 and risk != high. "
-        "List only spec keys that appear in both the product data and the rewritten description."
+        "You evaluate rewritten B2B industrial product descriptions across four dimensions. "
+        "Score each 0-10:\n"
+        "- accuracy: Does the description stay faithful to the provided product data? "
+        "Penalize any invented specs, materials, applications, or brands not in the source.\n"
+        "- searchability: Does the description include keywords industrial buyers would use to search? "
+        "Look for spec values, material names, application terms.\n"
+        "- specificity: Is the description specific about this product (dimensions, materials, standards) "
+        "vs. generic filler phrases that could apply to any product?\n"
+        "- clarity: Is the description clear, natural prose that is easy to read and not a spec dump?\n"
+        "hallucination_risk: 'low' if no invented claims, 'medium' if borderline, 'high' if clearly invented.\n"
+        "specs_verified: list only spec keys that appear in both the product data and the rewritten description."
     ),
 )
 
@@ -90,45 +111,53 @@ def heuristic_description_eval(
         score -= 1
         notes.append("Description may contain marketing fluff.")
 
+    base = max(1, min(score, 10))
     return {
-        "score": max(1, min(score, 10)),
-        "hallucination_risk": "unknown",
+        "accuracy": base,
+        "searchability": base,
+        "specificity": base,
+        "clarity": base,
+        "hallucination_risk": "low",
         "passes": score >= 7,
         "notes": notes or ["Heuristic fallback evaluation used."],
+        "specs_verified": [],
     }
 
 
 def normalize_eval_result(result: Dict[str, Any]) -> Dict[str, Any]:
-    score = result.get("score", 1)
+    def _clamp(val, default=5):
+        try:
+            return max(1, min(int(val), 10))
+        except (TypeError, ValueError):
+            return default
 
-    try:
-        score = int(score)
-    except (TypeError, ValueError):
-        score = 1
+    accuracy = _clamp(result.get("accuracy", result.get("score", 5)))
+    searchability = _clamp(result.get("searchability", accuracy))
+    specificity = _clamp(result.get("specificity", accuracy))
+    clarity = _clamp(result.get("clarity", accuracy))
 
     hallucination_risk = result.get("hallucination_risk", "medium")
-
     if hallucination_risk not in ["low", "medium", "high", "unknown"]:
         hallucination_risk = "medium"
 
-    passes = result.get("passes", False)
-
-    if isinstance(passes, str):
-        passes = passes.lower() == "true"
-
     notes = result.get("notes", [])
-
     if isinstance(notes, str):
         notes = [notes]
-
     if not isinstance(notes, list):
         notes = ["Judge returned notes in an unexpected format."]
 
+    composite = round((accuracy + searchability + specificity + clarity) / 4, 1)
+    passes = composite >= 7.0 and hallucination_risk != "high"
+
     return {
-        "score": max(1, min(score, 10)),
+        "accuracy": accuracy,
+        "searchability": searchability,
+        "specificity": specificity,
+        "clarity": clarity,
         "hallucination_risk": hallucination_risk,
         "passes": bool(passes),
         "notes": notes,
+        "specs_verified": result.get("specs_verified", []),
     }
 
 
@@ -204,10 +233,15 @@ async def evaluate_rewritten_description_async(
             )
             j = result.output
             return {
-                "score": j.score,
+                "accuracy": j.accuracy,
+                "searchability": j.searchability,
+                "specificity": j.specificity,
+                "clarity": j.clarity,
+                "composite_score": j.composite_score,
                 "hallucination_risk": j.hallucination_risk,
-                "passes": j.passes,
+                "passes": j.passes_quality_gate,
                 "notes": j.notes,
+                "specs_verified": j.specs_verified,
             }
         except Exception as error:
             fallback = heuristic_description_eval(product, rewritten_description)
@@ -249,13 +283,21 @@ async def evaluate_rewritten_descriptions_async(
     enriched_evaluations = []
 
     for (original, rewritten), evaluation in zip(weak_products, raw_evaluations):
+        composite = evaluation.get("composite_score") or round(
+            (evaluation.get("accuracy", 5) + evaluation.get("searchability", 5) +
+             evaluation.get("specificity", 5) + evaluation.get("clarity", 5)) / 4, 1
+        )
         enriched_evaluations.append(
             {
                 "sku": original.sku,
                 "name": original.name,
                 "original_description": original.description,
                 "rewritten_description": rewritten.description,
-                "judge_score": evaluation["score"],
+                "accuracy": evaluation.get("accuracy", 5),
+                "searchability": evaluation.get("searchability", 5),
+                "specificity": evaluation.get("specificity", 5),
+                "clarity": evaluation.get("clarity", 5),
+                "judge_score": composite,
                 "hallucination_risk": evaluation["hallucination_risk"],
                 "passes_quality_gate": evaluation["passes"],
                 "notes": evaluation["notes"],
