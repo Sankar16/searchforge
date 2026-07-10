@@ -19,8 +19,10 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
 - Identifies missing required specs per product category
 - Rewrites vague descriptions using Claude with spec-grounded prompts
 - LLM-as-judge scores every rewrite for hallucination risk
-- Repair loop re-prompts on failed evaluations (max 1 pass)
+- Repair loop re-prompts on failed evaluations (max 1 pass); 🔄 badge marks repaired descriptions
 - Per-row approve / edit / reject UI with apply + CSV export
+- Pydantic AI typed schemas enforce structured LLM outputs — no silent JSON parsing failures
+- Double-click protection prevents duplicate analysis jobs
 
 ### 🔍 Search Preview
 - Semantic search using ChromaDB + all-MiniLM-L6-v2
@@ -29,6 +31,7 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
 - **Search Gap Detector**: when optimized catalog returns zero results,
   Claude Haiku analyzes why and suggests which product descriptions
   need which keywords — turns a failure state into a merchandising insight
+- Analytics tracking on every search query (query, mode, result count, top match score)
 
 ### 🛒 Smart Recommendations
 - Compatibility knowledge graph (NetworkX) with 15 product relationships
@@ -36,7 +39,16 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
   Model Context Protocol instead of direct imports
 - Claude Haiku generates spec-grounded explanations for why products
   pair together (not correlation — reasoning)
+- Relationship badges mapped to actual graph edge types (Fits This Housing, Works With, Commonly Paired, Recommended Add-on)
 - Save pairings to session, export as CSV for merchandising platform
+
+### 📊 Analytics Dashboard
+- Real-time search performance metrics (auto-refreshes every 10s)
+- Zero-result rate tracking — surfaces queries where customers find nothing; turns red above 20%
+- Top 10 searched queries with hit counts
+- Recent gap analyses showing hidden match counts
+- Catalog activity: analyses run, descriptions approved, approval rate on rewrites
+- Session-scoped — resets on server restart; production would persist to Postgres/Redis
 
 ---
 
@@ -72,7 +84,13 @@ FastAPI Backend  (api/main.py · port 8000)
         │         │
         │         ▼
         │    Low-threshold search (min_score=15) across both indexes
-        │    → Claude Haiku: gap summary, hidden matches, keyword suggestions
+        │    → Claude Haiku (Pydantic AI): GapAnalysis structured output
+        │
+        ├─── GET  /api/analytics
+        │         → in-memory store: searches, gap analyses, catalog metrics
+        │
+        ├─── GET  /api/catalog/status/{job_id}
+        │         → async job polling (analyze runs in background thread)
         │
         └─── GET  /api/crosssell/{sku}
                   │
@@ -86,13 +104,18 @@ FastAPI Backend  (api/main.py · port 8000)
                   │
                   ▼
              NetworkX DiGraph  (15 compatibility edges)
-             + Claude Haiku  (spec-grounded explanation)
+             + Claude Haiku (Pydantic AI): CrossSellExplanation structured output
 
 Data layer
 ──────────
 data/catalog_messy.json    ← source / uploaded CSV
 data/catalog_clean.json    ← pipeline output
 data/catalog_final.json    ← merchandiser-approved
+
+LangSmith (optional tracing)
+─────────────────────────────
+Set LANGCHAIN_API_KEY + LANGCHAIN_TRACING_V2=true to trace every
+LangGraph node automatically — inputs, outputs, latency, token usage.
 ```
 
 ---
@@ -107,6 +130,9 @@ data/catalog_final.json    ← merchandiser-approved
 | Agent orchestration | LangGraph `StateGraph` |
 | LLM — rewrite / judge | Claude Sonnet 4.5 |
 | LLM — cross-sell / gap | Claude Haiku 4.5 |
+| Structured outputs | Pydantic AI 2.7+ |
+| LLM tracing | LangSmith (optional) |
+| Retry logic | Custom exponential backoff (`claude_retry.py`) |
 | Tool protocol | MCP via FastMCP (stdio transport) |
 | Vector search | ChromaDB + all-MiniLM-L6-v2 |
 | Compatibility graph | NetworkX DiGraph |
@@ -167,8 +193,13 @@ python -m pytest tests/ -v
 | `ANTHROPIC_REWRITE_MODEL` | `claude-sonnet-4-5` | Model used for description rewrites |
 | `ANTHROPIC_JUDGE_MODEL` | `claude-haiku-4-5` | Model used for LLM-as-judge evaluation |
 | `LLM_CONCURRENCY` | `5` | Max parallel LLM calls during rewrite batch |
+| `LANGCHAIN_API_KEY` | — | Optional — enables LangSmith tracing |
+| `LANGCHAIN_TRACING_V2` | — | Set to `true` to activate tracing |
+| `LANGCHAIN_PROJECT` | — | LangSmith project name (e.g. `searchforge`) |
 
 > **Without an API key:** spec checking, UOM normalization, dedup, and all tests run fine. The analyze, cross-sell, and gap analysis endpoints require a key.
+>
+> **LangSmith is optional.** The app works without it. Set `LANGCHAIN_API_KEY` to enable full pipeline observability — every LangGraph node's inputs, outputs, latency, and token usage.
 
 ---
 
@@ -202,12 +233,32 @@ searchforge/
 │   └── src/pages/
 │       ├── CatalogHealth.jsx
 │       ├── SearchComparison.jsx
-│       └── CrossSell.jsx
+│       ├── CrossSell.jsx
+│       └── Analytics.jsx
 ├── data/
 │   └── catalog_messy.json        # 74-product demo catalog
 ├── tests/                        # 47 pytest tests
 └── DESIGN.md                     # Architecture deep-dive
 ```
+
+---
+
+## Demo Walkthrough
+
+1. **Catalog Optimizer** → upload a CSV or click "Use demo catalog" → Analyze → review the description rewrites (look for the 🔄 badge on repaired descriptions) → Apply Changes
+2. **Search Preview** → search for `sealed bearing 25mm` before and after — see the optimized catalog surface results the messy one misses; try a zero-result query to trigger the gap detector
+3. **Smart Recommendations** → enter a SKU like `BRG-6205-2RS` → see compatibility graph results with Claude-generated explanations
+4. **Analytics** → see real-time search metrics, zero-result rate, and top queries auto-refreshing every 10s
+
+---
+
+## Known Limitations
+
+- Analytics are session-scoped — reset when the server restarts
+- LangSmith tracing requires `LANGCHAIN_API_KEY` in `.env` to activate
+- MCP client spawns a subprocess per cross-sell request (~200ms overhead)
+- The repair loop runs exactly once; a description that still fails after repair proceeds as-is
+- No catalog sync from live sources (ERP, PIM) — CSV upload only
 
 ---
 
@@ -220,5 +271,9 @@ searchforge/
 **Why two ChromaDB indexes?** Both `catalog_messy` and `catalog_clean` are built at startup and kept in memory. The Search Preview page queries both simultaneously and renders a side-by-side comparison in a single request, making the before/after difference immediately visible.
 
 **Why Haiku for gap analysis and cross-sell, Sonnet for rewrites?** Rewrites are stored permanently in the catalog — quality matters. Gap analysis and cross-sell explanations are ephemeral, grounded-generation tasks where speed and cost matter more than output quality ceiling.
+
+**Why Pydantic AI instead of raw Anthropic client calls?** Manual JSON parsing — fence stripping, `json.loads()`, defensive field extraction — was spread across four files and was the most likely place for silent failures. Pydantic AI moves schema enforcement to the framework level: the agent validates against a typed model before returning, and schema violations are explicit errors rather than silently malformed data.
+
+**Why in-memory analytics?** Zero operational overhead for a demo. The store is a plain dict reset on restart — sufficient for a single session. Production would use Postgres for query logs and Redis for real-time counters.
 
 See [DESIGN.md](DESIGN.md) for the full architecture deep-dive, including what's production-ready vs demo-only, known limitations, and what a production system would need.

@@ -193,7 +193,56 @@ When a query against the optimized catalog returns zero results, the Search Prev
 
 **Why this is the most useful feature for a merchandiser:** every other feature in the platform tells them what's wrong in aggregate. Gap analysis tells them what a specific customer searched for, which products they probably wanted, and exactly what text to add to fix it. It closes the loop between "search returned nothing" and "here's what to do about it."
 
-### 4.5 React Frontend
+### 4.5 Analytics and Observability
+
+SearchForge has two observability layers.
+
+**1. LangSmith tracing (infrastructure level)**
+
+Every LangGraph node execution is traced automatically when `LANGCHAIN_API_KEY` and `LANGCHAIN_TRACING_V2=true` are set in `.env`. Traces show inputs and outputs per node, latency, token usage, and cost per run — without any code changes to the pipeline. Useful for diagnosing why a rewrite failed the judge, or how long the repair loop added to a run.
+
+**2. In-session analytics (product level)**
+
+A module-level `analytics` dict in `api/main.py` tracks everything that happens during a server session:
+
+- Every search query with mode (clean/messy), result count, and top match score
+- Gap analysis triggers with the number of hidden matches found
+- Catalog analysis runs, and descriptions approved vs rejected via `apply-changes`
+
+`GET /api/analytics` returns computed metrics:
+
+- Top 10 search queries by frequency
+- Zero-result rate and zero-result query list
+- Average top-match score across all searches with results
+- Approval rate on description rewrites
+- Recent search history (last 50 entries, newest first)
+- Recent gap analyses (last 20 entries)
+
+The **Analytics page** (`/app/analytics`) displays all of this in a dashboard that auto-refreshes every 10 seconds. Zero-result rate turns red above 20% to surface a search quality problem at a glance.
+
+**Analytics reset on server restart** — the store is in-memory only. Production would use a persistent store (Postgres for query logs, Redis for real-time counters) to enable cross-session aggregation and time-series analysis.
+
+### 4.6 Pydantic AI Structured Outputs
+
+All LLM calls in SearchForge use Pydantic AI agents with typed output schemas instead of raw Anthropic client calls with manual JSON parsing.
+
+**Four schemas enforce structured outputs:**
+
+| Schema | Fields |
+|--------|--------|
+| `RewriteResult` | `rewritten_description: str`, `key_specs_used: list[str]` |
+| `JudgeResult` | `score: int (0–10)`, `hallucination_risk: Literal["low","medium","high"]`, `passes: bool`, `notes: list[str]`, `specs_verified: list[str]` |
+| `CrossSellExplanation` | `explanation: str`, `specs_referenced: list[str]` |
+| `GapAnalysis` | `gap_summary: str`, `likely_intent: str`, `hidden_matches: list[dict]`, `suggested_keywords: list[str]`, `description_suggestion: str | None` |
+
+**Why Pydantic AI over raw client calls:**
+
+- **Type safety:** schema violations raise validation errors rather than silently producing malformed data.
+- **No manual parsing:** eliminates `json.loads()`, markdown fence stripping, and defensive field extraction. That code was spread across four files and was the most likely place for silent failures to sneak in.
+- **Built-in retry:** Pydantic AI handles retries internally. `claude_retry.py` is kept for any remaining raw client calls but is no longer used in the main LLM paths.
+- **Simpler concurrency:** the `async with AsyncAnthropic(...) as client:` pattern — which required passing a client object through every async call signature — is gone. Agents manage their own connections; the calling code just `await agent.run(prompt)` inside the existing semaphore.
+
+### 4.7 React Frontend
 
 **Stack:** React 18 + Vite for the build tool, Tailwind CSS via CDN (no PostCSS build step — all styling is either inline or loaded from the Tailwind CDN script tag). The decision to use Tailwind CDN avoids build configuration complexity while keeping the demo visually consistent.
 
@@ -265,6 +314,22 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 
 **Rejected:** semantic only — too many exact-match queries in industrial B2B fail when the query is an alphanumeric part number that doesn't embed usefully.
 
+### Decision 7: Pydantic AI over raw Anthropic client calls
+
+**Chose:** Pydantic AI with typed output schemas (`output_type=MyModel`) for all four LLM call sites.
+
+**Why:** manual JSON parsing is the single most fragile part of any LLM-backed pipeline. Claude occasionally wraps responses in markdown fences, reformats field names, or nests objects differently — all of which are silent failures if the parser doesn't handle them. Pydantic AI moves schema enforcement to the framework level: the agent will not return until the output validates against the model, or it raises a typed error that the calling code can handle explicitly. The refactor also removed the `async with AsyncAnthropic() as client:` plumbing that had to thread through every async call signature.
+
+**Rejected:** continuing with manual JSON parsing and fence-stripping. The existing code worked for the demo catalog but added ~40 lines of defensive parsing across four files, each of which was a potential silent failure point.
+
+### Decision 8: In-memory analytics vs persistent store
+
+**Chose:** module-level dict in `api/main.py`, reset on server restart.
+
+**Why:** sufficient for a demo where a single session is the unit of observation. No external dependency, instant setup, zero operational overhead. The Analytics page auto-refreshes every 10 seconds and gives a complete picture of what's happened since the server started.
+
+**What production would use:** Postgres for query logs (so analytics survive restarts and span multiple instances), Redis for real-time counters (so the zero-result rate is always current without scanning the full query log), and a time-series store for trend analysis over days or weeks.
+
 ---
 
 ## 6. What's Production-Ready vs Demo-Only
@@ -276,6 +341,12 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 - Semantic search scoring — correct ChromaDB distance normalization
 - FastAPI endpoint structure — clean REST API with Pydantic request/response models
 - React component architecture — protected routes, context, clean page separation
+- Pydantic AI typed output schemas — correct pattern for structured LLM outputs, schema violations are errors not silent failures
+- LangSmith tracing integration — production observability on every LangGraph node
+- Retry with exponential backoff on LLM calls — `claude_retry.py` handles rate limits, timeouts, connection errors
+- Async background jobs with polling — `POST /api/catalog/analyze` is non-blocking; frontend polls `GET /api/catalog/status/{job_id}`
+- Repair loop with visibility — `was_repaired` field on each evaluation, UI badge shows which descriptions went through the repair pass
+- Double-click protection on the Analyze button — prevents duplicate jobs being submitted
 - Test coverage on core modules — 47 tests on dedup, spec checker, UOM, and knowledge graph
 
 **Demo-only (would need real work before production):**
@@ -283,12 +354,13 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 - In-memory ChromaDB — needs `PersistentClient` with a real data directory
 - `localStorage` auth — needs OAuth, SSO, or a real session system
 - MCP client spawns a subprocess per request — needs a persistent connection or a different transport
-- `POST /api/catalog/analyze` blocks the server thread for 30–90 seconds — needs FastAPI `BackgroundTasks` with a polling endpoint so the frontend can show real progress
 - No catalog sync from real sources — ERP, PIM, or database connectors are needed
 - No push integration — the cleaned catalog downloads as a CSV; there's no API push to HawkSearch or any eCommerce platform
 - Single user — no multi-tenancy, no per-user analysis history, no approval workflows with roles
 - No audit trail — once changes are applied, there's no record of what changed or why
 - No rollback — if an approved rewrite is wrong, the only option is to re-run the whole analysis
+- In-memory analytics store — resets on server restart; production would persist to Postgres/Redis
+- LangSmith traces only visible to the account owner — no shared dashboard without a team plan
 
 ---
 
@@ -300,7 +372,9 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 - **LLM rewrites are only as good as the source data.** Products with no specs and a generic name produce weak rewrites even after optimization. The pipeline can't invent technical specifications.
 - **MCP subprocess spawning adds ~200ms per cross-sell request.** Noticeable on first load for each SKU.
 - **The repair loop runs exactly once.** A description that fails the judge after repair proceeds to the final catalog as-is. There's no second chance and no fallback to the deterministic template rewriter (which only fires on API errors, not on judge failures of successful LLM calls).
-- **The `analyze` endpoint is synchronous and blocks.** Under concurrent load, multiple analysis requests would queue. Not a problem for single-user demo; a real problem for any shared deployment.
+- **Analytics are session-scoped.** The in-memory store resets when the server restarts. Metrics don't aggregate across sessions.
+- **LangSmith tracing requires `LANGCHAIN_API_KEY` in `.env` to activate.** Without it, the pipeline runs fine but no traces are recorded.
+- **Pydantic AI agents create a new HTTP connection per call.** No connection pooling. Acceptable for demo traffic; would need optimization at scale.
 
 ---
 
@@ -337,6 +411,9 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 | Agent orchestration | LangGraph | State machine for conditional multi-step AI pipeline |
 | LLM (rewrite/judge) | Claude Sonnet 4.5 | Quality matters for catalog copy that gets stored |
 | LLM (cross-sell/gap) | Claude Haiku 4.5 | Fast and cheap for grounded explanatory text |
+| Structured outputs | Pydantic AI 2.7+ | Type-safe LLM responses; no manual JSON parsing |
+| LLM observability | LangSmith | Automatic LangGraph node tracing |
+| Retry logic | claude_retry.py (custom) | Exponential backoff on rate limits, timeouts, connection errors |
 | Tool protocol | MCP (FastMCP, stdio) | Decoupled tool access; same pattern needed for real microservices |
 | Vector search | ChromaDB + all-MiniLM-L6-v2 | Local, fast, no API cost, good enough for industrial text |
 | Compatibility graph | NetworkX DiGraph | Lightweight, sufficient for hardcoded compatibility data |
@@ -369,6 +446,11 @@ ANTHROPIC_API_KEY=your_key_here
 ANTHROPIC_REWRITE_MODEL=claude-sonnet-4-5
 ANTHROPIC_JUDGE_MODEL=claude-haiku-4-5
 LLM_CONCURRENCY=5
+
+# Optional: LangSmith tracing
+LANGCHAIN_API_KEY=your_langsmith_key
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=searchforge
 ```
 
 **Demo credentials:**
