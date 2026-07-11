@@ -107,7 +107,7 @@ def rewrite_description_with_claude(product: Product) -> str:
     if client is None:
         return rewrite_description(product)
 
-    model = os.getenv("ANTHROPIC_REWRITE_MODEL", "claude-sonnet-4-5")
+    model = os.getenv("ANTHROPIC_REWRITE_MODEL", "claude-haiku-4-5-20251001")
     try:
         response = client.messages.create(
             model=model,

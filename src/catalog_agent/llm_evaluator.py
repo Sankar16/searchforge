@@ -200,7 +200,7 @@ def evaluate_rewritten_description(
     if client is None:
         return heuristic_description_eval(product, rewritten_description)
 
-    model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-haiku-4-5")
+    model = os.getenv("ANTHROPIC_JUDGE_MODEL", "claude-sonnet-4-6")
     try:
         response = client.messages.create(
             model=model,
