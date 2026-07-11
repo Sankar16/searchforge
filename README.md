@@ -56,7 +56,11 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
 - Session-scoped — resets on server restart; production would persist to Postgres/Redis
 
 ---
+## Demo
 
+Demo Link: https://www.loom.com/share/3efc51448eb448888916f7fa1cf85931
+
+___
 ## Architecture
 
 ```
