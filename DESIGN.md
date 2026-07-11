@@ -67,9 +67,7 @@ FastAPI Backend (api/main.py, port 8000)
 ┌──────────────────────────────────┐
 │           Data Layer             │
 │  catalog_messy.json   (source)   │
-│  catalog_uploaded.json (CSV)     │
 │  catalog_clean.json   (pipeline) │
-│  catalog_final.json   (approved) │
 └──────────────────────────────────┘
 ```
 
@@ -118,7 +116,7 @@ save_clean_catalog        → writes catalog_clean.json
 
 **What the agent produces:** `catalog_clean.json` with optimized descriptions for approved SKUs, a health report with before/after metrics, description evaluations with judge scores and hallucination risk levels, and a list of duplicate candidate pairs.
 
-**Model used:** Claude Sonnet for rewriting (needs quality), Claude Haiku for judging (speed matters when evaluating a batch). Both are configurable via `ANTHROPIC_REWRITE_MODEL` and `ANTHROPIC_JUDGE_MODEL`.
+**Model used:** Claude Haiku 4.5 for rewriting (speed matters for batch rewrites), Claude Sonnet 4.6 for judging (accuracy of the evaluation directly affects what enters the catalog). Both are configurable via `ANTHROPIC_REWRITE_MODEL` and `ANTHROPIC_JUDGE_MODEL`.
 
 **Representative output on the 74-product demo catalog:**
 ```
@@ -193,7 +191,43 @@ When a query against the optimized catalog returns zero results, the Search Prev
 
 **Why this is the most useful feature for a merchandiser:** every other feature in the platform tells them what's wrong in aggregate. Gap analysis tells them what a specific customer searched for, which products they probably wanted, and exactly what text to add to fix it. It closes the loop between "search returned nothing" and "here's what to do about it."
 
-### 4.5 Analytics and Observability
+### 4.5 Evaluation Pipeline
+
+Descriptions are evaluated across three layers, run in sequence for each product that was rewritten.
+
+**Layer 1 — Heuristic fallback** (`heuristic_description_eval`)
+
+Runs when no API key is present. Scores spec coverage, description length, and marketing fluff on a 0–10 scale. All four dimension scores are set to the same base value — it exists only so the pipeline runs end-to-end in environments without a key.
+
+**Layer 2 — LLM judge** (`evaluate_rewritten_description_async`)
+
+The main evaluation path. Claude Sonnet 4.6 scores each rewritten description across four dimensions:
+
+| Dimension | What it measures |
+|-----------|-----------------|
+| Accuracy | How well the description reflects the source data without inventing specs |
+| Searchability | Whether buyers searching for this product type would find it |
+| Specificity | Whether the description is specific to this product vs. generic filler |
+| Clarity | Whether the prose is readable and natural vs. a raw spec dump |
+
+Each dimension scores 0–10. `composite_score` is their average (a `@property` — not stored by the LLM). A description passes the quality gate when `composite_score ≥ 6.5` and `hallucination_risk != "high"`.
+
+**Hallucination vs. reasonable inference**
+
+The accuracy dimension distinguishes two failure modes that look similar but warrant different responses:
+
+- **Hallucination** (accuracy ≤ 2): the description invents specific technical specs that contradict or significantly extend beyond the source data — e.g., "120V rated" when the source has no voltage; "600 PSI" when no pressure rating exists.
+- **Reasonable inference** (accuracy 4–5): the description applies domain knowledge that is obvious from the product name and category alone — e.g., "t-shirt → short-sleeve design" (every t-shirt has short sleeves); "ball bearing → rotational support" (definitional). A knowledgeable product manager would infer these without any additional data.
+
+`hallucination_risk` maps from the accuracy score: `high` when accuracy ≤ 2, `medium` when accuracy = 3, `low` when accuracy ≥ 4. A `high` hallucination risk alone fails the quality gate, even if the composite score is otherwise acceptable.
+
+**Layer 3 — Repair loop**
+
+Descriptions that fail the quality gate are collected after the initial judge pass and re-prompted in a single repair pass. The repair prompt passes the judge's notes back to the rewriter as context so it can address the specific weak dimension. The pipeline re-judges the repaired batch once, then routes unconditionally to dedup — there is no second repair attempt.
+
+Repair rates varied by catalog domain. The industrial B2B demo catalog repaired 1 of 22 descriptions (5%). The apparel catalog initially saw a ~25% repair rate; after adding the hallucination/inference distinction to the judge prompt and lowering the pass threshold from 7.0 to 6.5, the repair rate dropped to ~10%.
+
+### 4.6 Analytics and Observability
 
 SearchForge has two observability layers.
 
@@ -222,7 +256,7 @@ The **Analytics page** (`/app/analytics`) displays all of this in a dashboard th
 
 **Analytics reset on server restart** — the store is in-memory only. Production would use a persistent store (Postgres for query logs, Redis for real-time counters) to enable cross-session aggregation and time-series analysis.
 
-### 4.6 Pydantic AI Structured Outputs
+### 4.7 Pydantic AI Structured Outputs
 
 All LLM calls in SearchForge use Pydantic AI agents with typed output schemas instead of raw Anthropic client calls with manual JSON parsing.
 
@@ -231,7 +265,7 @@ All LLM calls in SearchForge use Pydantic AI agents with typed output schemas in
 | Schema | Fields |
 |--------|--------|
 | `RewriteResult` | `rewritten_description: str`, `key_specs_used: list[str]` |
-| `JudgeResult` | `score: int (0–10)`, `hallucination_risk: Literal["low","medium","high"]`, `passes: bool`, `notes: list[str]`, `specs_verified: list[str]` |
+| `JudgeResult` | `accuracy: int (0–10)`, `searchability: int (0–10)`, `specificity: int (0–10)`, `clarity: int (0–10)`, `hallucination_risk: Literal["low","medium","high"]`, `notes: list[str]`, `specs_verified: list[str]`; `composite_score`, `passes_quality_gate`, `judge_score` are `@property` computed fields (not stored by LLM) |
 | `CrossSellExplanation` | `explanation: str`, `specs_referenced: list[str]` |
 | `GapAnalysis` | `gap_summary: str`, `likely_intent: str`, `hidden_matches: list[dict]`, `suggested_keywords: list[str]`, `description_suggestion: str | None` |
 
@@ -242,7 +276,7 @@ All LLM calls in SearchForge use Pydantic AI agents with typed output schemas in
 - **Built-in retry:** Pydantic AI handles retries internally. `claude_retry.py` is kept for any remaining raw client calls but is no longer used in the main LLM paths.
 - **Simpler concurrency:** the `async with AsyncAnthropic(...) as client:` pattern — which required passing a client object through every async call signature — is gone. Agents manage their own connections; the calling code just `await agent.run(prompt)` inside the existing semaphore.
 
-### 4.7 React Frontend
+### 4.8 React Frontend
 
 **Stack:** React 18 + Vite for the build tool, Tailwind CSS via CDN (no PostCSS build step — all styling is either inline or loaded from the Tailwind CDN script tag). The decision to use Tailwind CDN avoids build configuration complexity while keeping the demo visually consistent.
 
@@ -330,6 +364,22 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 
 **What production would use:** Postgres for query logs (so analytics survive restarts and span multiple instances), Redis for real-time counters (so the zero-result rate is always current without scanning the full query log), and a time-series store for trend analysis over days or weeks.
 
+### Decision 9: Four-dimension judge vs. single composite score
+
+**Chose:** four separate dimensions (accuracy, searchability, specificity, clarity), each scored 0–10, with `composite_score` as a `@property` average.
+
+**Why:** a single score hides the reason a description fails. A description that is accurate and specific but written as a raw spec dump (low clarity) and missing search keywords (low searchability) should fail the gate for different reasons than one that reads well but invents specs (low accuracy, high hallucination risk). Four dimensions let the repair prompt include the specific weak dimension — the rewriter sees "low specificity, 4/10" and knows to make the description more specific rather than re-prompting on a vague failure signal.
+
+**Rejected:** a single score with free-form notes. Notes are unstructured text; the repair loop can't reliably extract which dimension failed. Structured per-dimension scores are machine-readable without additional parsing.
+
+### Decision 10: Hybrid (rule + embedding) graph candidates vs. pure rule-based
+
+**Chose:** generate knowledge graph candidates from two sources — rule-based (spec value matching + hardcoded `COMPATIBLE_CATEGORY_PAIRS`) and embedding-based (semantic similarity across different categories via the sentence-transformer model already loaded by `semantic_retriever.py`) — then merge and cap at 60 pairs for LLM validation.
+
+**Why:** the hardcoded category pairs cover industrial and electronics domains well but produce zero candidates for unconfigured domains (apparel, food, office supplies). Embedding-based candidates find semantically similar products across different categories without domain knowledge — a polo shirt and a belt pair as cross-sell candidates because they embed similarly, even though no clothing category rules exist. The hybrid approach means the graph works out of the box for any product domain.
+
+**Rejected:** pure rule-based generation. This fails completely for catalogs in unconfigured domains. Pure embedding without rules: embedding similarity alone surfaces noise pairs (semantically similar ≠ compatible), and the rule-based pairs have higher precision for configured domains. The hybrid keeps both.
+
 ---
 
 ## 6. What's Production-Ready vs Demo-Only
@@ -347,7 +397,11 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 - Async background jobs with polling — `POST /api/catalog/analyze` is non-blocking; frontend polls `GET /api/catalog/status/{job_id}`
 - Repair loop with visibility — `was_repaired` field on each evaluation, UI badge shows which descriptions went through the repair pass
 - Double-click protection on the Analyze button — prevents duplicate jobs being submitted
-- Test coverage on core modules — 47 tests on dedup, spec checker, UOM, and knowledge graph
+- Test coverage on core modules — 73 tests across dedup, spec checker, UOM, knowledge graph, graph generator, semantic retriever, completeness scoring, and MCP tools
+- Four-dimension LLM judge with explicit hallucination/inference taxonomy — `composite_score`, `passes_quality_gate`, and `judge_score` as `@property` fields; schema violations are errors, not silent malformed data
+- Dynamic knowledge graph generation — validates candidate pairs with Claude Haiku, writes `generated_graph.json`, falls back to hardcoded graph when no API key or no edges found
+- Hybrid graph candidate generation — rule-based (spec matching + category pairs) + embedding-based (sentence-transformer cosine similarity across different categories); generalized across product domains without per-domain configuration
+- Lazy agent initialization throughout — `_agent = None` + `_get_agent()` pattern prevents import-time API key errors in MCP subprocess context
 
 **Demo-only (would need real work before production):**
 
@@ -416,9 +470,10 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 | Retry logic | claude_retry.py (custom) | Exponential backoff on rate limits, timeouts, connection errors |
 | Tool protocol | MCP (FastMCP, stdio) | Decoupled tool access; same pattern needed for real microservices |
 | Vector search | ChromaDB + all-MiniLM-L6-v2 | Local, fast, no API cost, good enough for industrial text |
-| Compatibility graph | NetworkX DiGraph | Lightweight, sufficient for hardcoded compatibility data |
+| Compatibility graph | NetworkX DiGraph + LLM validation (Claude Haiku) | Dynamic generation from catalog; falls back to hardcoded graph |
+| Graph candidates | Rule-based + sentence-transformer embeddings | Hybrid candidate generation; works for any product domain |
 | Data | JSON files | Sufficient for demo; swap for database in production |
-| Tests | pytest | 47 tests on UOM, dedup, spec checker, knowledge graph |
+| Tests | pytest | 73 tests across UOM, dedup, spec checker, knowledge graph, graph generator, semantic retriever, completeness, MCP tools |
 
 ---
 
@@ -458,3 +513,42 @@ LANGCHAIN_PROJECT=searchforge
 - Password: `demo123`
 
 **Without an API key:** the analyze endpoint will fail at the rewrite step. The search, cross-sell, and gap analysis endpoints all require a key. The spec checker, UOM normalization, dedup, and all tests run without one.
+
+---
+
+## 11. Observed Results
+
+Results from three distinct catalog domains. All numbers are from actual pipeline runs, not targets.
+
+### Industrial B2B — 74-product demo catalog
+
+The built-in demo catalog with bearings, housings, fasteners, pipe fittings, and valves.
+
+```
+Spec issues before UOM normalization:  41
+Spec issues after UOM normalization:   33
+Weak descriptions identified:          22
+Weak descriptions after rewrite:        0
+Descriptions passing judge:            21 / 22
+Average composite judge score:          8.1 / 10
+Duplicate pairs detected:               6
+Repair loop triggered on:               1 description
+```
+
+The one description that failed the judge still failed after repair and proceeded to the final catalog as-is. All 33 remaining spec issues after UOM normalization are genuine missing fields, not unit conversion artifacts.
+
+### Electronics catalog
+
+A catalog of laptops, monitors, keyboards, networking equipment, and peripherals.
+
+- Spec checker returns no issues for products whose type cannot be inferred (generic cables, USB hubs, adapters). This is intentional — spec requirements are domain-specific, and flagging unknown product types as errors produces noise for a merchandiser managing electronics. Unknown types are skipped rather than flagged.
+- Knowledge graph candidate generation uses the hardcoded `COMPATIBLE_CATEGORY_PAIRS` for electronics pairs (laptops+chargers, monitors+cables, keyboards+mice, etc.) supplemented by embedding-based candidates for cross-category pairs not explicitly listed.
+- Semantic indexing requires SKU deduplication before ChromaDB insertion; electronics catalogs frequently include duplicate SKUs for color or configuration variants.
+
+### Apparel catalog
+
+A clothing catalog (shirts, pants, belts, shoes) with minimal spec data.
+
+- Rewriter generates descriptions from product name and category alone when no specs are available.
+- Initial judge pass rate was depressed because the judge penalized definitional inferences (e.g., "t-shirt → short-sleeve design") as hallucinations. After adding the hallucination/inference taxonomy to the judge system prompt and lowering the pass threshold from 7.0 to 6.5, the repair rate dropped from approximately 25% to approximately 10%.
+- Embedding-based graph candidate generation finds cross-sell pairs (shirt + belt, shoes + socks) that the rule-based system cannot find, since no apparel category pairs are configured in `COMPATIBLE_CATEGORY_PAIRS`.

@@ -23,6 +23,9 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
 - Per-row approve / edit / reject UI with apply + CSV export
 - Pydantic AI typed schemas enforce structured LLM outputs — no silent JSON parsing failures
 - Double-click protection prevents duplicate analysis jobs
+- Four-dimension judge scoring (accuracy, searchability, specificity, clarity) with per-dimension feedback passed into the repair prompt
+- Explicit hallucination/inference taxonomy: definitional inferences from product name are scored separately from invented technical specs
+- LLM-based spec inference (`GET /api/catalog/spec-requirements`) — Claude Haiku determines expected specs for any product category
 
 ### 🔍 Search Preview
 - Semantic search using ChromaDB + all-MiniLM-L6-v2
@@ -41,6 +44,8 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
   pair together (not correlation — reasoning)
 - Relationship badges mapped to actual graph edge types (Fits This Housing, Works With, Commonly Paired, Recommended Add-on)
 - Save pairings to session, export as CSV for merchandising platform
+- Dynamic knowledge graph generation — LLM validates candidate pairs at pipeline end, writes `generated_graph.json`; falls back to hardcoded graph
+- Hybrid candidate generation — rule-based (spec matching + category pairs) + embedding-based (semantic similarity); works for any product domain without per-domain configuration
 
 ### 📊 Analytics Dashboard
 - Real-time search performance metrics (auto-refreshes every 10s)
@@ -108,9 +113,9 @@ FastAPI Backend  (api/main.py · port 8000)
 
 Data layer
 ──────────
-data/catalog_messy.json    ← source / uploaded CSV
-data/catalog_clean.json    ← pipeline output
-data/catalog_final.json    ← merchandiser-approved
+data/catalog_messy.json      ← source / uploaded CSV
+data/catalog_clean.json      ← pipeline output
+data/generated_graph.json    ← dynamic compatibility graph (regenerated each run)
 
 LangSmith (optional tracing)
 ─────────────────────────────
@@ -137,21 +142,31 @@ LangGraph node automatically — inputs, outputs, latency, token usage.
 | Vector search | ChromaDB + all-MiniLM-L6-v2 |
 | Compatibility graph | NetworkX DiGraph |
 | Fuzzy dedup | rapidfuzz (threshold 88) |
-| Tests | pytest — 47 tests across UOM, dedup, spec checker, knowledge graph |
+| Tests | pytest — 73 tests across UOM, dedup, spec checker, knowledge graph, graph generator, semantic retriever, completeness, MCP tools |
 
 ---
 
-## Results on the 74-product demo catalog
+## Results
+
+### Industrial B2B — 74-product demo catalog
 
 ```
 Spec issues before UOM normalization:  41
 Spec issues after UOM normalization:   33
-Weak descriptions before rewrite:      22
+Weak descriptions identified:          22
 Weak descriptions after rewrite:        0
 Descriptions passing judge:            21 / 22
-Average judge score:                    8.09 / 10
+Average composite judge score:          8.1 / 10
 Duplicate pairs detected:               6
+Repair loop triggered on:               1 description
 ```
+
+### Multi-domain generalization
+
+| Domain | Notes |
+|--------|-------|
+| Electronics | Spec checker skips unknown product types (no noise issues). ChromaDB dedup required for SKU variant catalogs. Graph candidates via hardcoded electronics pairs + embeddings. |
+| Apparel | No spec data — rewriter infers from name/category. Repair rate dropped from ~25% to ~10% after lowering pass threshold and adding hallucination/inference taxonomy. Cross-sell pairs found via embedding similarity (no apparel category rules needed). |
 
 ---
 
@@ -180,9 +195,11 @@ cd frontend && npm install && npm run dev
 **Demo credentials:** `demo@searchforge.com` / `demo123`
 
 ```bash
-# Run tests
+# Run tests  (73 tests)
 source venv/bin/activate  # activate venv first
 python -m pytest tests/ -v
+# Slow tests (semantic retriever — loads ML model) are marked @pytest.mark.slow
+# and run by default; skip them with: python -m pytest tests/ -v -m "not slow"
 ```
 
 ### Environment variables
@@ -226,7 +243,8 @@ searchforge/
 │   │   ├── semantic_retriever.py # ChromaDB + sentence-transformers
 │   │   └── retriever.py          # Keyword fallback
 │   └── crosssell_agent/
-│       ├── knowledge_graph.py    # NetworkX compatibility graph
+│       ├── knowledge_graph.py    # NetworkX hardcoded compatibility graph
+│       ├── graph_generator.py    # Dynamic graph generation via LLM
 │       ├── recommender.py
 │       └── llm_agent.py          # Claude Haiku explanation generator
 ├── frontend/
@@ -237,7 +255,7 @@ searchforge/
 │       └── Analytics.jsx
 ├── data/
 │   └── catalog_messy.json        # 74-product demo catalog
-├── tests/                        # 47 pytest tests
+├── tests/                        # 73 pytest tests
 └── DESIGN.md                     # Architecture deep-dive
 ```
 
@@ -259,6 +277,9 @@ searchforge/
 - MCP client spawns a subprocess per cross-sell request (~200ms overhead)
 - The repair loop runs exactly once; a description that still fails after repair proceeds as-is
 - No catalog sync from live sources (ERP, PIM) — CSV upload only
+- Spec checker only knows industrial B2B product types — electronics and apparel products are classified as "unknown" and skip spec validation; use `GET /api/catalog/spec-requirements` to infer requirements for unconfigured categories
+- Knowledge graph generation costs 1 LLM call per candidate pair (up to 60); a large catalog with many category matches will take proportionally longer and use more tokens
+- Embedding-based graph candidates reuse the sentence-transformer model from `semantic_retriever.py`; if semantic search has not been used in the session the model loads cold (~2s on first call)
 
 ---
 
