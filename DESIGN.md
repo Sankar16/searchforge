@@ -1,6 +1,6 @@
 # SearchForge — Design Document
 
-*Last updated: 2026-07-09. Reflects the actual implementation verified against source code. The previous version of this document was written during planning and referenced Streamlit, no tests, no ChromaDB, and no FastAPI or React — none of that is true anymore.*
+*Last updated: 2026-07-09. Reflects the actual implementation verified against source code. Migrated from the original Streamlit prototype to the current FastAPI + React architecture with ChromaDB, MCP, LangGraph, Pydantic AI, and 73 unit tests.*
 
 ---
 
@@ -394,7 +394,7 @@ The `resetAll()` function wipes analysis state but intentionally does **not** cl
 - Pydantic AI typed output schemas — correct pattern for structured LLM outputs, schema violations are errors not silent failures
 - LangSmith tracing integration — production observability on every LangGraph node
 - Retry with exponential backoff on LLM calls — `claude_retry.py` handles rate limits, timeouts, connection errors
-- Async background jobs with polling — `POST /api/catalog/analyze` is non-blocking; frontend polls `GET /api/catalog/status/{job_id}`
+- Async background jobs with polling — in-memory job store (resets on restart; production would use Redis or a database) — `POST /api/catalog/analyze` is non-blocking; frontend polls `GET /api/catalog/status/{job_id}`
 - Repair loop with visibility — `was_repaired` field on each evaluation, UI badge shows which descriptions went through the repair pass
 - Double-click protection on the Analyze button — prevents duplicate jobs being submitted
 - Test coverage on core modules — 73 tests across dedup, spec checker, UOM, knowledge graph, graph generator, semantic retriever, completeness scoring, and MCP tools
@@ -498,7 +498,7 @@ python -m pytest tests/ -v
 
 # Environment variables (create .env in project root)
 ANTHROPIC_API_KEY=your_key_here
-ANTHROPIC_REWRITE_MODEL=claude-sonnet-4-5
+ANTHROPIC_REWRITE_MODEL=claude-haiku-4-5-20251001
 ANTHROPIC_JUDGE_MODEL=claude-haiku-4-5
 LLM_CONCURRENCY=5
 

@@ -207,8 +207,8 @@ python -m pytest tests/ -v
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `ANTHROPIC_API_KEY` | — | Required for analyze, cross-sell, and gap analysis |
-| `ANTHROPIC_REWRITE_MODEL` | `claude-sonnet-4-5` | Model used for description rewrites |
-| `ANTHROPIC_JUDGE_MODEL` | `claude-haiku-4-5` | Model used for LLM-as-judge evaluation |
+| `ANTHROPIC_REWRITE_MODEL` | `claude-haiku-4-5-20251001` | Model used for description rewrites |
+| `ANTHROPIC_JUDGE_MODEL` | `claude-sonnet-4-6` | Model used for LLM-as-judge evaluation |
 | `LLM_CONCURRENCY` | `5` | Max parallel LLM calls during rewrite batch |
 | `LANGCHAIN_API_KEY` | — | Optional — enables LangSmith tracing |
 | `LANGCHAIN_TRACING_V2` | — | Set to `true` to activate tracing |
