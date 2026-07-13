@@ -58,7 +58,7 @@ Industrial B2B distributors lose revenue when messy product catalogs cause custo
 ---
 ## Demo
 
-Demo Link: https://www.loom.com/share/3efc51448eb448888916f7fa1cf85931
+Demo Link: https://www.loom.com/share/502db98f27c149c59550bd31c71d3410
 
 ___
 ## Architecture
