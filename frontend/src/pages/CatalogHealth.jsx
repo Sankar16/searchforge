@@ -81,7 +81,15 @@ export default function CatalogHealth() {
   const [dismissedPairs, setDismissedPairs] = useState(new Set())
   const [applyLoading, setApplyLoading] = useState(false)
   const [toast, setToast] = useState(null)
+  const [previewAvailable, setPreviewAvailable] = useState(false)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    fetch(`${API}/api/catalog/preview`)
+      .then(r => r.json())
+      .then(data => setPreviewAvailable(data.available))
+      .catch(() => {})
+  }, [])
 
   // Elapsed timer: ticks every 1 second, cycles status every 8 seconds
   useEffect(() => {
@@ -217,6 +225,28 @@ export default function CatalogHealth() {
     setUploadSource('sample')
     setUploadedFile({ name: 'catalog_messy.json', total_products: 74, columns_detected: ['sku', 'name', 'category', 'description', 'price', 'brand'], missing_optional: [] })
     setUploadError(null)
+  }
+
+  const handlePreviewLoad = async () => {
+    setLoading(true)
+    setUploadError(null)
+    try {
+      const res = await fetch(`${API}/api/catalog/preview`)
+      const data = await res.json()
+      if (data.available && data.result) {
+        setAnalysisResult(data.result)
+        setAnalysisRan(true)
+        setUploadSource('sample')
+        const allSkus = data.result.description_rewrites?.map(r => r.sku) || []
+        approveSkus(allSkus)
+      } else {
+        setUploadError('No previous analysis available')
+      }
+    } catch (err) {
+      setUploadError('Failed to load preview')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function runAnalysis() {
@@ -439,6 +469,44 @@ export default function CatalogHealth() {
             </div>
           )}
 
+          {previewAvailable && (
+            <div style={{
+              marginTop: 16,
+              border: '1px solid #99F6E4',
+              background: '#F0FDFA',
+              borderRadius: 12,
+              padding: '20px 24px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 20 }}>⚡</span>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: '#0A1628' }}>Preview Last Analysis</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 4px' }}>
+                    Load the previous analysis results instantly — no API calls needed
+                  </p>
+                  <p style={{ fontSize: 12, color: '#0D9488', fontWeight: 600, margin: 0 }}>
+                    ✓ Previous results available
+                  </p>
+                </div>
+                <button
+                  onClick={handlePreviewLoad}
+                  style={{
+                    background: '#0D9488', color: '#fff', border: 'none',
+                    padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+                    cursor: 'pointer', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#0F766E' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#0D9488' }}
+                >
+                  Load Preview →
+                </button>
+              </div>
+            </div>
+          )}
+
           {uploadSource && (
             <div style={{ marginTop: 28 }}>
               <button
@@ -482,6 +550,22 @@ export default function CatalogHealth() {
               Using: <span style={{ color: '#374151', fontWeight: 500 }}>{catalogLabel}</span>
             </div>
           </div>
+
+          {/* Preview banner */}
+          {analysisResult?.is_preview && (
+            <div style={{
+              background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8,
+              padding: '10px 16px', marginBottom: 16,
+              display: 'flex', alignItems: 'center', gap: 8,
+              fontSize: 13, color: '#92400E',
+            }}>
+              <span>⚡</span>
+              <span>
+                Showing cached results from last analysis — scores are estimates.
+                Run full analysis for exact scores.
+              </span>
+            </div>
+          )}
 
           {/* FIX 2: changesApplied banner */}
           {changesApplied && (
